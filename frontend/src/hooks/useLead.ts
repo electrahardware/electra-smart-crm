@@ -1,0 +1,1 @@
+export { useLead } from "../contexts/LeadContext";
