@@ -1,0 +1,54 @@
+ generator client {
+    provider = "prisma-client-js"
+  }
+
+  datasource db {
+    provider = "sqlite"
+    url      = "file:./dev.db"
+  }
+
+  model Lead {
+    id                Int      @id @default(autoincrement())
+
+    customerName      String
+    mobile            String   @unique
+    secondaryMobile   String?
+    whatsapp          String?
+    shopName          String?
+    customerType      String?
+
+    email             String?
+    gst               String?
+
+    country String?   @default("India")
+    state             String?
+    district          String?
+    area              String?
+    pincode           String?
+
+    addressLine1      String?
+    addressLine2      String?
+
+    website          String?
+
+    leadOwner         String?
+    leadSource        String?
+    language          String?
+
+    priority          String?
+    status            String?
+
+    expectedValue     Float?
+    probability       Int?
+
+    products          Json?
+
+    followupDate      DateTime?
+    followupTime      String?
+
+    notes             String?
+
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+  }
+
