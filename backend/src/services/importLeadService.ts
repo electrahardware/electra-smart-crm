@@ -1,122 +1,250 @@
+import prisma from "../lib/prisma";
+
 import type {
+  DuplicatePolicy,
+  ImportCommitResponse,
   ImportLeadRow,
   ImportPreviewResponse,
+  ImportPreviewRow,
 } from "../types/import";
-import prisma from "../lib/prisma";
-interface PreviewRow {
-  rowNumber: number;
-  status: "ready" | "invalid";
-  lead: ImportLeadRow;
-  errors: { message: string }[];
-  existingLeadId?: number;
-}
 
-export async function previewImportLeads(
-  rows: ImportLeadRow[]
-): Promise<ImportPreviewResponse> {
-  const previewRows: PreviewRow[] = rows.map((lead) => {
-  const errors: { message: string }[] = [];
+function validateLead(
+  lead: ImportLeadRow
+): {
+  status: ImportPreviewRow["status"];
+  errors: ImportPreviewRow["errors"];
+} {
+  const errors: ImportPreviewRow["errors"] = [];
 
   if (!lead.customerName.trim()) {
     errors.push({
+      field: "customerName",
       message: "Customer name is required.",
     });
   }
 
   if (!lead.mobile.trim()) {
     errors.push({
+      field: "mobile",
       message: "Mobile number is required.",
     });
   }
 
   return {
-    rowNumber: lead.rowNumber,
-    status: errors.length === 0 ? "ready" : "invalid",
-    lead,
+    status:
+      errors.length === 0
+        ? "ready"
+        : "invalid",
     errors,
   };
-});
+}
 
-const readyRows = previewRows.filter(
-  (row) => row.status === "ready"
-);
+export async function previewImportLeads(
+  rows: ImportLeadRow[]
+): Promise<ImportPreviewResponse> {
+  const previewRows: ImportPreviewRow[] =
+    rows.map((lead) => {
+      const validation =
+        validateLead(lead);
 
-const invalidRows = previewRows.filter(
-  (row) => row.status === "invalid"
-);
-const seenMobiles = new Set<string>();
-
-previewRows.forEach((row) => {
-  if (row.status === "invalid") {
-    return;
-  }
-
-  if (seenMobiles.has(row.lead.mobile)) {
-    row.status = "invalid";
-
-    row.errors.push({
-      message: "Duplicate mobile found in Excel.",
+      return {
+        rowNumber: lead.rowNumber,
+        lead,
+        status: validation.status,
+        errors: validation.errors,
+      };
     });
 
-    return;
-  }
+  const seen = new Set<string>();
 
-  seenMobiles.add(row.lead.mobile);
-});
+  previewRows.forEach((row) => {
+    if (row.status !== "ready") {
+      return;
+    }
 
-const mobilesToCheck = previewRows
-  .filter((row) => row.status === "ready")
-  .map((row) => row.lead.mobile);
+    if (seen.has(row.lead.mobile)) {
+      row.status = "duplicate";
 
-const existingLeads = await prisma.lead.findMany({
-  where: {
-    mobile: {
-      in: mobilesToCheck,
+      row.errors.push({
+        field: "mobile",
+        message:
+          "Duplicate mobile found in Excel.",
+      });
+
+      return;
+    }
+
+    seen.add(row.lead.mobile);
+  });
+
+  const mobiles = previewRows
+    .filter(
+      (row) => row.status === "ready"
+    )
+    .map((row) => row.lead.mobile);
+
+  const existingLeads =
+    await prisma.lead.findMany({
+      where: {
+        mobile: {
+          in: mobiles,
+        },
+      },
+      select: {
+        id: true,
+        mobile: true,
+      },
+    });
+
+  const existingMap = new Map(
+    existingLeads.map((lead) => [
+      lead.mobile,
+      lead.id,
+    ])
+  );
+
+  previewRows.forEach((row) => {
+    if (row.status !== "ready") {
+      return;
+    }
+
+    const id = existingMap.get(
+      row.lead.mobile
+    );
+
+    if (!id) {
+      return;
+    }
+
+    row.status = "duplicate";
+
+    row.existingLeadId = id;
+
+    row.errors.push({
+      field: "mobile",
+      message:
+        "Mobile already exists in CRM.",
+    });
+  });
+    const readyRows = previewRows.filter(
+    (row) => row.status === "ready"
+  ).length;
+
+  const duplicateRows = previewRows.filter(
+    (row) => row.status === "duplicate"
+  ).length;
+
+  const invalidRows = previewRows.filter(
+    (row) => row.status === "invalid"
+  ).length;
+
+  return {
+    summary: {
+      totalRows: previewRows.length,
+      readyRows,
+      duplicateRows,
+      invalidRows,
+      skippedRows: 0,
     },
-  },
-  select: {
-    id: true,
-    mobile: true,
-  },
-});
+    rows: previewRows,
+  };
+}
 
-const existingMobileMap = new Map(
-  existingLeads.map((lead) => [lead.mobile, lead.id])
-);
+export async function commitImportLeads(
+  rows: ImportLeadRow[],
+  duplicatePolicy: DuplicatePolicy
+): Promise<ImportCommitResponse> {
+  let insertedRows = 0;
+  let updatedRows = 0;
+  let skippedRows = 0;
+  let failedRows = 0;
 
-previewRows.forEach((row) => {
-  if (row.status === "invalid") {
-    return;
+  for (const lead of rows) {
+    try {
+      const existing = await prisma.lead.findFirst({
+        where: {
+          mobile: lead.mobile,
+        },
+      });
+
+      if (existing) {
+        if (duplicatePolicy === "skip_existing") {
+          skippedRows++;
+          continue;
+        }
+
+        await prisma.lead.update({
+          where: {
+            id: existing.id,
+          },
+          data: {
+            customerName: lead.customerName,
+            secondaryMobile: lead.secondaryMobile,
+            whatsapp: lead.whatsapp,
+            shopName: lead.shopName,
+            email: lead.email,
+            gst: lead.gst,
+            state: lead.state,
+            district: lead.district,
+            area: lead.area,
+            pincode: lead.pincode,
+            addressLine1: lead.addressLine1,
+            addressLine2: lead.addressLine2,
+            leadOwner: lead.leadOwner,
+            leadSource: lead.leadSource,
+            language: lead.language,
+            priority: lead.priority,
+            status: lead.status,
+            followupDate: lead.followupDate
+              ? new Date(lead.followupDate)
+              : null,
+            notes: lead.notes,
+          },
+        });
+
+        updatedRows++;
+        continue;
+      }
+
+      await prisma.lead.create({
+        data: {
+          customerName: lead.customerName,
+          mobile: lead.mobile,
+          secondaryMobile: lead.secondaryMobile,
+          whatsapp: lead.whatsapp,
+          shopName: lead.shopName,
+          email: lead.email,
+          gst: lead.gst,
+          state: lead.state,
+          district: lead.district,
+          area: lead.area,
+          pincode: lead.pincode,
+          addressLine1: lead.addressLine1,
+          addressLine2: lead.addressLine2,
+          leadOwner: lead.leadOwner,
+          leadSource: lead.leadSource,
+          language: lead.language,
+          priority: lead.priority,
+          status: lead.status,
+          followupDate: lead.followupDate
+            ? new Date(lead.followupDate)
+            : null,
+          notes: lead.notes,
+        },
+      });
+
+      insertedRows++;
+    } catch (error) {
+      console.error(error);
+      failedRows++;
+    }
   }
 
-  const existingLeadId = existingMobileMap.get(row.lead.mobile);
-
-  if (existingLeadId) {
-    row.status = "invalid";
-
-    row.existingLeadId = existingLeadId;
-
-    row.errors.push({
-      message: "Mobile number already exists in CRM.",
-    });
-  }
-});
-
-return {
-  summary: {
-    totalRows: rows.length,
-    readyRows: readyRows.length,
-   duplicateRows: previewRows.filter((row) =>
-  row.errors.some(
-    (error) =>
-      error.message === "Duplicate mobile found in Excel." ||
-      error.message === "Mobile number already exists in CRM."
-  )
-).length,
-    invalidRows: invalidRows.length,
-    skippedRows: invalidRows.length,
-  },
-
-  rows: previewRows,
-};
+  return {
+    insertedRows,
+    updatedRows,
+    duplicateRows: skippedRows,
+    skippedRows,
+    failedRows,
+  };
 }

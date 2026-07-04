@@ -1,172 +1,108 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 
-export const getAllLeads = async (req: Request, res: Response) => {
+export async function getAllLeads(
+  req: Request,
+  res: Response
+) {
   try {
     const leads = await prisma.lead.findMany({
       orderBy: {
-        createdAt: "desc",
+        id: "desc",
       },
     });
 
     res.json(leads);
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
 
     res.status(500).json({
-      message: "Unable to fetch leads",
+      message: "Unable to load leads.",
     });
   }
-};
-
-export const getLead = async (req: Request, res: Response) => {
-  try {
-    const id = Number(req.params.id);
-
-    const lead = await prisma.lead.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!lead) {
-      return res.status(404).json({
-        message: "Lead not found",
-      });
-    }
-
-    res.json(lead);
-  } catch (e) {
-    res.status(500).json({
-      message: "Error",
-    });
-  }
-};
-
-export const createLead = async (req: Request, res: Response) => {
-  try {
-    console.log("BODY =", req.body);
-    const existingLead = await prisma.lead.findFirst({
-  where: {
-    mobile: req.body.mobile,
-  },
-});
-
-if (existingLead) {
-  return res.status(409).json({
-    message: "Duplicate Mobile Number",
-    lead: existingLead,
-  });
 }
-    const lead = await prisma.lead.create({
-  data: {
-    ...req.body,
 
-    products: Array.isArray(req.body.products)
-      ? req.body.products.join(", ")
-      : req.body.products,
-
-      expectedValue:
-  req.body.expectedValue !== ""
-    ? Number(req.body.expectedValue)
-    : null,
-
-probability:
-  req.body.probability !== ""
-    ? Number(req.body.probability)
-    : null,
-
-    followupDate:
-      req.body.followupDate && req.body.followupDate !== ""
-        ? new Date(req.body.followupDate)
-        : null,
-  },
-});
-
-    res.status(201).json(lead);
-  } catch (e) {
-    console.error(e);
-
-    res.status(500).json({
-      message: "Unable to create lead",
-    });
-  }
-};
-
-export const updateLead = async (
+export async function getLead(
   req: Request,
   res: Response
-) => {
+) {
   try {
-
-    const id = Number(req.params.id);
-
-    console.log("UPDATE ID =", id);
-    console.log("UPDATE BODY =", req.body);
-
-    const lead = await prisma.lead.update({
-
+    const lead = await prisma.lead.findUnique({
       where: {
-        id,
+        id: Number(req.params.id),
       },
-
-      data: {
-
-        ...req.body,
-
-        products: Array.isArray(req.body.products)
-          ? req.body.products.join(", ")
-          : req.body.products,
-
-          expectedValue:
-  req.body.expectedValue !== ""
-    ? Number(req.body.expectedValue)
-    : null,
-
-probability:
-  req.body.probability !== ""
-    ? Number(req.body.probability)
-    : null,
-
-        followupDate:
-          req.body.followupDate &&
-          req.body.followupDate !== ""
-            ? new Date(req.body.followupDate)
-            : null,
-
-      },
-
     });
 
     res.json(lead);
-
-  } catch (e) {
-
-    console.error(e);
+  } catch (error) {
+    console.error(error);
 
     res.status(500).json({
-      message: "Unable to update",
+      message: "Unable to load lead.",
+    });
+  }
+}
+
+export async function createLead(
+  req: Request,
+  res: Response
+) {
+  try {
+    const lead = await prisma.lead.create({
+      data: req.body,
     });
 
+    res.status(201).json(lead);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Unable to create lead.",
+    });
   }
-};
+}
 
-export const deleteLead = async (req: Request, res: Response) => {
+export async function updateLead(
+  req: Request,
+  res: Response
+) {
   try {
-    const id = Number(req.params.id);
+    const lead = await prisma.lead.update({
+      where: {
+        id: Number(req.params.id),
+      },
+      data: req.body,
+    });
 
+    res.json(lead);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Unable to update lead.",
+    });
+  }
+}
+
+export async function deleteLead(
+  req: Request,
+  res: Response
+) {
+  try {
     await prisma.lead.delete({
       where: {
-        id,
+        id: Number(req.params.id),
       },
     });
 
     res.json({
       success: true,
     });
-  } catch (e) {
+  } catch (error) {
+    console.error(error);
+
     res.status(500).json({
-      message: "Unable to delete",
+      message: "Unable to delete lead.",
     });
   }
-};
+}

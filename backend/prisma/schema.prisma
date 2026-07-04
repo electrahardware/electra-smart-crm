@@ -48,6 +48,14 @@
 
     notes             String?
 
+    followupCompleted Boolean @default(false)
+
+followupCompletedAt DateTime?
+
+lastReminderSent DateTime?
+
+nextReminder DateTime?
+
     createdAt         DateTime @default(now())
     updatedAt         DateTime @updatedAt
   }
