@@ -196,17 +196,25 @@ for (let i = 1; i <= 20; i++) {
       "state"
     ),
 
-    district: getCellText(
-      row,
-      columnIndexes,
-      "district"
-    ),
+    district:
+  getCellText(
+    row,
+    columnIndexes,
+    "district"
+  ),
 
-    area: getCellText(
-      row,
-      columnIndexes,
-      "area"
-    ),
+    area:
+  getCellText(
+    row,
+    columnIndexes,
+    "area"
+  ) ||
+
+  getCellText(
+    row,
+    columnIndexes,
+    "district"
+  ),
 
     pincode: getCellText(
       row,

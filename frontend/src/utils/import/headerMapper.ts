@@ -22,37 +22,42 @@ export const HEADER_SYNONYMS: Record<
   string[]
 > = {
   customerName: [
-    "Customer Name",
-    "Customer",
-    "Name",
-    "Party Name",
-    "Dealer Name",
-  ],
+  "Customer Name",
+  "Customer",
+  "Name",
+  "Party Name",
+  "Dealer Name",
+  "Shop / Company Name",
+],
 
   shopName: [
-    "Shop Name",
-    "Firm Name",
-    "Company Name",
-    "Business Name",
-  ],
+  "Shop Name",
+  "Firm Name",
+  "Company Name",
+  "Business Name",
+  "Shop / Company Name",
+],
 
   mobile: [
-    "Mobile",
-    "Mobile No",
-    "Mobile Number",
-    "Phone",
-    "Phone Number",
-    "Contact",
-    "Contact No",
-    "Contact Number",
-  ],
+  "Mobile",
+  "Mobile No",
+  "Mobile Number",
+  "Phone",
+  "Phone Number",
+  "Contact",
+  "Contact No",
+  "Contact Number",
+  "Whatsapp Number",
+  "WhatsApp Number",
+],
 
   whatsapp: [
-    "Whatsapp",
-    "WhatsApp",
-    "WhatsApp No",
-    "WhatsApp Number",
-  ],
+  "Whatsapp",
+  "WhatsApp",
+  "WhatsApp No",
+  "WhatsApp Number",
+  "Whatsapp Number",
+],
 
   email: [
     "Email",
@@ -117,11 +122,12 @@ export const HEADER_SYNONYMS: Record<
   ],
 
   followupDate: [
-    "Follow-up Date",
-    "Followup Date",
-    "Next Followup",
-    "Next Follow-up",
-  ],
+  "Follow-up Date",
+  "Followup Date",
+  "Next Followup",
+  "Next Follow-up",
+  "Date",
+],
 
   notes: [
     "Notes",
