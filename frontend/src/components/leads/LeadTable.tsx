@@ -38,9 +38,7 @@ const [pageSize, setPageSize] =
 
   useEffect(() => {
   loadLeads();
-}, []);
 
-useEffect(() => {
   const handler = () => {
     loadLeads();
   };
@@ -57,6 +55,7 @@ useEffect(() => {
     );
   };
 }, []);
+
 
   async function loadLeads() {
 
@@ -647,9 +646,11 @@ className="rounded-xl bg-red-600 hover:bg-red-700 text-white px-5 py-2 font-semi
 
       </div>
 
-      <table className="w-full">
+      <div className="overflow-auto max-h-[650px]">
 
-        <thead className="bg-slate-100">
+<table className="w-full">
+
+        <thead className="sticky top-0 z-10 bg-slate-100 shadow-sm">
 
           <tr>
 
@@ -874,6 +875,8 @@ lead.priority==="🔴 Hot"
 
       </table>
 
+      </div>
+
       {filteredLeads.length === 0 && (
 
         <div className="p-10 text-center text-slate-500">
@@ -1029,62 +1032,37 @@ Next
 )}
 
     {selectedLead && (
+<div className="fixed inset-0 z-50 flex">
 
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+  <div
+    className="flex-1 bg-black/40"
+    onClick={() => setSelectedLead(null)}
+  />
 
-    <div className="bg-white rounded-2xl shadow-2xl w-[700px] max-h-[90vh] overflow-y-auto p-8">
+  <div className="w-[520px] bg-white shadow-2xl overflow-y-auto">
 
-      <div className="flex items-center justify-between mb-6">
+    <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between">
 
-        <h2 className="text-2xl font-bold">
-          👁 Lead Details
-        </h2>
+      <h2 className="text-2xl font-bold">
+        Lead Details
+      </h2>
 
-        <button
-          onClick={() => setSelectedLead(null)}
-          className="text-red-600 font-bold text-xl"
-        >
-          ✕
-        </button>
+      <button
+        onClick={() => setSelectedLead(null)}
+        className="text-red-600 text-2xl font-bold"
+      >
+        ✕
+      </button>
 
-      </div>
+    </div>
 
-      <div className="flex gap-3 mb-6">
-
-  <a
-    href={`https://wa.me/91${selectedLead.mobile}`}
-    target="_blank"
-    rel="noreferrer"
-    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-semibold"
-  >
-    💬 WhatsApp
-  </a>
-
-  <a
-  href={`mailto:${selectedLead.email}`}
-  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold"
->
-  📧 Email
-</a>
-
-<a
-  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${selectedLead.addressLine1} ${selectedLead.addressLine2} ${selectedLead.area} ${selectedLead.district} ${selectedLead.state} ${selectedLead.pincode}`
-  )}`}
-  target="_blank"
-  rel="noreferrer"
-  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-semibold"
->
-  📍 Google Map
-</a>
-
-</div>
+    <div className="p-6">
 
       <div className="grid grid-cols-2 gap-5">
 
         <div>
-          <p className="text-slate-500 text-sm">
-            Customer Name
+          <p className="text-xs text-slate-500">
+            Customer
           </p>
 
           <p className="font-semibold">
@@ -1093,7 +1071,7 @@ Next
         </div>
 
         <div>
-          <p className="text-slate-500 text-sm">
+          <p className="text-xs text-slate-500">
             Mobile
           </p>
 
@@ -1103,17 +1081,7 @@ Next
         </div>
 
         <div>
-          <p className="text-slate-500 text-sm">
-            WhatsApp
-          </p>
-
-          <p className="font-semibold">
-            {selectedLead.whatsapp || "-"}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-slate-500 text-sm">
+          <p className="text-xs text-slate-500">
             Shop
           </p>
 
@@ -1123,17 +1091,7 @@ Next
         </div>
 
         <div>
-          <p className="text-slate-500 text-sm">
-            Lead Owner
-          </p>
-
-          <p className="font-semibold">
-            {selectedLead.leadOwner || "-"}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-slate-500 text-sm">
+          <p className="text-xs text-slate-500">
             Status
           </p>
 
@@ -1142,58 +1100,14 @@ Next
           </p>
         </div>
 
-        <div className="col-span-2">
-
-          <p className="text-slate-500 text-sm">
-            Products
-          </p>
-
-          <p className="font-semibold">
-            {Array.isArray(selectedLead.products)
-              ? selectedLead.products.join(", ")
-              : selectedLead.products || "-"}
-          </p>
-
-        </div>
-
-        <div>
-          <p className="text-slate-500 text-sm">
-            Expected Value
-          </p>
-
-          <p className="font-semibold">
-            ₹ {Number(selectedLead.expectedValue || 0).toLocaleString()}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-slate-500 text-sm">
-            Follow-up Date
-          </p>
-
-          <p className="font-semibold">
-            {selectedLead.followupDate || "-"}
-          </p>
-        </div>
-
-        <div className="col-span-2">
-
-          <p className="text-slate-500 text-sm">
-            Notes
-          </p>
-
-          <p className="font-semibold whitespace-pre-wrap">
-            {selectedLead.notes || "-"}
-          </p>
-
-        </div>
-
       </div>
 
     </div>
 
   </div>
 
+</div>
+  
 )}
     
     </div>

@@ -1,62 +1,72 @@
- generator client {
-    provider = "prisma-client-js"
-  }
+generator client {
+  provider = "prisma-client-js"
+}
 
-  datasource db {
-    provider = "sqlite"
-    url      = "file:./dev.db"
-  }
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
 
-  model Lead {
-    id                Int      @id @default(autoincrement())
+model Lead {
+  id Int @id @default(autoincrement())
 
-    customerName      String
-    mobile            String   @unique
-    secondaryMobile   String?
-    whatsapp          String?
-    shopName          String?
-    customerType      String?
+  customerName    String
+  mobile          String  @unique
+  secondaryMobile String?
+  whatsapp        String?
+  shopName        String?
+  customerType    String?
 
-    email             String?
-    gst               String?
+  email String?
+  gst   String?
 
-    country String?   @default("India")
-    state             String?
-    district          String?
-    area              String?
-    pincode           String?
+  country  String? @default("India")
+  state    String?
+  district String?
+  area     String?
+  pincode  String?
 
-    addressLine1      String?
-    addressLine2      String?
+  addressLine1 String?
+  addressLine2 String?
 
-    website          String?
+  website String?
 
-    leadOwner         String?
-    leadSource        String?
-    language          String?
+  leadOwner  String?
+  leadSource String?
+  language   String?
 
-    priority          String?
-    status            String?
+  priority String?
+  status   String?
 
-    expectedValue     Float?
-    probability       Int?
+  expectedValue Float?
+  probability   Int?
 
-    products          Json?
+  products Json?
 
-    followupDate      DateTime?
-    followupTime      String?
+  followupDate DateTime?
+  followupTime String?
 
-    notes             String?
+  notes String?
 
-    followupCompleted Boolean @default(false)
+  followupCompleted   Boolean   @default(false)
+  followupCompletedAt DateTime?
+  lastReminderSent    DateTime?
+  nextReminder        DateTime?
 
-followupCompletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-lastReminderSent DateTime?
+  notesHistory LeadNote[]
+}
 
-nextReminder DateTime?
+model LeadNote {
+  id Int @id @default(autoincrement())
 
-    createdAt         DateTime @default(now())
-    updatedAt         DateTime @updatedAt
-  }
+  leadId Int
 
+  note String
+
+  createdAt DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}

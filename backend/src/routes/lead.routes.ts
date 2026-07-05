@@ -6,6 +6,9 @@ import {
   getAllLeads,
   getLead,
   updateLead,
+  addLeadNote,
+  getLeadNotes,
+  deleteLeadNote,
 } from "../controllers/lead.controller";
 
 const router = Router();
@@ -19,5 +22,12 @@ router.post("/", createLead);
 router.put("/:id", updateLead);
 
 router.delete("/:id", deleteLead);
+
+// Lead Notes
+router.get("/:id/notes", getLeadNotes);
+
+router.post("/:id/notes", addLeadNote);
+
+router.delete("/notes/:noteId", deleteLeadNote);
 
 export default router;

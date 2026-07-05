@@ -31,6 +31,13 @@ export async function getLead(
       where: {
         id: Number(req.params.id),
       },
+      include: {
+        notesHistory: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
     });
 
     res.json(lead);
@@ -103,6 +110,75 @@ export async function deleteLead(
 
     res.status(500).json({
       message: "Unable to delete lead.",
+    });
+  }
+}
+
+export async function getLeadNotes(
+  req: Request,
+  res: Response
+) {
+  try {
+    const notes = await prisma.leadNote.findMany({
+      where: {
+        leadId: Number(req.params.id),
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.json(notes);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Unable to load notes.",
+    });
+  }
+}
+
+export async function addLeadNote(
+  req: Request,
+  res: Response
+) {
+  try {
+    const note = await prisma.leadNote.create({
+      data: {
+        leadId: Number(req.params.id),
+        note: req.body.note,
+      },
+    });
+
+    res.status(201).json(note);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Unable to save note.",
+    });
+  }
+}
+
+export async function deleteLeadNote(
+  req: Request,
+  res: Response
+) {
+  try {
+    await prisma.leadNote.delete({
+      where: {
+        id: Number(req.params.noteId),
+      },
+    });
+
+    res.json({
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Unable to delete note.",
     });
   }
 }
