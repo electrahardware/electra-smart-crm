@@ -6,6 +6,7 @@ import {
   deleteLead,
 } from "../../services/leadService";
 import type { Lead } from "../../types/lead";
+import LeadDetailsDrawer from "./LeadDetailsDrawer";
 
 export default function LeadTable() {
 
@@ -424,6 +425,8 @@ function toggleAll() {
   }
 
   return (
+     <>
+    
 
     <div className="bg-white rounded-2xl shadow border border-slate-200">
 
@@ -1031,87 +1034,15 @@ Next
 
 )}
 
-    {selectedLead && (
-<div className="fixed inset-0 z-50 flex">
-
-  <div
-    className="flex-1 bg-black/40"
-    onClick={() => setSelectedLead(null)}
-  />
-
-  <div className="w-[520px] bg-white shadow-2xl overflow-y-auto">
-
-    <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between">
-
-      <h2 className="text-2xl font-bold">
-        Lead Details
-      </h2>
-
-      <button
-        onClick={() => setSelectedLead(null)}
-        className="text-red-600 text-2xl font-bold"
-      >
-        ✕
-      </button>
-
-    </div>
-
-    <div className="p-6">
-
-      <div className="grid grid-cols-2 gap-5">
-
-        <div>
-          <p className="text-xs text-slate-500">
-            Customer
-          </p>
-
-          <p className="font-semibold">
-            {selectedLead.customerName}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-xs text-slate-500">
-            Mobile
-          </p>
-
-          <p className="font-semibold">
-            {selectedLead.mobile}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-xs text-slate-500">
-            Shop
-          </p>
-
-          <p className="font-semibold">
-            {selectedLead.shopName || "-"}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-xs text-slate-500">
-            Status
-          </p>
-
-          <p className="font-semibold">
-            {selectedLead.status || "-"}
-          </p>
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-  
-)}
+    
     
     </div>
 
-  );
+<LeadDetailsDrawer
+  lead={selectedLead}
+  onClose={() => setSelectedLead(null)}
+/>
 
+</>
+);
 }

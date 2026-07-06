@@ -57,6 +57,7 @@ model Lead {
   updatedAt DateTime @updatedAt
 
   notesHistory LeadNote[]
+  calls        LeadCall[]
 }
 
 model LeadNote {
@@ -65,6 +66,24 @@ model LeadNote {
   leadId Int
 
   note String
+
+  createdAt DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+model LeadCall {
+  id Int @id @default(autoincrement())
+
+  leadId Int
+
+  callType String
+
+  duration Int?
+
+  remarks String?
+
+  nextFollowup DateTime?
 
   createdAt DateTime @default(now())
 

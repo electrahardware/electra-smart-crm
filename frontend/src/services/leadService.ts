@@ -1,21 +1,29 @@
 import type { Lead } from "../types/lead";
+
 export type LeadResponse = Lead;
 
 const API = "http://localhost:5000/api/leads";
 
 export async function getLeads(): Promise<LeadResponse[]> {
-
   const res = await fetch(API);
 
-  return await res.json();
+  if (!res.ok) {
+    throw new Error("Unable to load leads");
+  }
 
+  return res.json();
 }
 
 export async function getLead(
   id: number
 ): Promise<LeadResponse> {
   const res = await fetch(`${API}/${id}`);
-  return await res.json();
+
+  if (!res.ok) {
+    throw new Error("Unable to load lead");
+  }
+
+  return res.json();
 }
 
 export async function saveLead(data: Lead) {
@@ -29,20 +37,15 @@ export async function saveLead(data: Lead) {
 
   const result = await res.json();
 
-  console.log("STATUS:", res.status);
-  console.log("RESULT:", result);
-
   if (!res.ok) {
+    const error: any = new Error(
+      result.message || "Save Failed"
+    );
 
-  const error: any = new Error(
-    result.message || "Save Failed"
-  );
+    error.data = result;
 
-  error.data = result;
-
-  throw error;
-
-}
+    throw error;
+  }
 
   return result;
 }
@@ -59,7 +62,11 @@ export async function updateLead(
     body: JSON.stringify(data),
   });
 
-  return await res.json();
+  if (!res.ok) {
+    throw new Error("Unable to update lead");
+  }
+
+  return res.json();
 }
 
 export async function deleteLead(id: number) {
@@ -67,5 +74,64 @@ export async function deleteLead(id: number) {
     method: "DELETE",
   });
 
-  return await res.json();
+  if (!res.ok) {
+    throw new Error("Unable to delete lead");
+  }
+
+  return res.json();
+}
+
+export async function getLeadNotes(
+  leadId: number
+) {
+  const res = await fetch(
+    `${API}/${leadId}/notes`
+  );
+
+  if (!res.ok) {
+    throw new Error("Unable to load notes");
+  }
+
+  return res.json();
+}
+
+export async function addLeadNote(
+  leadId: number,
+  note: string
+) {
+  const res = await fetch(
+    `${API}/${leadId}/notes`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        note,
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Unable to save note");
+  }
+
+  return res.json();
+}
+
+export async function deleteLeadNote(
+  noteId: number
+) {
+  const res = await fetch(
+    `${API}/notes/${noteId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Unable to delete note");
+  }
+
+  return res.json();
 }
