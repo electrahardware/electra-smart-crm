@@ -1,225 +1,246 @@
-import { useEffect, useState } from "react";
-import { useLead } from "../../hooks/useLead";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   getLeads,
   deleteLead,
 } from "../../services/leadService";
+
 import type { Lead } from "../../types/lead";
+
+import { useLead } from "../../hooks/useLead";
+
+import StatusBadge from "./StatusBadge";
+import PriorityBadge from "./PriorityBadge";
 import LeadDetailsDrawer from "./LeadDetailsDrawer";
+import FollowupDashboard from "./FollowupDashboard";
+import TodayFollowupList from "./TodayFollowupList";
 
 export default function LeadTable() {
 
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] =
-  useState("All");
-  const [ownerFilter, setOwnerFilter] =
-  useState("All");
-  const [followupFilter, setFollowupFilter] =
-  useState("All");
-  const [currentPage, setCurrentPage] =
-  useState(1);
+  const [leads, setLeads] =
+    useState<Lead[]>([]);
 
-const [pageSize, setPageSize] =
-  useState(10);
-  const [sortBy, setSortBy] =
-  useState("latest");
-  const [
-  selectedIds,
-  setSelectedIds,
-] = useState<number[]>([]);
   const [selectedLead, setSelectedLead] =
-  useState<Lead | null>(null);
+    useState<Lead | null>(null);
+
+  const [selectedIds, setSelectedIds] =
+    useState<number[]>([]);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [statusFilter, setStatusFilter] =
+    useState("All");
+
+  const [ownerFilter, setOwnerFilter] =
+    useState("All");
+
+  const [followupFilter, setFollowupFilter] =
+    useState("All");
+
+  const [sortBy, setSortBy] =
+    useState("latest");
+
+  const [pageSize, setPageSize] =
+    useState(10);
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
 
   const {
     setLead,
     setEditingId,
   } = useLead();
 
-  useEffect(() => {
-  loadLeads();
-
-  const handler = () => {
+  const today =
+    new Date()
+      .toISOString()
+      .slice(0, 10); 
+        useEffect(() => {
     loadLeads();
-  };
 
-  window.addEventListener(
-    "lead-imported",
-    handler
-  );
+    const handler = () => {
+      loadLeads();
+    };
 
-  return () => {
-    window.removeEventListener(
+    window.addEventListener(
       "lead-imported",
       handler
     );
-  };
-}, []);
 
+    return () => {
+      window.removeEventListener(
+        "lead-imported",
+        handler
+      );
+    };
+  }, []);
 
   async function loadLeads() {
-
     try {
-
       const data = await getLeads();
 
       setLeads(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
-    } catch (err) {
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    search,
+    statusFilter,
+    ownerFilter,
+    followupFilter,
+    sortBy,
+    pageSize,
+  ]);
 
-      console.error(err);
+  const filteredLeads = useMemo(() => {
+    return leads.filter((lead) => {
+
+      const keyword =
+        search.toLowerCase();
+
+      const matchesSearch =
+        lead.customerName
+          .toLowerCase()
+          .includes(keyword) ||
+
+        lead.mobile.includes(keyword) ||
+
+        (lead.shopName || "")
+          .toLowerCase()
+          .includes(keyword);
+
+      const matchesStatus =
+        statusFilter === "All"
+          ? true
+          : lead.status === statusFilter;
+
+      const matchesOwner =
+        ownerFilter === "All"
+          ? true
+          : lead.leadOwner === ownerFilter;
+
+      const matchesFollowup = (() => {
+
+        if (followupFilter === "All") {
+          return true;
+        }
+
+        if (!lead.followupDate) {
+          return false;
+        }
+
+        const date =
+          lead.followupDate.slice(0, 10);
+
+        if (
+          followupFilter === "Today"
+        ) {
+          return date === today;
+        }
+
+        if (
+          followupFilter === "Overdue"
+        ) {
+          return date < today;
+        }
+
+        if (
+          followupFilter === "Upcoming"
+        ) {
+          return date > today;
+        }
+
+        return true;
+
+      })();
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesOwner &&
+        matchesFollowup
+      );
+
+    });
+  }, [
+    leads,
+    search,
+    statusFilter,
+    ownerFilter,
+    followupFilter,
+    today,
+  ]);
+    const sortedLeads = useMemo(() => {
+
+    const rows = [...filteredLeads];
+
+    switch (sortBy) {
+
+      case "customer":
+
+        rows.sort((a, b) =>
+          a.customerName.localeCompare(
+            b.customerName
+          )
+        );
+
+        break;
+
+      case "followup":
+
+        rows.sort((a, b) =>
+          (a.followupDate || "")
+            .localeCompare(
+              b.followupDate || ""
+            )
+        );
+
+        break;
+
+      case "value":
+
+        rows.sort(
+          (a, b) =>
+            Number(b.expectedValue || 0) -
+            Number(a.expectedValue || 0)
+        );
+
+        break;
+
+      default:
+
+        rows.sort(
+          (a, b) =>
+            (b.id || 0) -
+            (a.id || 0)
+        );
 
     }
 
-  }
+    return rows;
 
-  const filteredLeads = leads.filter((lead) => {
+  }, [
+    filteredLeads,
+    sortBy,
+  ]);
 
-  const text = search.toLowerCase();
-
-  const matchesSearch =
-
-    lead.customerName
-      .toLowerCase()
-      .includes(text)
-
-    ||
-
-    lead.mobile
-      .includes(text)
-
-    ||
-
-    (lead.shopName || "")
-      .toLowerCase()
-      .includes(text);
-
-  const matchesStatus =
-  
-
-    statusFilter === "All"
-
-      ? true
-
-      : lead.status === statusFilter;
-
-  const matchesOwner =
-  
-
-  ownerFilter === "All"
-
-    ? true
-
-    : lead.leadOwner === ownerFilter; 
-    
-  const matchesFollowup = (() => {
-
-  if (followupFilter === "All") {
-    return true;
-  }
-
-  if (!lead.followupDate) {
-    return false;
-  }
-
-  const date =
-    lead.followupDate.slice(0, 10);
-
-  if (followupFilter === "Today") {
-    return date === today;
-  }
-
-  if (followupFilter === "Overdue") {
-    return date < today;
-  }
-
-  if (followupFilter === "Upcoming") {
-    return date > today;
-  }
-
-  return true;
-
-})();
-
-  return (
-  matchesSearch &&
-  matchesStatus &&
-  matchesOwner &&
-  matchesFollowup
-);
-
-});
-
-useEffect(() => {
-
-  setCurrentPage(1);
-
-}, [
-  search,
-  statusFilter,
-  ownerFilter,
-  followupFilter,
-  pageSize,
-  sortBy,
-]);
-
-const sortedLeads = [...filteredLeads];
-
-switch (sortBy) {
-
-  case "customer":
-
-    sortedLeads.sort((a, b) =>
-      a.customerName.localeCompare(
-        b.customerName
-      )
-    );
-
-    break;
-
-  case "followup":
-
-    sortedLeads.sort((a, b) =>
-      (a.followupDate || "").localeCompare(
-        b.followupDate || ""
-      )
-    );
-
-    break;
-
-  case "value":
-
-    sortedLeads.sort(
-      (a, b) =>
-        Number(b.expectedValue || 0) -
-        Number(a.expectedValue || 0)
-    );
-
-    break;
-
-  default:
-
-    sortedLeads.sort(
-      (a, b) =>
-        (b.id || 0) -
-        (a.id || 0)
-    );
-
-}
-
-const totalPages = Math.max(
-  1,
-  Math.ceil(
-    filteredLeads.length / pageSize
-  )
-);
-
-const paginatedLeads =
-  sortedLeads.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
+  const totalPages = Math.max(
+    1,
+    Math.ceil(
+      sortedLeads.length / pageSize
+    )
   );
+
+  const paginatedLeads =
+    sortedLeads.slice(
+      (currentPage - 1) * pageSize,
+      currentPage * pageSize
+    );
 
   const totalLeads =
     filteredLeads.length;
@@ -227,96 +248,48 @@ const paginatedLeads =
   const hotLeads =
     filteredLeads.filter(
       (lead) =>
-        lead.priority === "🔴 Hot"
+        lead.priority === "Hot"
     ).length;
-
-  const today =
-    new Date()
-      .toISOString()
-      .slice(0, 10);
 
   const todayFollowups =
     filteredLeads.filter(
       (lead) =>
+        lead.followupDate?.slice(0, 10) ===
+        today
+    ).length;
+
+  const overdueLeads =
+    filteredLeads.filter(
+      (lead) =>
         lead.followupDate &&
-        lead.followupDate
-          .slice(0, 10) === today
+        lead.followupDate.slice(0, 10) <
+          today
+    ).length;
+
+  const upcomingLeads =
+    filteredLeads.filter(
+      (lead) =>
+        lead.followupDate &&
+        lead.followupDate.slice(0, 10) >
+          today
     ).length;
 
   const expectedValue =
     filteredLeads.reduce(
-      
-  
-      
       (total, lead) =>
         total +
         Number(
           lead.expectedValue || 0
         ),
       0
-    ); 
-    const overdueLeads = filteredLeads.filter((lead) => {
-
-  if (!lead.followupDate) return false;
-
-  return lead.followupDate.slice(0, 10) < today;
-
-}).length;
-
-const upcomingLeads = filteredLeads.filter((lead) => {
-
-  if (!lead.followupDate) return false;
-
-  return lead.followupDate.slice(0, 10) > today;
-
-}).length;
-async function handleDeleteSelected() {
-
-  if (selectedIds.length === 0) {
-
-    alert("Please select leads.");
-
-    return;
-
-  }
-
-  const ok = window.confirm(
-
-    `Delete ${selectedIds.length} selected lead(s)?`
-
-  );
-
-  if (!ok) return;
-
-  try {
-
-    await Promise.all(
-
-      selectedIds.map((id) =>
-
-        deleteLead(id)
-
-      )
-
     );
-
-    setSelectedIds([]);
-
-    await loadLeads();
-
-    alert("Selected Leads Deleted");
-
-  } catch (err) {
-
-    console.error(err);
-
-    alert("Unable to delete selected leads");
-
-  }
-
-}    
-
-async function handleDelete(
+    const dashboard = {
+  overdue: overdueLeads,
+  today: todayFollowups,
+  upcoming: upcomingLeads,
+  expectedValue,
+};
+      async function handleDelete(
     id: number
   ) {
 
@@ -324,7 +297,9 @@ async function handleDelete(
       "Are you sure you want to delete this lead?"
     );
 
-    if (!ok) return;
+    if (!ok) {
+      return;
+    }
 
     try {
 
@@ -332,66 +307,68 @@ async function handleDelete(
 
       await loadLeads();
 
-      alert(
-        "Lead Deleted Successfully"
+      setSelectedIds((prev) =>
+        prev.filter(
+          (item) => item !== id
+        )
       );
 
-    } catch (err) {
+      if (
+        selectedLead?.id === id
+      ) {
+        setSelectedLead(null);
+      }
 
-      console.error(err);
+    } catch (error) {
+
+      console.error(error);
 
       alert(
-        "Unable to delete lead"
+        "Unable to delete lead."
       );
 
     }
 
   }
 
-  function toggleLead(id: number) {
+  async function handleDeleteSelected() {
 
-  if (selectedIds.includes(id)) {
+    if (selectedIds.length === 0) {
+      return;
+    }
 
-    setSelectedIds(
-      selectedIds.filter(
-        (item) => item !== id
-      )
+    const ok = window.confirm(
+      `Delete ${selectedIds.length} selected lead(s)?`
     );
 
-    return;
+    if (!ok) {
+      return;
+    }
+
+    try {
+
+      await Promise.all(
+        selectedIds.map((id) =>
+          deleteLead(id)
+        )
+      );
+
+      setSelectedIds([]);
+
+      await loadLeads();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Unable to delete selected leads."
+      );
+
+    }
 
   }
 
-  setSelectedIds([
-    ...selectedIds,
-    id,
-  ]);
-
-}
-
-function toggleAll() {
-
-  if (
-    selectedIds.length ===
-    paginatedLeads.length
-  ) {
-
-    setSelectedIds([]);
-
-    return;
-
-  }
-
-  setSelectedIds(
-
-    paginatedLeads.map(
-      (lead) => lead.id!
-    )
-
-  );
-
-}
-  
   function handleEdit(
     lead: Lead
   ) {
@@ -399,650 +376,598 @@ function toggleAll() {
     setEditingId(lead.id!);
 
     setLead({
-
       ...lead,
-
       products:
         Array.isArray(
           lead.products
         )
           ? lead.products
           : [],
-
       followupDate:
         lead.followupDate ?? "",
-
     });
 
     window.scrollTo({
-
       top: 0,
-
       behavior: "smooth",
-
     });
+
+  }
+
+  function toggleLead(
+    id: number
+  ) {
+
+    setSelectedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter(
+            (item) =>
+              item !== id
+          )
+        : [...prev, id]
+    );
+
+  }
+
+  function toggleAll() {
+
+    if (
+      paginatedLeads.length > 0 &&
+      selectedIds.length ===
+        paginatedLeads.length
+    ) {
+
+      setSelectedIds([]);
+
+      return;
+
+    }
+
+    setSelectedIds(
+      paginatedLeads.map(
+        (lead) => lead.id!
+      )
+    );
 
   }
 
   return (
-     <>
-    
+    <> 
+    <FollowupDashboard
+  overdue={dashboard.overdue}
+  today={dashboard.today}
+  upcoming={dashboard.upcoming}
+  expectedValue={dashboard.expectedValue}
+/>
 
-    <div className="bg-white rounded-2xl shadow border border-slate-200">
+<div className="h-6" />
+<TodayFollowupList
+  leads={filteredLeads}
+  onRefresh={loadLeads}
+/>
 
-      {selectedIds.length > 0 && (
+<div className="h-6" />
+          <div className="bg-white rounded-2xl shadow border border-slate-200">
 
-<div className="flex items-center justify-between px-6 py-4 bg-red-50 border-b">
+        {selectedIds.length > 0 && (
 
-<div className="font-semibold text-red-700">
+          <div className="flex items-center justify-between border-b bg-red-50 px-6 py-4">
 
-{selectedIds.length}
+            <div className="font-semibold text-red-700">
+              {selectedIds.length} lead(s) selected
+            </div>
 
-lead(s) selected
+            <button
+              onClick={handleDeleteSelected}
+              className="rounded-xl bg-red-600 px-5 py-2 font-semibold text-white hover:bg-red-700"
+            >
+              🗑 Delete Selected
+            </button>
 
-</div>
+          </div>
 
-<button
+        )}
 
-onClick={handleDeleteSelected}
+        <div className="border-b p-6">
 
-className="rounded-xl bg-red-600 hover:bg-red-700 text-white px-5 py-2 font-semibold"
-
->
-
-🗑 Delete Selected
-
-</button>
-
-</div>
-
-)}
-      
-      <div className="p-6 border-b">
-
-        <h2 className="text-xl font-bold">
-
-          Saved Leads
-
-        </h2>
-
-      </div>
-
-      <div className="grid grid-cols-6 gap-4 p-6 border-b">
-
-        <div className="bg-blue-50 rounded-xl p-5 border">
-
-          <p className="text-sm text-slate-500">
-            Total Leads
-          </p>
-
-          <h2 className="text-3xl font-bold text-blue-700">
-            {totalLeads}
+          <h2 className="text-2xl font-bold">
+            Saved Leads
           </h2>
+
+          <p className="mt-1 text-slate-500">
+            Manage all customer leads from one place.
+          </p>
 
         </div>
 
-        <div className="bg-red-50 rounded-xl p-5 border">
+        <div className="grid grid-cols-6 gap-4 border-b p-6">
 
-          <p className="text-sm text-slate-500">
-            Hot Leads
-          </p>
+          <SummaryCard
+            title="Total Leads"
+            value={totalLeads}
+            color="blue"
+          />
 
-          <h2 className="text-3xl font-bold text-red-700">
-            {hotLeads}
-          </h2>
+          <SummaryCard
+            title="Hot Leads"
+            value={hotLeads}
+            color="red"
+          />
 
-        </div>        <div className="bg-green-50 rounded-xl p-5 border">
+          <SummaryCard
+            title="Today's Follow-up"
+            value={todayFollowups}
+            color="green"
+          />
 
-          <p className="text-sm text-slate-500">
-            Today's Follow-up
-          </p>
+          <SummaryCard
+            title="Expected Value"
+            value={`₹ ${expectedValue.toLocaleString()}`}
+            color="yellow"
+          />
 
-          <h2 className="text-3xl font-bold text-green-700">
-            {todayFollowups}
-          </h2>
+          <SummaryCard
+            title="Overdue"
+            value={overdueLeads}
+            color="orange"
+          />
+
+          <SummaryCard
+            title="Upcoming"
+            value={upcomingLeads}
+            color="cyan"
+          />
 
         </div>
 
-        <div className="bg-yellow-50 rounded-xl p-5 border">
+        <div className="border-b p-6 space-y-4">
 
-          <p className="text-sm text-slate-500">
-            Expected Value
-          </p>
+          <input
+            type="text"
+            placeholder="🔍 Search by Customer, Shop or Mobile..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+          />
 
-          <h2 className="text-3xl font-bold text-yellow-700">
-            ₹ {expectedValue.toLocaleString()}
-          </h2>
+          <div className="grid grid-cols-3 gap-4">
+
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(
+                  e.target.value
+                )
+              }
+              className="rounded-xl border border-slate-300 px-4 py-3"
+            >
+              <option value="All">All Status</option>
+              <option value="New">New</option>
+              <option value="Follow-up">Follow-up</option>
+              <option value="Quotation Sent">Quotation Sent</option>
+              <option value="Won">Won</option>
+              <option value="Lost">Lost</option>
+            </select>
+
+            <select
+              value={ownerFilter}
+              onChange={(e) =>
+                setOwnerFilter(
+                  e.target.value
+                )
+              }
+              className="rounded-xl border border-slate-300 px-4 py-3"
+            >
+              <option value="All">
+                All Owners
+              </option>
+
+              {[
+                ...new Set(
+                  leads
+                    .map((lead) => lead.leadOwner)
+                    .filter(Boolean)
+                ),
+              ].map((owner) => (
+                <option
+                  key={owner}
+                  value={owner}
+                >
+                  {owner}
+                </option>
+              ))}
+
+            </select>
+
+            <select
+              value={followupFilter}
+              onChange={(e) =>
+                setFollowupFilter(
+                  e.target.value
+                )
+              }
+              className="rounded-xl border border-slate-300 px-4 py-3"
+            >
+              <option value="All">All Follow-ups</option>
+              <option value="Today">Today</option>
+              <option value="Overdue">Overdue</option>
+              <option value="Upcoming">Upcoming</option>
+            </select>
+
+          </div>
 
         </div>
 
-        <div className="bg-orange-50 rounded-xl p-5 border">
+        <div className="max-h-[650px] overflow-auto">
 
-  <p className="text-sm text-slate-500">
-    Overdue
-  </p>
+          <table className="w-full">
 
-  <h2 className="text-3xl font-bold text-orange-700">
-    {overdueLeads}
-  </h2>
+  <thead className="sticky top-0 z-10 bg-slate-100">
 
-</div>
+    <tr>
 
-<div className="bg-cyan-50 rounded-xl p-5 border">
-
-  <p className="text-sm text-slate-500">
-    Upcoming
-  </p>
-
-  <h2 className="text-3xl font-bold text-cyan-700">
-    {upcomingLeads}
-  </h2>
-
-</div>
-
-      </div>
-
-      <div className="p-6 border-b">
+      <th className="p-3">
 
         <input
-          type="text"
-          placeholder="🔍 Search by Name, Mobile or Shop..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
+          type="checkbox"
+          checked={
+            paginatedLeads.length > 0 &&
+            selectedIds.length ===
+              paginatedLeads.length
           }
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-red-600 focus:ring-2 focus:ring-red-200"
+          onChange={toggleAll}
         />
 
-        <select
-  value={statusFilter}
-  onChange={(e) =>
-    setStatusFilter(
-      e.target.value
-    )
-  }
-  className="mt-4 w-full rounded-xl border border-slate-300 px-4 py-3"
->
+      </th>
 
-  <option>
-    All
-  </option>
+      <th className="p-3 text-left">
+        Customer
+      </th>
 
-  <option>
-    New
-  </option>
+      <th className="p-3 text-left">
+        Mobile
+      </th>
 
-  <option>
-    Follow-up
-  </option>
+      <th className="p-3 text-left">
+        Shop
+      </th>
 
-  <option>
-    Quotation Sent
-  </option>
+      <th className="p-3 text-left">
+        Status
+      </th>
 
-  <option>
-    Won
-  </option>
+      <th className="p-3 text-left">
+        Owner
+      </th>
 
-  <option>
-    Lost
-  </option>
+      <th className="p-3 text-left">
+        Priority
+      </th>
 
-</select>
+      <th className="p-3 text-left">
+        Actions
+      </th>
 
-<select
-  value={ownerFilter}
-  onChange={(e) =>
-    setOwnerFilter(
-      e.target.value
-    )
-  }
-  className="mt-4 w-full rounded-xl border border-slate-300 px-4 py-3"
->
-  <option value="All">
-    All Owners
-  </option>
+    </tr>
 
-  {[
-    ...new Set(
-      leads
-        .map((lead) => lead.leadOwner)
-        .filter(Boolean)
-    ),
-  ].map((owner) => (
-    <option
-      key={owner}
-      value={owner}
-    >
-      {owner}
-    </option>
-  ))}
-</select>
+  </thead>
 
-<select
-  value={followupFilter}
-  onChange={(e) =>
-    setFollowupFilter(
-      e.target.value
-    )
-  }
-  className="mt-4 w-full rounded-xl border border-slate-300 px-4 py-3"
->
+  <tbody>
 
-  <option value="All">
-    All Follow-ups
-  </option>
+    {paginatedLeads.map((lead) => (
 
-  <option value="Today">
-    Today
-  </option>
+      <tr
+        key={lead.id}
+        className="border-t hover:bg-slate-50"
+      >
 
-  <option value="Overdue">
-    Overdue
-  </option>
+        <td className="p-3">
 
-  <option value="Upcoming">
-    Upcoming
-  </option>
+          <input
+            type="checkbox"
+            checked={selectedIds.includes(
+              lead.id!
+            )}
+            onChange={() =>
+              toggleLead(lead.id!)
+            }
+          />
 
-</select>
+        </td>
 
-      </div>
+        <td className="p-3 font-medium">
+          {lead.customerName}
+        </td>
 
-      <div className="overflow-auto max-h-[650px]">
+        <td className="p-3">
+          {lead.mobile}
+        </td>
 
-<table className="w-full">
+        <td className="p-3">
+          {lead.shopName || "-"}
+        </td>
 
-        <thead className="sticky top-0 z-10 bg-slate-100 shadow-sm">
+        <td className="p-3">
+          <StatusBadge
+            status={lead.status}
+          />
+        </td>
 
-          <tr>
+        <td className="p-3">
+          {lead.leadOwner || "-"}
+        </td>
 
-            <th className="p-3">
+        <td className="p-3">
+          <PriorityBadge
+            priority={lead.priority}
+          />
+        </td>
 
-<input
-type="checkbox"
+        <td className="p-3">
 
-checked={
-paginatedLeads.length>0 &&
-selectedIds.length===
-paginatedLeads.length
-}
+          <div className="flex items-center gap-2">
 
-onChange={toggleAll}
-
-/>
-
-</th>
-
-            <th className="p-3 text-left">
-              Customer
-            </th>
-
-            <th className="p-3 text-left">
-              Mobile
-            </th>
-
-            <th className="p-3 text-left">
-              Shop
-            </th>
-
-            <th className="p-3 text-left">
-              Status
-            </th>
-
-            <th className="p-3 text-left">
-              Owner
-            </th>
-
-            <th className="p-3 text-left">
-              Priority
-            </th>
-
-            <th className="p-3 text-left">
-              Actions
-            </th>
-
-          </tr>
-
-        </thead>
-
-        <tbody>          {paginatedLeads.map((lead) => (
-
-            <tr
-              key={lead.id}
-              className={`border-t
-
-${
-  lead.followupDate &&
-  lead.followupDate.slice(0, 10) <
-    new Date().toISOString().slice(0, 10)
-
-    ? "bg-red-50"
-
-    : lead.followupDate &&
-      lead.followupDate.slice(0, 10) ===
-        new Date().toISOString().slice(0, 10)
-
-    ? "bg-green-50"
-
-    : "hover:bg-slate-50"
-}`}
+            <a
+              href={`tel:${lead.mobile}`}
+              className="rounded-lg p-2 hover:bg-blue-100"
+              title="Call"
             >
+              📞
+            </a>
 
-              <td className="p-3">
+            <a
+              href={`https://wa.me/91${lead.mobile}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-lg p-2 hover:bg-green-100"
+              title="WhatsApp"
+            >
+              💬
+            </a>
 
-<input
+            <button
+              onClick={() =>
+                setSelectedLead(lead)
+              }
+              className="rounded-lg p-2 hover:bg-slate-100"
+              title="View"
+            >
+              👁️
+            </button>
 
-type="checkbox"
+            <button
+              onClick={() =>
+                handleEdit(lead)
+              }
+              className="rounded-lg p-2 hover:bg-orange-100"
+              title="Edit"
+            >
+              ✏️
+            </button>
 
-checked={
-selectedIds.includes(
-lead.id!
-)
-}
+            <button
+              onClick={() =>
+                handleDelete(
+                  lead.id!
+                )
+              }
+              className="rounded-lg p-2 text-red-600 hover:bg-red-100"
+              title="Delete"
+            >
+              🗑️
+            </button>
 
-onChange={()=>
+          </div>
 
-toggleLead(
-lead.id!
-)
+        </td>
 
-}
+      </tr>
 
-/>
+    ))}
 
-</td>
-              
-              <td className="p-3">
-                {lead.customerName}
-              </td>
+  </tbody>
 
-              <td className="p-3">
-                {lead.mobile}
-              </td>
+</table>
 
-              <td className="p-3">
-                {lead.shopName || "-"}
-              </td>
+</div>
+        
 
-              <td className="p-3">
+                {filteredLeads.length === 0 && (
 
-                <span
-  className={`px-3 py-1 rounded-full text-xs font-semibold
+          <div className="p-12 text-center text-slate-500">
 
-${
-lead.status==="New"
-?"bg-blue-100 text-blue-700"
+            No leads found.
 
-:lead.status==="Follow-up"
-?"bg-yellow-100 text-yellow-700"
+          </div>
 
-:lead.status==="Quotation Sent"
-?"bg-purple-100 text-purple-700"
+        )}
 
-:lead.status==="Won"
-?"bg-green-100 text-green-700"
+        {filteredLeads.length > 0 && (
 
-:lead.status==="Lost"
-?"bg-red-100 text-red-700"
+          <div className="flex items-center justify-between border-t p-5">
 
-:"bg-slate-100 text-slate-700"
+            <div className="flex items-center gap-3">
 
-}`}
->
+              <span className="text-sm">
+                Rows
+              </span>
 
-{lead.status || "-"}
+              <select
+                value={pageSize}
+                onChange={(e) =>
+                  setPageSize(
+                    Number(e.target.value)
+                  )
+                }
+                className="rounded-lg border px-3 py-2"
+              >
 
-</span>
+                <option value={10}>
+                  10
+                </option>
 
-              </td>
+                <option value={25}>
+                  25
+                </option>
 
-              <td className="p-3">
-                {lead.leadOwner || "-"}
-              </td>
+                <option value={50}>
+                  50
+                </option>
 
-              <td className="p-3">
+                <option value={100}>
+                  100
+                </option>
 
-                <span
-  className={`px-3 py-1 rounded-full text-xs font-semibold
+              </select>
 
-${
-lead.priority==="🔴 Hot"
-?"bg-red-100 text-red-700"
+              <span className="ml-6 text-sm">
+                Sort
+              </span>
 
-:lead.priority==="🟠 Warm"
-?"bg-orange-100 text-orange-700"
+              <select
+                value={sortBy}
+                onChange={(e) =>
+                  setSortBy(
+                    e.target.value
+                  )
+                }
+                className="rounded-lg border px-3 py-2"
+              >
 
-:lead.priority==="🔵 Cold"
-?"bg-blue-100 text-blue-700"
+                <option value="latest">
+                  Latest
+                </option>
 
-:"bg-slate-100 text-slate-700"
+                <option value="customer">
+                  Customer
+                </option>
 
-}`}
->
+                <option value="followup">
+                  Follow-up Date
+                </option>
 
-{lead.priority || "-"}
+                <option value="value">
+                  Expected Value
+                </option>
 
-</span>
+              </select>
 
-              </td>
+            </div>
 
-              <td className="p-3">
+            <div className="text-sm text-slate-500">
 
-  <div className="flex items-center gap-3 flex-wrap">
+              Page
 
-    <a
-      href={`tel:${lead.mobile}`}
-      className="text-blue-600 hover:text-blue-800 font-semibold"
-    >
-      📞 Call
-    </a>
+              <b className="mx-2">
+                {currentPage}
+              </b>
 
-    <a
-      href={`https://wa.me/91${lead.mobile}`}
-      target="_blank"
-      rel="noreferrer"
-      className="text-green-600 hover:text-green-800 font-semibold"
-    >
-      💬 WhatsApp
-    </a>
+              of
 
-    <button
-      onClick={() => setSelectedLead(lead)}
-      className="text-emerald-600 hover:text-emerald-800 font-semibold"
-    >
-      👁 View
-    </button>
+              <b className="mx-2">
+                {totalPages}
+              </b>
 
-    <button
-      onClick={() => handleEdit(lead)}
-      className="text-blue-600 hover:text-blue-800 font-semibold"
-    >
-      ✏️ Edit
-    </button>
+            </div>
 
-    <button
-      onClick={() => handleDelete(lead.id!)}
-      className="text-red-600 hover:text-red-800 font-semibold"
-    >
-      🗑 Delete
-    </button>
+            <div className="flex gap-2">
 
-  </div>
+              <button
+                disabled={
+                  currentPage === 1
+                }
+                onClick={() =>
+                  setCurrentPage(
+                    (page) =>
+                      page - 1
+                  )
+                }
+                className="rounded-lg border px-4 py-2 disabled:opacity-40"
+              >
+                Previous
+              </button>
 
-</td>
+              <button
+                disabled={
+                  currentPage ===
+                  totalPages
+                }
+                onClick={() =>
+                  setCurrentPage(
+                    (page) =>
+                      page + 1
+                  )
+                }
+                className="rounded-lg border px-4 py-2 disabled:opacity-40"
+              >
+                Next
+              </button>
 
-            </tr>
+            </div>
 
-          ))}        </tbody>
+          </div>
 
-      </table>
+        )}
 
       </div>
 
-      {filteredLeads.length === 0 && (
+            <LeadDetailsDrawer
+        lead={selectedLead}
+        onClose={() =>
+          setSelectedLead(null)
+        }
+      />
 
-        <div className="p-10 text-center text-slate-500">
-
-          No leads found.
-
-        </div>
-
-      )}
-
-      {filteredLeads.length > 0 && (
-
-<div className="flex items-center justify-between p-5 border-t">
-
-<div className="flex items-center gap-2">
-
-<span className="text-sm">
-
-Rows
-
-<div className="flex items-center gap-2">
-
-<span className="text-sm">
-
-Sort
-
-</span>
-
-<select
-value={sortBy}
-onChange={(e)=>
-setSortBy(
-e.target.value
-)
-}
-className="rounded-lg border px-3 py-2"
->
-
-<option value="latest">
-Latest
-</option>
-
-<option value="customer">
-Customer
-</option>
-
-<option value="followup">
-Follow-up Date
-</option>
-
-<option value="value">
-Expected Value
-</option>
-
-</select>
-
-</div>
-
-</span>
-
-<select
-
-value={pageSize}
-
-onChange={(e)=>
-
-setPageSize(
-Number(e.target.value)
-)
-
+    </>
+  );
 }
 
-className="rounded-lg border px-3 py-2"
-
->
-
-<option value={10}>
-10
-</option>
-
-<option value={25}>
-25
-</option>
-
-<option value={50}>
-50
-</option>
-
-<option value={100}>
-100
-</option>
-
-</select>
-
-</div>
-
-<div className="text-sm text-slate-500">
-
-Page
-
-<b className="mx-1">
-
-{currentPage}
-
-</b>
-
-of
-
-<b className="mx-1">
-
-{totalPages}
-
-</b>
-
-</div>
-
-<div className="flex gap-2">
-
-<button
-disabled={currentPage===1}
-onClick={()=>
-setCurrentPage(
-(current)=>current-1
-)
+interface SummaryCardProps {
+  title: string;
+  value: string | number;
+  color:
+    | "blue"
+    | "red"
+    | "green"
+    | "yellow"
+    | "orange"
+    | "cyan";
 }
-className="rounded-lg border px-4 py-2 disabled:opacity-40"
->
 
-Previous
+function SummaryCard({
+  title,
+  value,
+  color,
+}: SummaryCardProps) {
 
-</button>
+  const colors = {
+    blue:
+      "bg-blue-50 border-blue-200 text-blue-700",
+    red:
+      "bg-red-50 border-red-200 text-red-700",
+    green:
+      "bg-green-50 border-green-200 text-green-700",
+    yellow:
+      "bg-yellow-50 border-yellow-200 text-yellow-700",
+    orange:
+      "bg-orange-50 border-orange-200 text-orange-700",
+    cyan:
+      "bg-cyan-50 border-cyan-200 text-cyan-700",
+  };
 
-<button
-disabled={
-currentPage===totalPages
-}
-onClick={()=>
-setCurrentPage(
-(current)=>current+1
-)
-}
-className="rounded-lg border px-4 py-2 disabled:opacity-40"
->
+  return (
+    <div
+      className={`rounded-xl border p-5 ${colors[color]}`}
+    >
+      <p className="text-sm opacity-70">
+        {title}
+      </p>
 
-Next
-
-</button>
-
-</div>
-
-</div>
-
-)}
-
-    
-    
+      <h2 className="mt-2 text-3xl font-bold">
+        {value}
+      </h2>
     </div>
-
-<LeadDetailsDrawer
-  lead={selectedLead}
-  onClose={() => setSelectedLead(null)}
-/>
-
-</>
-);
+  );
 }

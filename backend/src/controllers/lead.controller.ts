@@ -78,7 +78,26 @@ export async function updateLead(
       where: {
         id: Number(req.params.id),
       },
-      data: req.body,
+      data: {
+  ...req.body,
+
+  followupCompleted:
+    req.body.followupCompleted,
+
+  followupCompletedAt:
+    req.body.followupCompletedAt
+      ? new Date(
+          req.body.followupCompletedAt
+        )
+      : undefined,
+
+  followupDate:
+    req.body.followupDate
+      ? new Date(
+          req.body.followupDate
+        )
+      : undefined,
+},
     });
 
     res.json(lead);

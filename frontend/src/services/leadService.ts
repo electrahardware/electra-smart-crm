@@ -78,7 +78,31 @@ export async function deleteLead(id: number) {
     throw new Error("Unable to delete lead");
   }
 
+  
+
   return res.json();
+}
+
+export async function markFollowupDone(
+  id: number
+) {
+  const res = await fetch(
+    `${API}/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        followupCompleted: true,
+        followupCompletedAt:
+          new Date().toISOString(),
+      }),
+    }
+  );
+
+  return await res.json();
 }
 
 export async function getLeadNotes(
