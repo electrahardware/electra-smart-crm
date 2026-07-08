@@ -57,6 +57,7 @@ model Lead {
   updatedAt DateTime @updatedAt
 
   notesHistory LeadNote[]
+  attachments  LeadAttachment[]
   calls        LeadCall[]
 }
 
@@ -66,6 +67,22 @@ model LeadNote {
   leadId Int
 
   note String
+
+  createdAt DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+model LeadAttachment {
+  id Int @id @default(autoincrement())
+
+  leadId Int
+
+  fileName     String
+  originalName String
+  fileType     String
+  fileSize     Int
+  filePath     String
 
   createdAt DateTime @default(now())
 

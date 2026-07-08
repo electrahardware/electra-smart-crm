@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { Lead } from "../../types/lead";
 
 import LeadTabs from "./LeadTabs";
+import LeadAttachments from "./LeadAttachments";
 import LeadNotes from "./LeadNotes";
 import LeadCalls from "./LeadCalls";
 
@@ -195,6 +196,14 @@ export default function LeadDetailsDrawer({
     />
 
   </>
+
+)}
+
+{activeTab === "Attachments" && (
+
+  <LeadAttachments
+    lead={lead}
+  />
 
 )}
 
