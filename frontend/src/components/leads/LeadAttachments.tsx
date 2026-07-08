@@ -1,5 +1,7 @@
 import { useRef } from "react";
+import type { ChangeEvent } from "react";
 import type { Lead } from "../../types/lead";
+import { uploadAttachment } from "../../services/attachmentService";
 
 interface Props {
   lead: Lead | null;
@@ -10,7 +12,6 @@ export default function LeadAttachments({
   lead,
   onUpload,
 }: Props) {
-
   const fileInputRef =
     useRef<HTMLInputElement>(null);
 
@@ -18,28 +19,43 @@ export default function LeadAttachments({
     return null;
   }
 
+  const leadId = lead.id!;
+
   function handleUploadClick() {
     fileInputRef.current?.click();
   }
 
-  function handleFileChange(
-    e: React.ChangeEvent<HTMLInputElement>
+  async function handleFileChange(
+    e: ChangeEvent<HTMLInputElement>
   ) {
-
     const file = e.target.files?.[0];
 
     if (!file) {
       return;
     }
 
-    console.log(file);
+    try {
+      await uploadAttachment(
+        leadId,
+        file
+      );
 
-    onUpload?.();
+      alert("Attachment uploaded successfully.");
 
+      onUpload?.();
+
+      e.target.value = "";
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert("Unable to upload attachment.");
+
+    }
   }
 
   return (
-
     <div className="rounded-2xl border bg-white p-6">
 
       <div className="flex items-center justify-between">
@@ -51,31 +67,25 @@ export default function LeadAttachments({
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-
             Upload quotation, visiting card,
             catalogue, invoice and images.
-
           </p>
 
         </div>
 
-        <>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          onChange={handleFileChange}
+        />
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-
-          <button
-            onClick={handleUploadClick}
-            className="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
-          >
-            + Upload
-          </button>
-
-        </>
+        <button
+          onClick={handleUploadClick}
+          className="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
+        >
+          + Upload
+        </button>
 
       </div>
 
@@ -86,16 +96,12 @@ export default function LeadAttachments({
         </div>
 
         <h3 className="mt-4 text-lg font-semibold">
-
           No Attachments Yet
-
         </h3>
 
         <p className="mt-2 text-slate-500">
-
           Upload PDF, Images, Visiting Card,
           Catalogue or Invoice.
-
         </p>
 
         <button
@@ -108,7 +114,5 @@ export default function LeadAttachments({
       </div>
 
     </div>
-
   );
-
 }
