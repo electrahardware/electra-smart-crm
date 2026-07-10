@@ -1,24 +1,30 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
+import { createTimeline } from "../services/timeline.service";
 
 export async function getAllLeads(
   req: Request,
   res: Response
 ) {
   try {
-    const leads = await prisma.lead.findMany({
-      orderBy: {
-        id: "desc",
-      },
-    });
+
+    const leads =
+      await prisma.lead.findMany({
+        orderBy: {
+          id: "desc",
+        },
+      });
 
     res.json(leads);
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       message: "Unable to load leads.",
     });
+
   }
 }
 
@@ -27,26 +33,31 @@ export async function getLead(
   res: Response
 ) {
   try {
-    const lead = await prisma.lead.findUnique({
-      where: {
-        id: Number(req.params.id),
-      },
-      include: {
-        notesHistory: {
-          orderBy: {
-            createdAt: "desc",
+
+    const lead =
+      await prisma.lead.findUnique({
+        where: {
+          id: Number(req.params.id),
+        },
+        include: {
+          notesHistory: {
+            orderBy: {
+              createdAt: "desc",
+            },
           },
         },
-      },
-    });
+      });
 
     res.json(lead);
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       message: "Unable to load lead.",
     });
+
   }
 }
 
@@ -55,17 +66,30 @@ export async function createLead(
   res: Response
 ) {
   try {
-    const lead = await prisma.lead.create({
-      data: req.body,
+
+    const lead =
+      await prisma.lead.create({
+        data: req.body,
+      });
+
+    await createTimeline({
+      leadId: lead.id,
+      type: "LEAD",
+      title: "Lead Created",
+      description: "New lead created.",
+      createdBy: "System",
     });
 
     res.status(201).json(lead);
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       message: "Unable to create lead.",
     });
+
   }
 }
 
@@ -74,39 +98,78 @@ export async function updateLead(
   res: Response
 ) {
   try {
-    const lead = await prisma.lead.update({
-      where: {
-        id: Number(req.params.id),
-      },
-      data: {
-  ...req.body,
 
-  followupCompleted:
-    req.body.followupCompleted,
+    const leadId =
+      Number(req.params.id);
 
-  followupCompletedAt:
-    req.body.followupCompletedAt
-      ? new Date(
-          req.body.followupCompletedAt
-        )
-      : undefined,
+    const lead =
+      await prisma.lead.update({
+        where: {
+          id: leadId,
+        },
+        data: {
+          ...req.body,
 
-  followupDate:
-    req.body.followupDate
-      ? new Date(
-          req.body.followupDate
-        )
-      : undefined,
-},
-    });
+          followupCompleted:
+            req.body.followupCompleted,
+
+          followupCompletedAt:
+            req.body.followupCompletedAt
+              ? new Date(
+                  req.body.followupCompletedAt
+                )
+              : undefined,
+
+          followupDate:
+            req.body.followupDate
+              ? new Date(
+                  req.body.followupDate
+                )
+              : undefined,
+        },
+      });
+
+    if (
+      req.body.followupCompleted === true
+    ) {
+
+      await createTimeline({
+        leadId,
+        type: "FOLLOWUP",
+        title: "Follow-up Completed",
+        description:
+          "Customer follow-up marked as completed.",
+        createdBy: "System",
+      });
+
+    }
+
+    if (
+      req.body.followupDate &&
+      !req.body.followupCompleted
+    ) {
+
+      await createTimeline({
+        leadId,
+        type: "FOLLOWUP",
+        title: "Follow-up Rescheduled",
+        description:
+          `Next Follow-up: ${req.body.followupDate}`,
+        createdBy: "System",
+      });
+
+    }
 
     res.json(lead);
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       message: "Unable to update lead.",
     });
+
   }
 }
 
@@ -115,6 +178,7 @@ export async function deleteLead(
   res: Response
 ) {
   try {
+
     await prisma.lead.delete({
       where: {
         id: Number(req.params.id),
@@ -124,12 +188,15 @@ export async function deleteLead(
     res.json({
       success: true,
     });
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       message: "Unable to delete lead.",
     });
+
   }
 }
 
@@ -138,22 +205,27 @@ export async function getLeadNotes(
   res: Response
 ) {
   try {
-    const notes = await prisma.leadNote.findMany({
-      where: {
-        leadId: Number(req.params.id),
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+
+    const notes =
+      await prisma.leadNote.findMany({
+        where: {
+          leadId: Number(req.params.id),
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
 
     res.json(notes);
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       message: "Unable to load notes.",
     });
+
   }
 }
 
@@ -162,20 +234,36 @@ export async function addLeadNote(
   res: Response
 ) {
   try {
-    const note = await prisma.leadNote.create({
-      data: {
-        leadId: Number(req.params.id),
-        note: req.body.note,
-      },
+
+    const leadId =
+      Number(req.params.id);
+
+    const note =
+      await prisma.leadNote.create({
+        data: {
+          leadId,
+          note: req.body.note,
+        },
+      });
+
+    await createTimeline({
+      leadId,
+      type: "NOTE",
+      title: "Note Added",
+      description: note.note,
+      createdBy: "System",
     });
 
     res.status(201).json(note);
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       message: "Unable to save note.",
     });
+
   }
 }
 
@@ -184,20 +272,92 @@ export async function deleteLeadNote(
   res: Response
 ) {
   try {
+
     await prisma.leadNote.delete({
       where: {
         id: Number(req.params.noteId),
       },
     });
 
+    await createTimeline({
+      leadId: Number(req.params.id),
+      type: "NOTE",
+      title: "Note Deleted",
+      description: "Lead note deleted.",
+      createdBy: "System",
+    });
+
     res.json({
       success: true,
     });
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
       message: "Unable to delete note.",
     });
+
+  }
+}
+
+export async function getTodayFollowups(
+  req: Request,
+  res: Response
+) {
+  try {
+
+    const today = new Date();
+
+    today.setHours(
+      0,
+      0,
+      0,
+      0
+    );
+
+    const tomorrow =
+      new Date(today);
+
+    tomorrow.setDate(
+      tomorrow.getDate() + 1
+    );
+
+    const followups =
+      await prisma.lead.findMany({
+        where: {
+          followupDate: {
+            gte: today,
+            lt: tomorrow,
+          },
+          followupCompleted: false,
+        },
+        orderBy: {
+          followupDate: "asc",
+        },
+        select: {
+          id: true,
+          customerName: true,
+          mobile: true,
+          shopName: true,
+          followupDate: true,
+          followupTime: true,
+          priority: true,
+          status: true,
+        },
+      });
+
+    res.json(followups);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message:
+        "Unable to load today's followups.",
+    });
+
   }
 }

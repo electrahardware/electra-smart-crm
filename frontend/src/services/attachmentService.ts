@@ -1,13 +1,20 @@
-const API = "http://localhost:5000/api/attachments";
+import { api } from "../lib/api";
+
+export interface Attachment {
+  id: number;
+  leadId: number;
+  fileName: string;
+  originalName: string;
+  fileType: string;
+  fileSize: number;
+  filePath: string;
+  createdAt: string;
+}
 
 export async function getAttachments(
   leadId: number
-) {
-  const res = await fetch(
-    `${API}/${leadId}`
-  );
-
-  return await res.json();
+): Promise<Attachment[]> {
+  return api<Attachment[]>(`/attachments/${leadId}`);
 }
 
 export async function uploadAttachment(
@@ -16,28 +23,41 @@ export async function uploadAttachment(
 ) {
   const formData = new FormData();
 
+  formData.append("leadId", String(leadId));
   formData.append("file", file);
 
+  const token = localStorage.getItem("token");
+
   const res = await fetch(
-    `${API}/${leadId}`,
+    "http://localhost:5000/api/attachments",
     {
       method: "POST",
+      headers: {
+        Authorization: token
+          ? `Bearer ${token}`
+          : "",
+      },
       body: formData,
     }
   );
 
-  return await res.json();
+  if (!res.ok) {
+    throw new Error("Upload failed");
+  }
+
+  return res.json();
 }
 
 export async function deleteAttachment(
   id: number
-) {
-  const res = await fetch(
-    `${API}/${id}`,
-    {
-      method: "DELETE",
-    }
-  );
+): Promise<void> {
+  return api<void>(`/attachments/${id}`, {
+    method: "DELETE",
+  });
+}
 
-  return await res.json();
+export function getAttachmentUrl(
+  fileName: string
+) {
+  return `http://localhost:5000/uploads/${fileName}`;
 }

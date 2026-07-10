@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
+import { createTimeline } from "../services/timeline.service";
 
 export async function uploadAttachment(
   req: Request,
@@ -13,10 +14,13 @@ export async function uploadAttachment(
       });
     }
 
+    const leadId =
+      Number(req.params.leadId);
+
     const attachment =
       await prisma.leadAttachment.create({
         data: {
-          leadId: Number(req.params.leadId),
+          leadId,
           fileName: req.file.filename,
           originalName: req.file.originalname,
           fileType: req.file.mimetype,
@@ -24,6 +28,14 @@ export async function uploadAttachment(
           filePath: req.file.path,
         },
       });
+
+    await createTimeline({
+      leadId,
+      type: "ATTACHMENT",
+      title: "Attachment Uploaded",
+      description: attachment.originalName,
+      createdBy: "System",
+    });
 
     res.status(201).json(attachment);
 

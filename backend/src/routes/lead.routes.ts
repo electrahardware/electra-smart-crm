@@ -9,11 +9,17 @@ import {
   addLeadNote,
   getLeadNotes,
   deleteLeadNote,
+  getTodayFollowups,
 } from "../controllers/lead.controller";
 
 const router = Router();
 
 router.get("/", getAllLeads);
+
+router.get(
+  "/today-followups",
+  getTodayFollowups
+);
 
 router.get("/:id", getLead);
 

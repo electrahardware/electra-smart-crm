@@ -3,9 +3,11 @@ import { useRef, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
 import LeadWizard from "../components/leads/LeadWizard";
 import LeadTable from "../components/leads/LeadTable";
+import LeadSearch from "../components/leads/LeadSearch";
 import FollowupPanel from "../components/leads/FollowupPanel";
 import ImportPreviewTable from "../components/leads/ImportPreviewTable";
 import { useImport } from "../hooks/useImport";
+import toast from "react-hot-toast";
 
 
 export default function Leads() {
@@ -19,6 +21,10 @@ export default function Leads() {
   duplicatePolicy,
   setDuplicatePolicy,
 } = useImport();
+
+const [search, setSearch] =
+  useState("");
+
 const handleImportClick = () => {
   fileInputRef.current?.click();
 };
@@ -37,7 +43,9 @@ const handleFileChange = async (
   } catch (error) {
     console.error(error);
 
-    alert("Failed to import Excel.");
+    toast.error(
+  "Failed to import Excel."
+);
   }
 
   e.target.value = "";
@@ -102,6 +110,15 @@ const handleFileChange = async (
 )}
 
   <LeadWizard />
+
+  <div className="my-6">
+
+  <LeadSearch
+    value={search}
+    onChange={setSearch}
+  />
+
+</div>
 
 <div className="grid grid-cols-4 gap-4">
 
@@ -276,14 +293,14 @@ const handleFileChange = async (
 
             if (!result) return;
 
-            alert(
-              `Import Completed ✅
+            toast.success(
+  `Import Completed
 
 Inserted : ${result.insertedRows}
 Updated : ${result.updatedRows}
 Skipped : ${result.skippedRows}
 Failed : ${result.failedRows}`
-            );
+);
 
             clearPreview();
             window.dispatchEvent(

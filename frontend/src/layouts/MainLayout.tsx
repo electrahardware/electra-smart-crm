@@ -1,42 +1,71 @@
 import type { ReactNode } from "react";
+
 import Sidebar from "../components/layout/Sidebar";
+import NotificationBell from "../components/layout/NotificationBell";
+import ProfileMenu from "../components/layout/ProfileMenu";
+
+import {
+  SidebarProvider,
+} from "../hooks/useSidebar";
 
 interface MainLayoutProps {
   children: ReactNode;
 }
 
-export default function MainLayout({ children }: MainLayoutProps) {
+export default function MainLayout({
+  children,
+}: MainLayoutProps) {
+
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
 
-      <div className="flex-1">
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
-          <div>
-            <h1 className="text-xl font-bold text-slate-800">
-              Electra Smart CRM
-            </h1>
-          </div>
+    <SidebarProvider>
 
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center font-bold">
-              N
-            </div>
+      <div className="flex min-h-screen bg-slate-100">
 
-            <div>
-              <p className="font-semibold text-slate-800">
-                Nirav Patel
+        <Sidebar />
+
+        <div className="flex min-w-0 flex-1 flex-col">
+
+          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm lg:px-8">
+
+            <div className="ml-14 lg:ml-0">
+
+              <h1 className="text-2xl font-bold text-slate-800">
+
+                Electra Smart CRM
+
+              </h1>
+
+              <p className="text-sm text-slate-500">
+
+                Lead Management System
+
               </p>
 
-              <p className="text-xs text-slate-500">
-                Owner
-              </p>
             </div>
-          </div>
-        </header>
 
-        <main className="p-8">{children}</main>
+            <div className="flex items-center gap-4">
+
+              <NotificationBell />
+
+              <ProfileMenu />
+
+            </div>
+
+          </header>
+
+          <main className="flex-1 overflow-auto p-4 lg:p-8">
+
+            {children}
+
+          </main>
+
+        </div>
+
       </div>
-    </div>
+
+    </SidebarProvider>
+
   );
+
 }

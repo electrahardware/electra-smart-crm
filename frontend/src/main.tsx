@@ -4,13 +4,23 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { LeadProvider } from "./contexts/LeadContext";
 import "./index.css";
-
+import ErrorBoundary from "./components/common/ErrorBoundary";
+import { Toaster } from "react-hot-toast";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <LeadProvider>
+    <ErrorBoundary>
+
+  <BrowserRouter>
+
   <App />
-</LeadProvider>
-    </BrowserRouter>
+
+  <Toaster
+    position="top-right"
+    reverseOrder={false}
+  />
+
+</BrowserRouter>
+
+</ErrorBoundary>
   </React.StrictMode>
 );

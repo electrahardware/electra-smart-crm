@@ -1,4 +1,4 @@
-const API = "http://localhost:5000/api/calls";
+import { api } from "../lib/api";
 
 export interface LeadCall {
   id: number;
@@ -13,13 +13,7 @@ export interface LeadCall {
 export async function getLeadCalls(
   leadId: number
 ): Promise<LeadCall[]> {
-  const res = await fetch(`${API}/${leadId}`);
-
-  if (!res.ok) {
-    throw new Error("Failed to load calls");
-  }
-
-  return res.json();
+  return api<LeadCall[]>(`/calls/${leadId}`);
 }
 
 export async function addLeadCall(
@@ -30,32 +24,20 @@ export async function addLeadCall(
     remarks?: string;
     nextFollowup?: string;
   }
-) {
-  const res = await fetch(`${API}/${leadId}`, {
+): Promise<LeadCall> {
+  return api<LeadCall>("/calls", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      leadId,
+      ...data,
+    }),
   });
-
-  if (!res.ok) {
-    throw new Error("Unable to save call");
-  }
-
-  return res.json();
 }
 
 export async function deleteLeadCall(
-  callId: number
-) {
-  const res = await fetch(`${API}/${callId}`, {
+  id: number
+): Promise<void> {
+  return api<void>(`/calls/${id}`, {
     method: "DELETE",
   });
-
-  if (!res.ok) {
-    throw new Error("Unable to delete call");
-  }
-
-  return res.json();
 }

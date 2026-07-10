@@ -14,6 +14,8 @@ import PriorityBadge from "./PriorityBadge";
 import LeadDetailsDrawer from "./LeadDetailsDrawer";
 import FollowupDashboard from "./FollowupDashboard";
 import TodayFollowupList from "./TodayFollowupList";
+import toast from "react-hot-toast";
+import LeadSummaryCards from "./LeadSummaryCards";
 
 export default function LeadTable() {
 
@@ -34,6 +36,15 @@ export default function LeadTable() {
 
   const [ownerFilter, setOwnerFilter] =
     useState("All");
+
+   const [priorityFilter, setPriorityFilter] =
+  useState("All");
+
+const [stateFilter, setStateFilter] =
+  useState("All");
+
+const [sourceFilter, setSourceFilter] =
+  useState("All"); 
 
   const [followupFilter, setFollowupFilter] =
     useState("All");
@@ -89,13 +100,16 @@ export default function LeadTable() {
   useEffect(() => {
     setCurrentPage(1);
   }, [
-    search,
-    statusFilter,
-    ownerFilter,
-    followupFilter,
-    sortBy,
-    pageSize,
-  ]);
+  leads,
+  search,
+  statusFilter,
+  ownerFilter,
+  priorityFilter,
+  stateFilter,
+  sourceFilter,
+  followupFilter,
+  today,
+]);
 
   const filteredLeads = useMemo(() => {
     return leads.filter((lead) => {
@@ -104,15 +118,62 @@ export default function LeadTable() {
         search.toLowerCase();
 
       const matchesSearch =
-        lead.customerName
-          .toLowerCase()
-          .includes(keyword) ||
 
-        lead.mobile.includes(keyword) ||
+  lead.customerName
+    .toLowerCase()
+    .includes(keyword) ||
 
-        (lead.shopName || "")
-          .toLowerCase()
-          .includes(keyword);
+  lead.mobile
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.secondaryMobile || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.whatsapp || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.shopName || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.email || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.gst || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.area || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.district || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.state || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.leadOwner || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.leadSource || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.status || "")
+    .toLowerCase()
+    .includes(keyword) ||
+
+  (lead.priority || "")
+    .toLowerCase()
+    .includes(keyword);
 
       const matchesStatus =
         statusFilter === "All"
@@ -123,6 +184,24 @@ export default function LeadTable() {
         ownerFilter === "All"
           ? true
           : lead.leadOwner === ownerFilter;
+
+      const matchesPriority =
+  priorityFilter === "All"
+    ? true
+    : lead.priority ===
+      priorityFilter;
+
+const matchesState =
+  stateFilter === "All"
+    ? true
+    : lead.state ===
+      stateFilter;
+
+const matchesSource =
+  sourceFilter === "All"
+    ? true
+    : lead.leadSource ===
+      sourceFilter;
 
       const matchesFollowup = (() => {
 
@@ -160,11 +239,14 @@ export default function LeadTable() {
       })();
 
       return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesOwner &&
-        matchesFollowup
-      );
+  matchesSearch &&
+  matchesStatus &&
+  matchesOwner &&
+  matchesPriority &&
+  matchesState &&
+  matchesSource &&
+  matchesFollowup
+);
 
     });
   }, [
@@ -174,6 +256,9 @@ export default function LeadTable() {
     ownerFilter,
     followupFilter,
     today,
+    priorityFilter,
+stateFilter,
+sourceFilter,
   ]);
     const sortedLeads = useMemo(() => {
 
@@ -305,6 +390,10 @@ export default function LeadTable() {
 
       await deleteLead(id);
 
+      toast.success(
+  "Lead deleted successfully."
+);
+
       await loadLeads();
 
       setSelectedIds((prev) =>
@@ -323,9 +412,9 @@ export default function LeadTable() {
 
       console.error(error);
 
-      alert(
-        "Unable to delete lead."
-      );
+      toast.error(
+  "Unable to delete lead."
+);
 
     }
 
@@ -353,6 +442,10 @@ export default function LeadTable() {
         )
       );
 
+      toast.success(
+  `${selectedIds.length} lead(s) deleted successfully.`
+);
+
       setSelectedIds([]);
 
       await loadLeads();
@@ -361,9 +454,9 @@ export default function LeadTable() {
 
       console.error(error);
 
-      alert(
-        "Unable to delete selected leads."
-      );
+      toast.error(
+  "Unable to delete selected leads."
+);
 
     }
 
@@ -480,45 +573,14 @@ export default function LeadTable() {
 
         </div>
 
-        <div className="grid grid-cols-6 gap-4 border-b p-6">
-
-          <SummaryCard
-            title="Total Leads"
-            value={totalLeads}
-            color="blue"
-          />
-
-          <SummaryCard
-            title="Hot Leads"
-            value={hotLeads}
-            color="red"
-          />
-
-          <SummaryCard
-            title="Today's Follow-up"
-            value={todayFollowups}
-            color="green"
-          />
-
-          <SummaryCard
-            title="Expected Value"
-            value={`₹ ${expectedValue.toLocaleString()}`}
-            color="yellow"
-          />
-
-          <SummaryCard
-            title="Overdue"
-            value={overdueLeads}
-            color="orange"
-          />
-
-          <SummaryCard
-            title="Upcoming"
-            value={upcomingLeads}
-            color="cyan"
-          />
-
-        </div>
+        <LeadSummaryCards
+  totalLeads={totalLeads}
+  hotLeads={hotLeads}
+  todayFollowups={todayFollowups}
+  expectedValue={expectedValue}
+  overdueLeads={overdueLeads}
+  upcomingLeads={upcomingLeads}
+/>
 
         <div className="border-b p-6 space-y-4">
 
@@ -532,7 +594,7 @@ export default function LeadTable() {
             className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
           />
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-6 gap-4">
 
             <select
               value={statusFilter}
@@ -854,6 +916,96 @@ export default function LeadTable() {
 
               </select>
 
+              <select
+  value={priorityFilter}
+  onChange={(e) =>
+    setPriorityFilter(e.target.value)
+  }
+  className="rounded-xl border border-slate-300 px-4 py-3"
+>
+  <option value="All">
+    All Priority
+  </option>
+
+  <option value="Hot">
+    Hot
+  </option>
+
+  <option value="Warm">
+    Warm
+  </option>
+
+  <option value="Cold">
+    Cold
+  </option>
+
+</select>
+
+<select
+  value={stateFilter}
+  onChange={(e) =>
+    setStateFilter(e.target.value)
+  }
+  className="rounded-xl border border-slate-300 px-4 py-3"
+>
+  <option value="All">
+    All States
+  </option>
+
+  {[
+    ...new Set(
+      leads
+        .map(
+          (lead) => lead.state
+        )
+        .filter(Boolean)
+    ),
+  ].map((state) => (
+
+    <option
+      key={state}
+      value={state}
+    >
+      {state}
+    </option>
+
+  ))}
+
+</select>
+
+<select
+  value={sourceFilter}
+  onChange={(e) =>
+    setSourceFilter(e.target.value)
+  }
+  className="rounded-xl border border-slate-300 px-4 py-3"
+>
+  <option value="All">
+    All Sources
+  </option>
+
+  {[
+    ...new Set(
+      leads
+        .map(
+          (lead) =>
+            lead.leadSource
+        )
+        .filter(Boolean)
+    ),
+  ].map((source) => (
+
+    <option
+      key={source}
+      value={source}
+    >
+      {source}
+    </option>
+
+  ))}
+
+</select>
+
             </div>
 
             <div className="text-sm text-slate-500">
@@ -909,11 +1061,11 @@ export default function LeadTable() {
 
           </div>
 
-        )}
+                )}
 
       </div>
 
-            <LeadDetailsDrawer
+      <LeadDetailsDrawer
         lead={selectedLead}
         onClose={() =>
           setSelectedLead(null)
@@ -921,53 +1073,5 @@ export default function LeadTable() {
       />
 
     </>
-  );
-}
-
-interface SummaryCardProps {
-  title: string;
-  value: string | number;
-  color:
-    | "blue"
-    | "red"
-    | "green"
-    | "yellow"
-    | "orange"
-    | "cyan";
-}
-
-function SummaryCard({
-  title,
-  value,
-  color,
-}: SummaryCardProps) {
-
-  const colors = {
-    blue:
-      "bg-blue-50 border-blue-200 text-blue-700",
-    red:
-      "bg-red-50 border-red-200 text-red-700",
-    green:
-      "bg-green-50 border-green-200 text-green-700",
-    yellow:
-      "bg-yellow-50 border-yellow-200 text-yellow-700",
-    orange:
-      "bg-orange-50 border-orange-200 text-orange-700",
-    cyan:
-      "bg-cyan-50 border-cyan-200 text-cyan-700",
-  };
-
-  return (
-    <div
-      className={`rounded-xl border p-5 ${colors[color]}`}
-    >
-      <p className="text-sm opacity-70">
-        {title}
-      </p>
-
-      <h2 className="mt-2 text-3xl font-bold">
-        {value}
-      </h2>
-    </div>
   );
 }

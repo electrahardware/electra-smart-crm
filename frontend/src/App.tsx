@@ -1,31 +1,98 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-
-import Dashboard from "./pages/Dashboard";
-import Leads from "./pages/Leads";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import { LeadProvider } from "./contexts/LeadContext";
 
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+
+import Dashboard from "./pages/Dashboard";
+import Leads from "./pages/Leads";
+import DuplicateLeads from "./pages/DuplicateLeads";
+import Settings from "./pages/Settings";
+import Login from "./pages/Login";
+
 function App() {
+
   return (
+
     <LeadProvider>
+
       <Routes>
+
         <Route
           path="/"
-          element={<Navigate to="/dashboard" replace />}
+          element={
+            <Navigate
+              to="/dashboard"
+              replace
+            />
+          }
+        />
+
+        <Route
+          path="/login"
+          element={<Login />}
         />
 
         <Route
           path="/dashboard"
-          element={<Dashboard />}
+          element={
+            <ProtectedRoute>
+
+              <Dashboard />
+
+            </ProtectedRoute>
+          }
         />
 
         <Route
           path="/leads"
-          element={<Leads />}
+          element={
+            <ProtectedRoute>
+
+              <Leads />
+
+            </ProtectedRoute>
+          }
         />
+
+        <Route
+          path="/duplicates"
+          element={
+            <ProtectedRoute>
+
+              <DuplicateLeads />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+
+              <Settings />
+
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/dashboard"
+              replace
+            />
+          }
+        />
+
       </Routes>
+
     </LeadProvider>
+
   );
+
 }
 
 export default App;

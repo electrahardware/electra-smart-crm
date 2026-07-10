@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model Lead {
@@ -59,14 +59,15 @@ model Lead {
   notesHistory LeadNote[]
   attachments  LeadAttachment[]
   calls        LeadCall[]
+  timeline     LeadTimeline[]
+  quotations   Quotation[]
 }
 
 model LeadNote {
   id Int @id @default(autoincrement())
 
   leadId Int
-
-  note String
+  note   String
 
   createdAt DateTime @default(now())
 
@@ -95,14 +96,87 @@ model LeadCall {
   leadId Int
 
   callType String
-
   duration Int?
-
-  remarks String?
+  remarks  String?
 
   nextFollowup DateTime?
 
   createdAt DateTime @default(now())
 
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+model LeadTimeline {
+  id Int @id @default(autoincrement())
+
+  leadId Int
+
+  type        String
+  title       String
+  description String?
+  createdBy   String?
+
+  createdAt DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+model Quotation {
+  id Int @id @default(autoincrement())
+
+  leadId Int
+
+  quotationNo String @unique
+
+  customerName String
+  companyName  String?
+  mobile       String
+  address      String?
+
+  subtotal Float
+  discount Float @default(0)
+  gst      Float @default(0)
+  total    Float
+
+  status String @default("Draft")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  items QuotationItem[]
+}
+
+model QuotationItem {
+  id Int @id @default(autoincrement())
+
+  quotationId Int
+
+  product     String
+  description String?
+
+  qty    Int
+  rate   Float
+  amount Float
+
+  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  email String @unique
+
+  password String
+
+  role String @default("Sales")
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
 }
