@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
-
 dotenv.config();
+
 import express from "express";
 import cors from "cors";
 
@@ -18,54 +18,44 @@ import activityRoutes from "./routes/activity.routes";
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
 app.use(
-  express.urlencoded({
-    extended: true,
+  cors({
+    origin: "*",
   })
 );
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.get("/", (_req, res) => {
+  res.json({
+    status: "OK",
+    service: "Electra Smart CRM API",
+  });
+});
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.use("/api/leads", leadRoutes);
 app.use("/api/import", importRoutes);
 app.use("/api/calls", callRoutes);
 app.use("/api/attachments", attachmentRoutes);
 app.use("/api/timeline", timelineRoutes);
-app.use(
-  "/api/duplicates",
-  duplicateRoutes
-);
-app.use(
-  "/api/merge",
-  mergeRoutes
-);
-app.use(
-  "/api/activity",
-  activityRoutes
-);
 app.use("/api/dashboard", dashboardRoutes);
-app.use(
-  "/api/quotations",
-  quotationRoutes
-);
-app.use(
-  "/api/users",
-  userRoutes
-);
+app.use("/api/quotations", quotationRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/duplicates", duplicateRoutes);
+app.use("/api/merge", mergeRoutes);
+app.use("/api/activity", activityRoutes);
 
-app.get("/", (req, res) => {
-  res.send(
-    "Electra Smart CRM Backend"
-  );
-});
+const PORT = Number(process.env.PORT) || 10000;
 
-const PORT =
-  Number(
-    process.env.PORT
-  ) || 5000;
-
-app.listen(PORT, () => {
-  console.log(
-    `🚀 Server Running : http://localhost:${PORT}`
-  );
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on ${PORT}`);
 });
