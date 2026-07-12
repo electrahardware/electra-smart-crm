@@ -163,6 +163,97 @@ export default function Dashboard() {
 
         </div>
 
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+
+  <h2 className="mb-5 text-xl font-bold">
+    🆕 Recent Leads
+  </h2>
+
+  {stats?.recentLeads?.length ? (
+
+    <div className="overflow-x-auto">
+
+      <table className="min-w-full text-sm">
+
+        <thead>
+
+          <tr className="border-b bg-slate-50">
+
+            <th className="px-4 py-3 text-left">
+              Customer
+            </th>
+
+            <th className="px-4 py-3 text-left">
+              Shop
+            </th>
+
+            <th className="px-4 py-3 text-left">
+              Mobile
+            </th>
+
+            <th className="px-4 py-3 text-left">
+              Status
+            </th>
+
+            <th className="px-4 py-3 text-left">
+              Priority
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          {stats.recentLeads.map((lead) => (
+
+            <tr
+              key={lead.id}
+              className="border-b hover:bg-slate-50"
+            >
+
+              <td className="px-4 py-3 font-medium">
+                {lead.customerName}
+              </td>
+
+              <td className="px-4 py-3">
+                {lead.shopName || "-"}
+              </td>
+
+              <td className="px-4 py-3">
+                {lead.mobile}
+              </td>
+
+              <td className="px-4 py-3">
+                {lead.status || "-"}
+              </td>
+
+              <td className="px-4 py-3">
+                {lead.priority || "-"}
+              </td>
+
+            </tr>
+
+          ))}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  ) : (
+
+    <div className="flex h-56 items-center justify-center text-slate-500">
+
+      📭 No Leads Yet
+
+    </div>
+
+  )}
+
+</div>
+
         <TodayFollowups />
 
         <RecentActivities />
