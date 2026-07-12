@@ -1,0 +1,128 @@
+interface Props {
+  currentPage: number;
+
+  totalPages: number;
+
+  pageSize: number;
+
+  setPageSize: (
+    value: number
+  ) => void;
+
+  setCurrentPage: (
+    value:
+      | number
+      | ((page: number) => number)
+  ) => void;
+}
+
+export default function LeadPagination({
+  currentPage,
+  totalPages,
+  pageSize,
+  setPageSize,
+  setCurrentPage,
+}: Props) {
+
+  return (
+
+    <div className="flex flex-col gap-4 border-t bg-slate-50 p-6 md:flex-row md:items-center md:justify-between">
+
+      <div className="flex items-center gap-3">
+
+        <span className="text-sm text-slate-500">
+          Rows per page
+        </span>
+
+        <select
+          value={pageSize}
+          onChange={(e) => {
+
+            setPageSize(
+              Number(
+                e.target.value
+              )
+            );
+
+            setCurrentPage(1);
+
+          }}
+          className="rounded-lg border px-3 py-2"
+        >
+
+          <option value={10}>
+            10
+          </option>
+
+          <option value={25}>
+            25
+          </option>
+
+          <option value={50}>
+            50
+          </option>
+
+          <option value={100}>
+            100
+          </option>
+
+        </select>
+
+      </div>
+
+      <div className="text-sm text-slate-500">
+
+        Page
+
+        <b className="mx-2">
+          {currentPage}
+        </b>
+
+        of
+
+        <b className="mx-2">
+          {totalPages}
+        </b>
+
+      </div>
+
+      <div className="flex gap-2">
+
+        <button
+          disabled={
+            currentPage === 1
+          }
+          onClick={() =>
+            setCurrentPage(
+              (page) =>
+                page - 1
+            )
+          }
+          className="rounded-lg border px-4 py-2 disabled:opacity-40"
+        >
+          Previous
+        </button>
+
+        <button
+          disabled={
+            currentPage ===
+            totalPages
+          }
+          onClick={() =>
+            setCurrentPage(
+              (page) =>
+                page + 1
+            )
+          }
+          className="rounded-lg border px-4 py-2 disabled:opacity-40"
+        >
+          Next
+        </button>
+
+      </div>
+
+    </div>
+
+  );
+
+}
