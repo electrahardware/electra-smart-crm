@@ -18,6 +18,8 @@ import toast from "react-hot-toast";
 import LeadSummaryCards from "./LeadSummaryCards";
 import LeadToolbar from "./LeadToolbar";
 import LeadPagination from "./LeadPagination";
+import LeadBulkActions from "./LeadBulkActions";
+import LeadRow from "./LeadRow";
 
 export default function LeadTable() {
 
@@ -518,6 +520,7 @@ sourceFilter,
 
     }
 
+
     setSelectedIds(
       paginatedLeads.map(
         (lead) => lead.id!
@@ -525,6 +528,42 @@ sourceFilter,
     );
 
   }
+
+  function deleteSelected() {
+
+  if (
+    selectedIds.length === 0
+  ) {
+    return;
+  }
+
+  if (
+    !window.confirm(
+      `Delete ${selectedIds.length} selected lead(s)?`
+    )
+  ) {
+    return;
+  }
+
+  alert(
+    "Bulk Delete API will be connected in next step."
+  );
+
+}
+
+function exportSelected() {
+
+  if (
+    selectedIds.length === 0
+  ) {
+    return;
+  }
+
+  alert(
+    "Export API will be connected in next step."
+  );
+
+}
 
   return (
     <> 
@@ -544,24 +583,14 @@ sourceFilter,
 <div className="h-6" />
           <div className="bg-white rounded-2xl shadow border border-slate-200">
 
-        {selectedIds.length > 0 && (
-
-          <div className="flex items-center justify-between border-b bg-red-50 px-6 py-4">
-
-            <div className="font-semibold text-red-700">
-              {selectedIds.length} lead(s) selected
-            </div>
-
-            <button
-              onClick={handleDeleteSelected}
-              className="rounded-xl bg-red-600 px-5 py-2 font-semibold text-white hover:bg-red-700"
-            >
-              🗑 Delete Selected
-            </button>
-
-          </div>
-
-        )}
+        <LeadBulkActions
+  selectedCount={selectedIds.length}
+  onDelete={deleteSelected}
+  onExport={exportSelected}
+  onClear={() =>
+    setSelectedIds([])
+  }
+/>
 
         <div className="border-b p-6">
 
@@ -667,114 +696,29 @@ sourceFilter,
 
     {paginatedLeads.map((lead) => (
 
-      <tr
-        key={lead.id}
-        className="border-t hover:bg-slate-50"
-      >
+  <LeadRow
+    key={lead.id}
+    lead={lead}
+    selected={selectedIds.includes(
+      lead.id!
+    )}
+    onToggle={() =>
+      toggleLead(lead.id!)
+    }
+    onView={() =>
+      setSelectedLead(lead)
+    }
+    onEdit={() =>
+      handleEdit(lead)
+    }
+    onDelete={() =>
+      handleDelete(
+        lead.id!
+      )
+    }
+  />
 
-        <td className="p-3">
-
-          <input
-            type="checkbox"
-            checked={selectedIds.includes(
-              lead.id!
-            )}
-            onChange={() =>
-              toggleLead(lead.id!)
-            }
-          />
-
-        </td>
-
-        <td className="p-3 font-medium">
-          {lead.customerName}
-        </td>
-
-        <td className="p-3">
-          {lead.mobile}
-        </td>
-
-        <td className="p-3">
-          {lead.shopName || "-"}
-        </td>
-
-        <td className="p-3">
-          <StatusBadge
-            status={lead.status}
-          />
-        </td>
-
-        <td className="p-3">
-          {lead.leadOwner || "-"}
-        </td>
-
-        <td className="p-3">
-          <PriorityBadge
-            priority={lead.priority}
-          />
-        </td>
-
-        <td className="p-3">
-
-          <div className="flex items-center gap-2">
-
-            <a
-              href={`tel:${lead.mobile}`}
-              className="rounded-lg p-2 hover:bg-blue-100"
-              title="Call"
-            >
-              📞
-            </a>
-
-            <a
-              href={`https://wa.me/91${lead.mobile}`}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-lg p-2 hover:bg-green-100"
-              title="WhatsApp"
-            >
-              💬
-            </a>
-
-            <button
-              onClick={() =>
-                setSelectedLead(lead)
-              }
-              className="rounded-lg p-2 hover:bg-slate-100"
-              title="View"
-            >
-              👁️
-            </button>
-
-            <button
-              onClick={() =>
-                handleEdit(lead)
-              }
-              className="rounded-lg p-2 hover:bg-orange-100"
-              title="Edit"
-            >
-              ✏️
-            </button>
-
-            <button
-              onClick={() =>
-                handleDelete(
-                  lead.id!
-                )
-              }
-              className="rounded-lg p-2 text-red-600 hover:bg-red-100"
-              title="Delete"
-            >
-              🗑️
-            </button>
-
-          </div>
-
-        </td>
-
-      </tr>
-
-    ))}
+))}
 
   </tbody>
 
