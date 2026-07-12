@@ -21,6 +21,7 @@ import LeadPagination from "./LeadPagination";
 import LeadBulkActions from "./LeadBulkActions";
 import LeadRow from "./LeadRow";
 import LeadTableHeader from "./LeadTableHeader";
+import LeadStats from "./LeadStats";
 
 export default function LeadTable() {
 
@@ -605,7 +606,7 @@ function exportSelected() {
 
         </div>
 
-        <LeadSummaryCards
+        <LeadStats
   totalLeads={totalLeads}
   hotLeads={hotLeads}
   todayFollowups={todayFollowups}
