@@ -16,6 +16,7 @@ import FollowupDashboard from "./FollowupDashboard";
 import TodayFollowupList from "./TodayFollowupList";
 import toast from "react-hot-toast";
 import LeadSummaryCards from "./LeadSummaryCards";
+import LeadToolbar from "./LeadToolbar";
 
 export default function LeadTable() {
 
@@ -582,85 +583,30 @@ sourceFilter,
   upcomingLeads={upcomingLeads}
 />
 
-        <div className="border-b p-6 space-y-4">
+        <LeadToolbar
+  leads={leads}
 
-          <input
-            type="text"
-            placeholder="🔍 Search by Customer, Shop or Mobile..."
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
-          />
+  search={search}
+  setSearch={setSearch}
 
-          <div className="grid grid-cols-6 gap-4">
+  statusFilter={statusFilter}
+  setStatusFilter={setStatusFilter}
 
-            <select
-              value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(
-                  e.target.value
-                )
-              }
-              className="rounded-xl border border-slate-300 px-4 py-3"
-            >
-              <option value="All">All Status</option>
-              <option value="New">New</option>
-              <option value="Follow-up">Follow-up</option>
-              <option value="Quotation Sent">Quotation Sent</option>
-              <option value="Won">Won</option>
-              <option value="Lost">Lost</option>
-            </select>
+  ownerFilter={ownerFilter}
+  setOwnerFilter={setOwnerFilter}
 
-            <select
-              value={ownerFilter}
-              onChange={(e) =>
-                setOwnerFilter(
-                  e.target.value
-                )
-              }
-              className="rounded-xl border border-slate-300 px-4 py-3"
-            >
-              <option value="All">
-                All Owners
-              </option>
+  priorityFilter={priorityFilter}
+  setPriorityFilter={setPriorityFilter}
 
-              {[
-                ...new Set(
-                  leads
-                    .map((lead) => lead.leadOwner)
-                    .filter(Boolean)
-                ),
-              ].map((owner) => (
-                <option
-                  key={owner}
-                  value={owner}
-                >
-                  {owner}
-                </option>
-              ))}
+  stateFilter={stateFilter}
+  setStateFilter={setStateFilter}
 
-            </select>
+  sourceFilter={sourceFilter}
+  setSourceFilter={setSourceFilter}
 
-            <select
-              value={followupFilter}
-              onChange={(e) =>
-                setFollowupFilter(
-                  e.target.value
-                )
-              }
-              className="rounded-xl border border-slate-300 px-4 py-3"
-            >
-              <option value="All">All Follow-ups</option>
-              <option value="Today">Today</option>
-              <option value="Overdue">Overdue</option>
-              <option value="Upcoming">Upcoming</option>
-            </select>
-
-          </div>
-
-        </div>
+  followupFilter={followupFilter}
+  setFollowupFilter={setFollowupFilter}
+/>
 
         <div className="max-h-[650px] overflow-auto">
 
