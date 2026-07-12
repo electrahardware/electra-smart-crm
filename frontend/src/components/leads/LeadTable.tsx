@@ -20,6 +20,7 @@ import LeadToolbar from "./LeadToolbar";
 import LeadPagination from "./LeadPagination";
 import LeadBulkActions from "./LeadBulkActions";
 import LeadRow from "./LeadRow";
+import LeadTableHeader from "./LeadTableHeader";
 
 export default function LeadTable() {
 
@@ -642,55 +643,14 @@ function exportSelected() {
 
           <table className="w-full">
 
-  <thead className="sticky top-0 z-10 bg-slate-100">
-
-    <tr>
-
-      <th className="p-3">
-
-        <input
-          type="checkbox"
-          checked={
-            paginatedLeads.length > 0 &&
-            selectedIds.length ===
-              paginatedLeads.length
-          }
-          onChange={toggleAll}
-        />
-
-      </th>
-
-      <th className="p-3 text-left">
-        Customer
-      </th>
-
-      <th className="p-3 text-left">
-        Mobile
-      </th>
-
-      <th className="p-3 text-left">
-        Shop
-      </th>
-
-      <th className="p-3 text-left">
-        Status
-      </th>
-
-      <th className="p-3 text-left">
-        Owner
-      </th>
-
-      <th className="p-3 text-left">
-        Priority
-      </th>
-
-      <th className="p-3 text-left">
-        Actions
-      </th>
-
-    </tr>
-
-  </thead>
+  <LeadTableHeader
+  allSelected={
+    paginatedLeads.length > 0 &&
+    selectedIds.length ===
+      paginatedLeads.length
+  }
+  onToggleAll={toggleAll}
+/>
 
   <tbody>
 
