@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export default function Login() {
 
+  const navigate = useNavigate();
+  
   const [email, setEmail] =
     useState("");
 
@@ -19,7 +22,7 @@ export default function Login() {
 
       const res =
         await fetch(
-          "http://localhost:5000/api/users/login",
+  `${import.meta.env.VITE_API_URL}/users/login`,
           {
             method: "POST",
             headers: {
@@ -59,8 +62,9 @@ export default function Login() {
 );
 
 setTimeout(() => {
-  window.location.href =
-    "/dashboard";
+
+  navigate("/dashboard");
+
 }, 600);
 
     } catch (error) {
