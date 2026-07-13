@@ -361,3 +361,46 @@ export async function getTodayFollowups(
 
   }
 }
+
+export async function deleteMultipleLeads(
+  req: Request,
+  res: Response
+) {
+  try {
+
+    const { ids } = req.body;
+
+    if (
+      !Array.isArray(ids) ||
+      ids.length === 0
+    ) {
+
+      return res.status(400).json({
+        message: "No leads selected.",
+      });
+
+    }
+
+    await prisma.lead.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    res.json({
+      success: true,
+      message: `${ids.length} lead(s) deleted successfully.`,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Unable to delete selected leads.",
+    });
+
+  }
+}

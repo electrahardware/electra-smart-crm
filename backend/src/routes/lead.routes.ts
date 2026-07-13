@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   createLead,
   deleteLead,
+  deleteMultipleLeads,
   getAllLeads,
   getLead,
   updateLead,
@@ -29,11 +30,24 @@ router.put("/:id", updateLead);
 
 router.delete("/:id", deleteLead);
 
-// Lead Notes
-router.get("/:id/notes", getLeadNotes);
+/* Bulk Delete */
+router.delete("/", deleteMultipleLeads);
 
-router.post("/:id/notes", addLeadNote);
+/* Lead Notes */
 
-router.delete("/notes/:noteId", deleteLeadNote);
+router.get(
+  "/:id/notes",
+  getLeadNotes
+);
+
+router.post(
+  "/:id/notes",
+  addLeadNote
+);
+
+router.delete(
+  "/notes/:noteId",
+  deleteLeadNote
+);
 
 export default router;
