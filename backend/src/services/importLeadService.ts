@@ -195,9 +195,11 @@ export async function commitImportLeads(
             language: lead.language,
             priority: lead.priority,
             status: lead.status,
-            followupDate: lead.followupDate
-              ? new Date(lead.followupDate)
-              : null,
+            followupDate: null,
+
+followupCompleted: false,
+
+followupCompletedAt: null,
             notes: lead.notes,
           },
         });
@@ -241,9 +243,11 @@ export async function commitImportLeads(
       language: lead.language,
       priority: lead.priority,
       status: lead.status,
-      followupDate: lead.followupDate
-        ? new Date(lead.followupDate)
-        : null,
+      followupDate: null,
+
+followupCompleted: false,
+
+followupCompletedAt: null,
       notes: lead.notes,
     },
   });
