@@ -8,7 +8,9 @@ export type CanonicalColumn =
   | "address"
   | "area"
   | "district"
+  | "city"
   | "state"
+  | "leadDate"
   | "pincode"
   | "leadOwner"
   | "leadSource"
@@ -84,9 +86,14 @@ export const HEADER_SYNONYMS: Record<
   ],
 
   district: [
-    "District",
-    "City",
-  ],
+  "District",
+],
+
+city: [
+  "City",
+  "Town",
+  "Village",
+],
 
   state: [
     "State",
@@ -126,6 +133,12 @@ export const HEADER_SYNONYMS: Record<
   "Followup Date",
   "Next Followup",
   "Next Follow-up",
+],
+
+leadDate: [
+  "Lead Date",
+  "Created Date",
+  "Entry Date",
   "Date",
 ],
 

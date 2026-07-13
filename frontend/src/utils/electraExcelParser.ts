@@ -203,6 +203,13 @@ for (let i = 1; i <= 20; i++) {
     "district"
   ),
 
+  city:
+  getCellText(
+    row,
+    columnIndexes,
+    "city"
+  ),
+
     area:
   getCellText(
     row,
@@ -259,6 +266,14 @@ for (let i = 1; i <= 20; i++) {
     expectedValue: undefined,
 
     probability: undefined,
+
+    leadDate: parseExcelDate(
+  getCell(
+    row,
+    columnIndexes,
+    "leadDate"
+  )
+),
 
     followupDate: parseExcelDate(
       getCell(

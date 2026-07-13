@@ -13,10 +13,13 @@ export interface Lead {
   gst: string;
 
   country: string;
-  state: string;
-  district: string;
-  area: string;
-  pincode: string;
+state: string;
+district: string;
+city: string;
+area: string;
+pincode: string;
+
+leadDate: string;
 
   addressLine1: string;
   addressLine2: string;
@@ -57,10 +60,16 @@ export const EmptyLead: Lead = {
   gst: "",
 
   country: "India",
-  state: "",
-  district: "",
-  area: "",
-  pincode: "",
+
+state: "",
+district: "",
+city: "",
+area: "",
+pincode: "",
+
+leadDate: new Date()
+  .toISOString()
+  .slice(0, 10),
 
   addressLine1: "",
   addressLine2: "",
