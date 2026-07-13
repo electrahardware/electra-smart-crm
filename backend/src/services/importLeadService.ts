@@ -202,37 +202,65 @@ export async function commitImportLeads(
           },
         });
 
+        if (
+  lead.notes &&
+  lead.notes.trim() !== ""
+) {
+
+  await prisma.leadNote.create({
+    data: {
+      leadId: existing.id,
+      note: lead.notes,
+    },
+  });
+
+}
+
         updatedRows++;
         continue;
       }
 
-      await prisma.lead.create({
-        data: {
-          customerName: lead.customerName,
-          mobile: lead.mobile,
-          secondaryMobile: lead.secondaryMobile,
-          whatsapp: lead.whatsapp,
-          shopName: lead.shopName,
-          email: lead.email,
-          gst: lead.gst,
-          state: lead.state,
-          district: lead.district,
-          area: lead.area,
-          pincode: lead.pincode,
-          addressLine1: lead.addressLine1,
-          addressLine2: lead.addressLine2,
-          leadOwner: lead.leadOwner,
-          leadSource: lead.leadSource,
-          language: lead.language,
-          priority: lead.priority,
-          status: lead.status,
-          followupDate: lead.followupDate
-            ? new Date(lead.followupDate)
-            : null,
-          notes: lead.notes,
-        },
-      });
+      const newLead =
+  await prisma.lead.create({
+    data: {
+      customerName: lead.customerName,
+      mobile: lead.mobile,
+      secondaryMobile: lead.secondaryMobile,
+      whatsapp: lead.whatsapp,
+      shopName: lead.shopName,
+      email: lead.email,
+      gst: lead.gst,
+      state: lead.state,
+      district: lead.district,
+      area: lead.area,
+      pincode: lead.pincode,
+      addressLine1: lead.addressLine1,
+      addressLine2: lead.addressLine2,
+      leadOwner: lead.leadOwner,
+      leadSource: lead.leadSource,
+      language: lead.language,
+      priority: lead.priority,
+      status: lead.status,
+      followupDate: lead.followupDate
+        ? new Date(lead.followupDate)
+        : null,
+      notes: lead.notes,
+    },
+  });
 
+if (
+  lead.notes &&
+  lead.notes.trim() !== ""
+) {
+
+  await prisma.leadNote.create({
+    data: {
+      leadId: newLead.id,
+      note: lead.notes,
+    },
+  });
+
+}
       insertedRows++;
     } catch (error) {
       console.error(error);

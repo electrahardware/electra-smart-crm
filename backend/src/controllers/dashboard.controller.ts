@@ -70,6 +70,23 @@ export async function getDashboard(
         },
       });
 
+      const recentLeads =
+  await prisma.lead.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 5,
+    select: {
+      id: true,
+      customerName: true,
+      shopName: true,
+      mobile: true,
+      status: true,
+      priority: true,
+      createdAt: true,
+    },
+  });
+
     res.json({
       totalLeads,
       hotLeads,
@@ -79,17 +96,19 @@ export async function getDashboard(
       overdueFollowups,
       pipelineValue:
         pipeline._sum.expectedValue || 0,
+
+        recentLeads,
     });
 
   } catch (error) {
 
-    console.error(error);
+  console.error("Dashboard Error:", error);
 
-    res.status(500).json({
-      message:
-        "Unable to load dashboard.",
-    });
+  res.status(500).json({
+    message: "Unable to load dashboard.",
+    error,
+  });
 
-  }
+}
 }
 
