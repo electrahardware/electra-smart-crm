@@ -69,15 +69,17 @@ useEffect(() => {
 
   setLead((prev) => ({
 
-    ...prev,
+  ...prev,
 
-    state: "",
+  state: "",
 
-    district: "",
+  district: "",
 
-    area: "",
+  city: "",
 
-  }));
+  area: "",
+
+}));
 
   return;
 
@@ -100,17 +102,19 @@ useEffect(() => {
 
         setLead((prev) => ({
 
-          ...prev,
+  ...prev,
 
-          country: office.Country,
+  country: office.Country,
 
-          state: office.State,
+  state: office.State,
 
-          district: office.District,
+  district: office.District,
 
-          area: office.Name,
+  city: office.District,
 
-        }));
+  area: office.Name,
+
+}));
 
       }
 
@@ -221,6 +225,19 @@ useEffect(() => {
   onChange={(value) => updateLead("whatsapp", value)}
 />
 
+<TextInput
+  label="Lead Date"
+  type="date"
+  value={
+    lead.leadDate ||
+    new Date().toISOString().slice(0, 10)
+  }
+  field="leadDate"
+  onChange={(e) =>
+    updateLead("leadDate", e.target.value)
+  }
+/>
+
           <TextInput
   label="Customer Name"
   required
@@ -313,6 +330,16 @@ useEffect(() => {
   value={lead.district}
   placeholder="Auto after pincode"
   readOnly
+/>
+
+<TextInput
+  label="City"
+  value={lead.city}
+  field="city"
+  placeholder="Enter City"
+  onChange={(e) =>
+    updateLead("city", e.target.value)
+  }
 />
 
           <TextInput

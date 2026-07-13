@@ -52,6 +52,15 @@ const [stateFilter, setStateFilter] =
 const [sourceFilter, setSourceFilter] =
   useState("All"); 
 
+const [cityFilter, setCityFilter] =
+  useState("All");
+
+const [fromDate, setFromDate] =
+  useState("");
+
+const [toDate, setToDate] =
+  useState("");
+
   const [followupFilter, setFollowupFilter] =
     useState("All");
 
@@ -113,7 +122,10 @@ const [sourceFilter, setSourceFilter] =
   priorityFilter,
   stateFilter,
   sourceFilter,
+  cityFilter,
   followupFilter,
+  fromDate,
+  toDate,
   today,
 ]);
 
@@ -209,6 +221,36 @@ const matchesSource =
     : lead.leadSource ===
       sourceFilter;
 
+      const matchesCity =
+  cityFilter === "All"
+    ? true
+    : lead.city === cityFilter;
+
+const matchesDate = (() => {
+
+  if (!fromDate && !toDate) {
+    return true;
+  }
+
+  const date =
+    (
+      lead.leadDate ||
+      lead.createdAt ||
+      ""
+    ).slice(0, 10);
+
+  if (fromDate && date < fromDate) {
+    return false;
+  }
+
+  if (toDate && date > toDate) {
+    return false;
+  }
+
+  return true;
+
+})();
+
       const matchesFollowup = (() => {
 
         if (followupFilter === "All") {
@@ -245,13 +287,17 @@ const matchesSource =
       })();
 
       return (
+
   matchesSearch &&
   matchesStatus &&
   matchesOwner &&
   matchesPriority &&
   matchesState &&
   matchesSource &&
+  matchesCity &&
+  matchesDate &&
   matchesFollowup
+
 );
 
     });
@@ -282,6 +328,30 @@ sourceFilter,
 
         break;
 
+      case "date":
+
+  rows.sort((a, b) => {
+
+    const dateA =
+      (
+        a.leadDate ||
+        a.createdAt ||
+        ""
+      ).slice(0, 10);
+
+    const dateB =
+      (
+        b.leadDate ||
+        b.createdAt ||
+        ""
+      ).slice(0, 10);
+
+    return dateB.localeCompare(dateA);
+
+  });
+
+  break;  
+
       case "followup":
 
         rows.sort((a, b) =>
@@ -303,13 +373,31 @@ sourceFilter,
 
         break;
 
-      default:
+      default: {
 
-        rows.sort(
-          (a, b) =>
-            (b.id || 0) -
-            (a.id || 0)
-        );
+  rows.sort((a, b) => {
+
+    const dateA =
+      (
+        a.leadDate ||
+        a.createdAt ||
+        ""
+      ).slice(0, 10);
+
+    const dateB =
+      (
+        b.leadDate ||
+        b.createdAt ||
+        ""
+      ).slice(0, 10);
+
+    return dateB.localeCompare(dateA);
+
+  });
+
+  break;
+
+}
 
     }
 
@@ -637,11 +725,20 @@ function exportSelected() {
   stateFilter={stateFilter}
   setStateFilter={setStateFilter}
 
+  cityFilter={cityFilter}
+  setCityFilter={setCityFilter}
+
   sourceFilter={sourceFilter}
   setSourceFilter={setSourceFilter}
 
   followupFilter={followupFilter}
   setFollowupFilter={setFollowupFilter}
+
+  fromDate={fromDate}
+  setFromDate={setFromDate}
+
+  toDate={toDate}
+  setToDate={setToDate}
 />
 
         <div className="max-h-[650px] overflow-auto">

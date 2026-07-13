@@ -1,7 +1,14 @@
-import type { Dispatch, SetStateAction } from "react";
-import type { Lead } from "../../types/lead";
+import type {
+  Dispatch,
+  SetStateAction,
+} from "react";
+
+import type {
+  Lead,
+} from "../../types/lead";
 
 interface Props {
+
   leads: Lead[];
 
   search: string;
@@ -19,14 +26,24 @@ interface Props {
   stateFilter: string;
   setStateFilter: Dispatch<SetStateAction<string>>;
 
+  cityFilter: string;
+  setCityFilter: Dispatch<SetStateAction<string>>;
+
   sourceFilter: string;
   setSourceFilter: Dispatch<SetStateAction<string>>;
 
   followupFilter: string;
   setFollowupFilter: Dispatch<SetStateAction<string>>;
+
+  fromDate: string;
+  setFromDate: Dispatch<SetStateAction<string>>;
+
+  toDate: string;
+  setToDate: Dispatch<SetStateAction<string>>;
 }
 
 export default function LeadToolbar({
+
   leads,
 
   search,
@@ -44,14 +61,26 @@ export default function LeadToolbar({
   stateFilter,
   setStateFilter,
 
+  cityFilter,
+  setCityFilter,
+
   sourceFilter,
   setSourceFilter,
 
   followupFilter,
   setFollowupFilter,
+
+  fromDate,
+  setFromDate,
+
+  toDate,
+  setToDate,
+
 }: Props) {
+
   return (
-    <div className="border-b p-6 space-y-4">
+
+    <div className="space-y-4 border-b p-6">
 
       <input
         type="text"
@@ -60,10 +89,10 @@ export default function LeadToolbar({
         onChange={(e) =>
           setSearch(e.target.value)
         }
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"
       />
 
-      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-8">
 
         <select
           value={statusFilter}
@@ -120,9 +149,18 @@ export default function LeadToolbar({
             All Priority
           </option>
 
-          <option value="Hot">Hot</option>
-          <option value="Warm">Warm</option>
-          <option value="Cold">Cold</option>
+          <option value="Hot">
+            Hot
+          </option>
+
+          <option value="Warm">
+            Warm
+          </option>
+
+          <option value="Cold">
+            Cold
+          </option>
+
         </select>
 
         <select
@@ -148,6 +186,33 @@ export default function LeadToolbar({
               value={state}
             >
               {state}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={cityFilter}
+          onChange={(e) =>
+            setCityFilter(e.target.value)
+          }
+          className="rounded-xl border px-4 py-3"
+        >
+          <option value="All">
+            All Cities
+          </option>
+
+          {[
+            ...new Set(
+              leads
+                .map((x) => x.city)
+                .filter(Boolean)
+            ),
+          ].map((city) => (
+            <option
+              key={city}
+              value={city}
+            >
+              {city}
             </option>
           ))}
         </select>
@@ -179,32 +244,28 @@ export default function LeadToolbar({
           ))}
         </select>
 
-        <select
-          value={followupFilter}
+        <input
+          type="date"
+          value={fromDate}
           onChange={(e) =>
-            setFollowupFilter(e.target.value)
+            setFromDate(e.target.value)
           }
           className="rounded-xl border px-4 py-3"
-        >
-          <option value="All">
-            All Follow-ups
-          </option>
+        />
 
-          <option value="Today">
-            Today
-          </option>
-
-          <option value="Upcoming">
-            Upcoming
-          </option>
-
-          <option value="Overdue">
-            Overdue
-          </option>
-        </select>
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) =>
+            setToDate(e.target.value)
+          }
+          className="rounded-xl border px-4 py-3"
+        />
 
       </div>
 
     </div>
+
   );
+
 }

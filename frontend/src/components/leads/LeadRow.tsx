@@ -25,6 +25,13 @@ export default function LeadRow({
   onDelete,
 }: Props) {
 
+  const leadDate =
+    (
+      lead.leadDate ||
+      lead.createdAt ||
+      ""
+    ).slice(0, 10);
+
   return (
 
     <tr className="border-t hover:bg-slate-50">
@@ -36,6 +43,12 @@ export default function LeadRow({
           checked={selected}
           onChange={onToggle}
         />
+
+      </td>
+
+      <td className="p-3 whitespace-nowrap">
+
+        {leadDate || "-"}
 
       </td>
 
@@ -59,15 +72,21 @@ export default function LeadRow({
 
       <td className="p-3">
 
-        <StatusBadge
-          status={lead.status}
-        />
+        {lead.city || "-"}
 
       </td>
 
       <td className="p-3">
 
         {lead.leadOwner || "-"}
+
+      </td>
+
+      <td className="p-3">
+
+        <StatusBadge
+          status={lead.status}
+        />
 
       </td>
 

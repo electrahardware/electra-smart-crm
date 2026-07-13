@@ -31,6 +31,10 @@ export default function LeadTableHeader({
         </th>
 
         <th className="p-3 text-left">
+          Date
+        </th>
+
+        <th className="p-3 text-left">
           Customer
         </th>
 
@@ -43,11 +47,15 @@ export default function LeadTableHeader({
         </th>
 
         <th className="p-3 text-left">
-          Status
+          City
         </th>
 
         <th className="p-3 text-left">
           Owner
+        </th>
+
+        <th className="p-3 text-left">
+          Status
         </th>
 
         <th className="p-3 text-left">
