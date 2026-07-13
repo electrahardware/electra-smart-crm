@@ -67,10 +67,30 @@ export async function createLead(
 ) {
   try {
 
-    const lead =
-      await prisma.lead.create({
-        data: req.body,
-      });
+    const data = {
+  ...req.body,
+
+  followupDate:
+    req.body.followupDate
+      ? new Date(req.body.followupDate)
+      : null,
+
+  followupCompleted:
+    req.body.followupCompleted ??
+    false,
+
+  followupCompletedAt:
+    req.body.followupCompletedAt
+      ? new Date(
+          req.body.followupCompletedAt
+        )
+      : null,
+};
+
+const lead =
+  await prisma.lead.create({
+    data,
+  });
 
     await createTimeline({
       leadId: lead.id,
