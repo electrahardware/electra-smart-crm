@@ -1,8 +1,10 @@
+import { api } from "../lib/api";
 import type { Lead } from "../types/lead";
 
 export type LeadResponse = Lead;
 
-const API = "http://localhost:5000/api/leads";
+const API =
+  `${import.meta.env.VITE_API_URL}/leads`;
 
 export async function getLeads(): Promise<LeadResponse[]> {
   const res = await fetch(API);

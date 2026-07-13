@@ -1,26 +1,13 @@
-const API =
-  "http://localhost:5000/api/leads";
+import { api } from "../lib/api";
 
 import type {
   Followup,
 } from "../types/followup";
 
-export async function
-getTodayFollowups() {
+export async function getTodayFollowups(): Promise<Followup[]> {
 
-  const res =
-    await fetch(
-      `${API}/today-followups`
-    );
-
-  if (!res.ok) {
-
-    throw new Error(
-      "Unable to load followups."
-    );
-
-  }
-
-  return await res.json() as Followup[];
+  return api<Followup[]>(
+    "/leads/today-followups"
+  );
 
 }

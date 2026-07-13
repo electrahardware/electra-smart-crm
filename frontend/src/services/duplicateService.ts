@@ -1,24 +1,6 @@
-const API =
-  "http://localhost:5000/api/duplicates";
+import { api } from "../lib/api";
+import type { DuplicateLead } from "../types/duplicate";
 
-import type {
-  DuplicateLead,
-} from "../types/duplicate";
-
-export async function
-getDuplicates() {
-
-  const res =
-    await fetch(API);
-
-  if (!res.ok) {
-
-    throw new Error(
-      "Unable to load duplicate leads."
-    );
-
-  }
-
-  return await res.json() as DuplicateLead[];
-
+export async function getDuplicates(): Promise<DuplicateLead[]> {
+  return api<DuplicateLead[]>("/duplicates");
 }

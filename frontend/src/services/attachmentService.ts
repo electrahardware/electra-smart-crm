@@ -11,10 +11,15 @@ export interface Attachment {
   createdAt: string;
 }
 
+const BASE_URL =
+  import.meta.env.VITE_API_URL;
+
 export async function getAttachments(
   leadId: number
 ): Promise<Attachment[]> {
-  return api<Attachment[]>(`/attachments/${leadId}`);
+  return api<Attachment[]>(
+    `/attachments/${leadId}`
+  );
 }
 
 export async function uploadAttachment(
@@ -23,20 +28,30 @@ export async function uploadAttachment(
 ) {
   const formData = new FormData();
 
-  formData.append("leadId", String(leadId));
-  formData.append("file", file);
+  formData.append(
+    "leadId",
+    String(leadId)
+  );
 
-  const token = localStorage.getItem("token");
+  formData.append(
+    "file",
+    file
+  );
+
+  const token =
+    localStorage.getItem("token");
 
   const res = await fetch(
-    "http://localhost:5000/api/attachments",
+    `${BASE_URL}/attachments`,
     {
       method: "POST",
+
       headers: {
         Authorization: token
           ? `Bearer ${token}`
           : "",
       },
+
       body: formData,
     }
   );
@@ -51,13 +66,19 @@ export async function uploadAttachment(
 export async function deleteAttachment(
   id: number
 ): Promise<void> {
-  return api<void>(`/attachments/${id}`, {
-    method: "DELETE",
-  });
+  return api<void>(
+    `/attachments/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
 }
 
 export function getAttachmentUrl(
   fileName: string
 ) {
-  return `http://localhost:5000/uploads/${fileName}`;
+  return `${BASE_URL.replace(
+    "/api",
+    ""
+  )}/uploads/${fileName}`;
 }
