@@ -159,3 +159,34 @@ export async function deleteLeadNote(
 
   return res.json();
 }
+
+export async function deleteMultipleLeads(
+  ids: number[]
+) {
+
+  const res = await fetch(
+    `${API}/leads`,
+    {
+      method: "DELETE",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        ids,
+      }),
+    }
+  );
+
+  if (!res.ok) {
+
+    throw new Error(
+      "Unable to delete selected leads."
+    );
+
+  }
+
+  return res.json();
+
+}

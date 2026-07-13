@@ -531,25 +531,33 @@ sourceFilter,
 
   }
 
-  function deleteSelected() {
+  async function deleteSelected() {
 
-  if (
-    selectedIds.length === 0
-  ) {
+  if (selectedIds.length === 0) {
     return;
   }
 
-  if (
-    !window.confirm(
-      `Delete ${selectedIds.length} selected lead(s)?`
-    )
-  ) {
-    return;
-  }
-
-  alert(
-    "Bulk Delete API will be connected in next step."
+  const ok = window.confirm(
+    `Delete ${selectedIds.length} selected lead(s)?`
   );
+
+  if (!ok) {
+    return;
+  }
+
+  try {
+
+    await handleDeleteSelected();
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast.error(
+      "Unable to delete selected leads."
+    );
+
+  }
 
 }
 
