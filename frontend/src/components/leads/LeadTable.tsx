@@ -585,10 +585,6 @@ function exportSelected() {
 />
 
 <div className="h-6" />
-<TodayFollowupList
-  leads={filteredLeads}
-  onRefresh={loadLeads}
-/>
 
 <div className="h-6" />
           <div className="bg-white rounded-2xl shadow border border-slate-200">
