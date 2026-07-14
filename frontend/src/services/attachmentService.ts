@@ -29,11 +29,6 @@ export async function uploadAttachment(
   const formData = new FormData();
 
   formData.append(
-    "leadId",
-    String(leadId)
-  );
-
-  formData.append(
     "file",
     file
   );
@@ -42,7 +37,7 @@ export async function uploadAttachment(
     localStorage.getItem("token");
 
   const res = await fetch(
-    `${BASE_URL}/attachments`,
+    `${BASE_URL}/attachments/${leadId}`,
     {
       method: "POST",
 
