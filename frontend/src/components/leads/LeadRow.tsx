@@ -25,77 +25,63 @@ export default function LeadRow({
   onDelete,
 }: Props) {
 
-  const leadDate =
-    (
-      lead.leadDate ||
-      lead.createdAt ||
-      ""
-    ).slice(0, 10);
+  const rawDate =
+    lead.leadDate ||
+    lead.createdAt ||
+    "";
+
+  const leadDate = rawDate
+    ? new Intl.DateTimeFormat("en-GB")
+        .format(new Date(rawDate))
+        .replace(/\//g, "-")
+    : "-";
 
   return (
 
     <tr className="border-t hover:bg-slate-50">
 
       <td className="p-3">
-
         <input
           type="checkbox"
           checked={selected}
           onChange={onToggle}
         />
-
       </td>
 
       <td className="p-3 whitespace-nowrap">
-
-        {leadDate || "-"}
-
+        {leadDate}
       </td>
 
       <td className="p-3 font-medium">
-
         {lead.customerName}
-
       </td>
 
       <td className="p-3">
-
         {lead.mobile}
-
       </td>
 
       <td className="p-3">
-
         {lead.shopName || "-"}
-
       </td>
 
       <td className="p-3">
-
         {lead.city || "-"}
-
       </td>
 
       <td className="p-3">
-
         {lead.leadOwner || "-"}
-
       </td>
 
       <td className="p-3">
-
         <StatusBadge
           status={lead.status}
         />
-
       </td>
 
       <td className="p-3">
-
         <PriorityBadge
           priority={lead.priority}
         />
-
       </td>
 
       <td className="p-3">
@@ -104,7 +90,7 @@ export default function LeadRow({
 
           <a
             href={`tel:${lead.mobile}`}
-            className="rounded-lg p-2 hover:bg-blue-100"
+            className="rounded-lg p-2 hover:bg-pink-100"
             title="Call"
           >
             📞

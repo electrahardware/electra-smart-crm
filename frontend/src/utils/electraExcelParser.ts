@@ -145,6 +145,14 @@ for (let i = 1; i <= 20; i++) {
   .filter(Boolean)
   .join("\n");
 
+  const city = getCellText(
+  row,
+  columnIndexes,
+  "city"
+);
+
+console.log("CITY =", city);
+
   return {
     rowNumber: index + 2,
 
@@ -203,12 +211,9 @@ for (let i = 1; i <= 20; i++) {
     "district"
   ),
 
-  city:
-  getCellText(
-    row,
-    columnIndexes,
-    "city"
-  ),
+ city,
+
+  
 
     area:
   getCellText(

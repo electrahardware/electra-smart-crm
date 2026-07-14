@@ -3,6 +3,8 @@ import type {
   SetStateAction,
 } from "react";
 
+import MultiSelectDropdown from "../ui/MultiSelectDropdown";
+
 import type {
   Lead,
 } from "../../types/lead";
@@ -26,8 +28,10 @@ interface Props {
   stateFilter: string;
   setStateFilter: Dispatch<SetStateAction<string>>;
 
-  cityFilter: string;
-  setCityFilter: Dispatch<SetStateAction<string>>;
+  cityFilter: string[];
+setCityFilter: Dispatch<
+  SetStateAction<string[]>
+>;
 
   sourceFilter: string;
   setSourceFilter: Dispatch<SetStateAction<string>>;
@@ -190,32 +194,18 @@ export default function LeadToolbar({
           ))}
         </select>
 
-        <select
-          value={cityFilter}
-          onChange={(e) =>
-            setCityFilter(e.target.value)
-          }
-          className="rounded-xl border px-4 py-3"
-        >
-          <option value="All">
-            All Cities
-          </option>
-
-          {[
-            ...new Set(
-              leads
-                .map((x) => x.city)
-                .filter(Boolean)
-            ),
-          ].map((city) => (
-            <option
-              key={city}
-              value={city}
-            >
-              {city}
-            </option>
-          ))}
-        </select>
+        <MultiSelectDropdown
+  label="Select Cities"
+  options={[
+    ...new Set(
+      leads
+        .map((x) => x.city)
+        .filter(Boolean)
+    ),
+  ]}
+  selected={cityFilter}
+  onChange={setCityFilter}
+/>
 
         <select
           value={sourceFilter}

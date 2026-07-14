@@ -53,7 +53,7 @@ const [sourceFilter, setSourceFilter] =
   useState("All"); 
 
 const [cityFilter, setCityFilter] =
-  useState("All");
+  useState<string[]>([]);
 
 const [fromDate, setFromDate] =
   useState("");
@@ -173,6 +173,10 @@ const [toDate, setToDate] =
     .toLowerCase()
     .includes(keyword) ||
 
+  (lead.city || "")
+  .toLowerCase()
+  .includes(keyword) ||
+
   (lead.state || "")
     .toLowerCase()
     .includes(keyword) ||
@@ -222,9 +226,11 @@ const matchesSource =
       sourceFilter;
 
       const matchesCity =
-  cityFilter === "All"
+  cityFilter.length === 0
     ? true
-    : lead.city === cityFilter;
+    : cityFilter.includes(
+        lead.city || ""
+      );
 
 const matchesDate = (() => {
 
@@ -302,16 +308,19 @@ const matchesDate = (() => {
 
     });
   }, [
-    leads,
-    search,
-    statusFilter,
-    ownerFilter,
-    followupFilter,
-    today,
-    priorityFilter,
-stateFilter,
-sourceFilter,
-  ]);
+  leads,
+  search,
+  statusFilter,
+  ownerFilter,
+  priorityFilter,
+  stateFilter,
+  cityFilter,
+  sourceFilter,
+  followupFilter,
+  fromDate,
+  toDate,
+  today,
+]);
     const sortedLeads = useMemo(() => {
 
     const rows = [...filteredLeads];

@@ -26,9 +26,11 @@ export interface ImportLeadRow {
   country: string;
   state: string;
   district: string;
-  area: string;
-  pincode: string;
+city: string;
+area: string;
+pincode: string;
 
+leadDate: string;
   addressLine1: string;
   addressLine2: string;
 
