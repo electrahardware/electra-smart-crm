@@ -25,7 +25,7 @@ export async function uploadAttachment(
           originalName: req.file.originalname,
           fileType: req.file.mimetype,
           fileSize: req.file.size,
-          filePath: req.file.path,
+          filePath: req.file.filename,
         },
       });
 
