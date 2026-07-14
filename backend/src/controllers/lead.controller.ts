@@ -10,9 +10,14 @@ export async function getAllLeads(
 
     const leads =
       await prisma.lead.findMany({
-        orderBy: {
-          id: "desc",
-        },
+        orderBy: [
+  {
+    leadDate: "desc",
+  },
+  {
+    id: "desc",
+  },
+],
       });
 
     res.json(leads);
@@ -69,6 +74,14 @@ export async function createLead(
 
     const data = {
   ...req.body,
+
+  leadDate:
+    req.body.leadDate
+      ? new Date(req.body.leadDate)
+      : new Date(),
+
+  city:
+    req.body.city || "",
 
   followupDate:
     req.body.followupDate
@@ -129,6 +142,14 @@ export async function updateLead(
         },
         data: {
           ...req.body,
+
+          leadDate:
+  req.body.leadDate
+    ? new Date(req.body.leadDate)
+    : undefined,
+
+city:
+  req.body.city,
 
           followupCompleted:
             req.body.followupCompleted,

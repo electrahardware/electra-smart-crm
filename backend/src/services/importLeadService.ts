@@ -186,8 +186,13 @@ export async function commitImportLeads(
             gst: lead.gst,
             state: lead.state,
             district: lead.district,
-            area: lead.area,
-            pincode: lead.pincode,
+            city: lead.city,
+area: lead.area,
+pincode: lead.pincode,
+
+leadDate: lead.leadDate
+  ? new Date(lead.leadDate)
+  : new Date(),
             addressLine1: lead.addressLine1,
             addressLine2: lead.addressLine2,
             leadOwner: lead.leadOwner,
@@ -234,8 +239,13 @@ followupCompletedAt: null,
       gst: lead.gst,
       state: lead.state,
       district: lead.district,
-      area: lead.area,
-      pincode: lead.pincode,
+      city: lead.city,
+area: lead.area,
+pincode: lead.pincode,
+
+leadDate: lead.leadDate
+  ? new Date(lead.leadDate)
+  : new Date(),
       addressLine1: lead.addressLine1,
       addressLine2: lead.addressLine2,
       leadOwner: lead.leadOwner,

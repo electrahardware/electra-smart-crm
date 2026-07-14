@@ -21,10 +21,14 @@ model Lead {
   gst   String?
 
   country  String? @default("India")
-  state    String?
-  district String?
-  area     String?
-  pincode  String?
+
+state    String?
+district String?
+city     String?
+area     String?
+pincode  String?
+
+leadDate DateTime @default(now())
 
   addressLine1 String?
   addressLine2 String?
