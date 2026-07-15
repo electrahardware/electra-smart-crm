@@ -78,3 +78,131 @@ export async function login(
 
   }
 }
+
+export async function getUsers(
+  _req: Request,
+  res: Response
+) {
+  try {
+
+    const users =
+      await prisma.user.findMany({
+
+        orderBy: {
+          name: "asc",
+        },
+
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+        },
+
+      });
+
+    res.json(users);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message:
+        "Unable to load users.",
+    });
+
+  }
+}
+
+export async function createUser(
+  req: Request,
+  res: Response
+) {
+  try {
+
+    const {
+      name,
+      email,
+      password,
+      role,
+    } = req.body;
+
+    if (
+      !name ||
+      !email ||
+      !password
+    ) {
+      return res.status(400).json({
+        message:
+          "Name, email and password are required.",
+      });
+    }
+
+    const existing =
+      await prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+
+    if (existing) {
+      return res.status(400).json({
+        message:
+          "Email already exists.",
+      });
+    }
+
+    const hashedPassword =
+      await bcrypt.hash(
+        password,
+        10
+      );
+
+    const user =
+      await prisma.user.create({
+
+        data: {
+
+          name,
+
+          email,
+
+          password:
+            hashedPassword,
+
+          role:
+            role || "Sales",
+
+        },
+
+      });
+
+    res.status(201).json({
+
+      id: user.id,
+
+      name: user.name,
+
+      email: user.email,
+
+      role: user.role,
+
+      isActive:
+        user.isActive,
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message:
+        "Unable to create user.",
+    });
+
+  }
+}
