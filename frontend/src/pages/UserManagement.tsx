@@ -1,6 +1,45 @@
 import MainLayout from "../layouts/MainLayout";
+import { useEffect, useState } from "react";
+
+import {
+  getUsers,
+  type User,
+} from "../services/userService";
 
 export default function UserManagement() {
+
+const [users, setUsers] =
+  useState<User[]>([]);
+
+const [loading, setLoading] =
+  useState(true);
+
+async function loadUsers() {
+
+  try {
+
+    const data =
+      await getUsers();
+
+    setUsers(data);
+
+  } catch (error) {
+
+    console.error(error);
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+}
+
+useEffect(() => {
+
+  loadUsers();
+
+}, []);
 
   return (
 
@@ -40,11 +79,84 @@ export default function UserManagement() {
 
         </h2>
 
-        <p className="mt-2 text-slate-500">
+        {loading ? (
 
-          No users loaded yet.
+  <p className="mt-2 text-slate-500">
 
-        </p>
+    Loading users...
+
+  </p>
+
+) : (
+
+  <div className="mt-6 overflow-x-auto">
+
+    <table className="min-w-full">
+
+      <thead>
+
+        <tr className="border-b">
+
+          <th className="px-4 py-3 text-left">
+            Name
+          </th>
+
+          <th className="px-4 py-3 text-left">
+            Email
+          </th>
+
+          <th className="px-4 py-3 text-left">
+            Role
+          </th>
+
+          <th className="px-4 py-3 text-left">
+            Status
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {users.map((user) => (
+
+          <tr
+            key={user.id}
+            className="border-b"
+          >
+
+            <td className="px-4 py-3">
+              {user.name}
+            </td>
+
+            <td className="px-4 py-3">
+              {user.email}
+            </td>
+
+            <td className="px-4 py-3">
+              {user.role}
+            </td>
+
+            <td className="px-4 py-3">
+
+              {user.isActive
+                ? "🟢 Active"
+                : "🔴 Disabled"}
+
+            </td>
+
+          </tr>
+
+        ))}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+)}
 
       </div>
 
