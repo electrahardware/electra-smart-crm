@@ -1,4 +1,5 @@
 import MainLayout from "../layouts/MainLayout";
+import { useNavigate } from "react-router-dom";
 
 const menus = [
 
@@ -47,6 +48,7 @@ const menus = [
 ];
 
 export default function Settings() {
+  const navigate = useNavigate();
 
   return (
 
@@ -63,9 +65,18 @@ export default function Settings() {
         {menus.map((item) => (
 
           <button
-            key={item.title}
-            className="rounded-2xl border bg-white p-6 text-left shadow-sm transition hover:shadow-lg"
-          >
+  key={item.title}
+  onClick={() => {
+
+    if (item.title === "Users") {
+
+      navigate("/settings/users");
+
+    }
+
+  }}
+  className="rounded-2xl border bg-white p-6 text-left shadow-sm transition hover:shadow-lg"
+>
 
             <div className="text-5xl">
 

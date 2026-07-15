@@ -22,6 +22,7 @@ import LeadBulkActions from "./LeadBulkActions";
 import LeadRow from "./LeadRow";
 import LeadTableHeader from "./LeadTableHeader";
 import LeadStats from "./LeadStats";
+import { exportLeadsExcel } from "../../utils/exportLeadsExcel";
 
 export default function LeadTable() {
 
@@ -668,6 +669,26 @@ function exportSelected() {
 
   alert(
     "Export API will be connected in next step."
+  );
+
+}
+
+function exportFilteredLeads() {
+
+  if (sortedLeads.length === 0) {
+
+    toast.error(
+      "No leads available to export."
+    );
+
+    return;
+
+  }
+
+  exportLeadsExcel(sortedLeads);
+
+  toast.success(
+    `${sortedLeads.length} lead(s) exported successfully.`
   );
 
 }

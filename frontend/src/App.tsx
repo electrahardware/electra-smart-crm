@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import DuplicateLeads from "./pages/DuplicateLeads";
 import Settings from "./pages/Settings";
+import UserManagement from "./pages/UserManagement";
 import Login from "./pages/Login";
 
 function App() {
@@ -76,6 +77,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/settings/users"
+  element={
+    <ProtectedRoute>
+
+      <UserManagement />
+
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="*"
