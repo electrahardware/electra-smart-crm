@@ -1,5 +1,6 @@
 import MainLayout from "../layouts/MainLayout";
 import { useEffect, useState } from "react";
+import AddUserModal from "../components/settings/AddUserModal";
 
 import {
   getUsers,
@@ -13,6 +14,9 @@ const [users, setUsers] =
 
 const [loading, setLoading] =
   useState(true);
+
+const [openModal, setOpenModal] =
+  useState(false);  
 
 async function loadUsers() {
 
@@ -64,6 +68,7 @@ useEffect(() => {
         </div>
 
         <button
+          onClick={() => setOpenModal(true)}
           className="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700"
         >
           + Add User
@@ -159,6 +164,12 @@ useEffect(() => {
 )}
 
       </div>
+
+      <AddUserModal
+  open={openModal}
+  onClose={() => setOpenModal(false)}
+  onSuccess={loadUsers}
+/>
 
     </MainLayout>
 
