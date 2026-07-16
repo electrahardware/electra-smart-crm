@@ -98,6 +98,19 @@ export async function createLead(
           req.body.followupCompletedAt
         )
       : null,
+
+  expectedValue:
+  req.body.expectedValue !== "" &&
+  req.body.expectedValue != null
+    ? Number(req.body.expectedValue)
+    : null,
+
+probability:
+  req.body.probability !== "" &&
+  req.body.probability != null
+    ? Number(req.body.probability)
+    : 0,
+
 };
 
 const lead =
@@ -167,6 +180,21 @@ city:
                   req.body.followupDate
                 )
               : undefined,
+
+          expectedValue:
+  req.body.expectedValue !== undefined
+    ? (
+        req.body.expectedValue === ""
+          ? null
+          : Number(req.body.expectedValue)
+      )
+    : undefined,
+
+probability:
+  req.body.probability !== undefined
+    ? Number(req.body.probability)
+    : undefined,
+    
         },
       });
 
