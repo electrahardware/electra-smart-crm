@@ -1,5 +1,8 @@
 import dotenv from "dotenv";
+
 dotenv.config();
+
+console.log("SERVER JWT =", process.env.JWT_SECRET);
 
 import express from "express";
 import cors from "cors";
@@ -46,7 +49,7 @@ app.get("/", (_req, res) => {
 });
 
 app.get("/health", (_req, res) => {
-  res.status(200).json({
+  res.json({
     status: "ok",
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
@@ -64,6 +67,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/duplicates", duplicateRoutes);
 app.use("/api/merge", mergeRoutes);
 app.use("/api/activity", activityRoutes);
+
 app.use(
   "/uploads",
   express.static(
@@ -71,9 +75,11 @@ app.use(
   )
 );
 
+const PORT =
+  Number(process.env.PORT) || 5000;
 
-const PORT = Number(process.env.PORT) || 10000;
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on ${PORT}`);
+app.listen(PORT, () => {
+  console.log(
+    `🚀 Server running on port ${PORT}`
+  );
 });

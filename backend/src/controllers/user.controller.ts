@@ -7,6 +7,9 @@ const JWT_SECRET =
   process.env.JWT_SECRET ||
   "electra_secret";
 
+console.log("LOGIN SECRET =", JWT_SECRET);
+console.log("TOKEN WILL BE CREATED");
+
 export async function login(
   req: Request,
   res: Response
@@ -44,6 +47,11 @@ export async function login(
           "Invalid email or password.",
       });
     }
+
+    console.log(
+  "LOGIN SECRET:",
+  JWT_SECRET
+);
 
     const token =
   jwt.sign(
