@@ -3,13 +3,8 @@ import { useEffect, useState } from "react";
 import {
   getLeadNotes,
   addLeadNote,
+  type Note,
 } from "../../services/leadService";
-
-interface Note {
-  id: number;
-  note: string;
-  createdAt: string;
-}
 
 interface Props {
   leadId: number;
@@ -18,41 +13,76 @@ interface Props {
 export default function LeadNotes({
   leadId,
 }: Props) {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [text, setText] = useState("");
+
+  const [notes, setNotes] =
+    useState<Note[]>([]);
+
+  const [text, setText] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
 
   async function loadNotes() {
+
     try {
-      const data = await getLeadNotes(
-        leadId
-      );
+
+      const data =
+        await getLeadNotes(
+          leadId
+        );
 
       setNotes(data);
-    } catch (err) {
-      console.error(err);
+
+    } catch (error) {
+
+      console.error(error);
+
     }
+
   }
 
   useEffect(() => {
+
     loadNotes();
+
   }, [leadId]);
 
   async function saveNote() {
+
     if (!text.trim()) {
+
       return;
+
     }
 
-    await addLeadNote(
-      leadId,
-      text
-    );
+    try {
 
-    setText("");
+      setLoading(true);
 
-    await loadNotes();
+      await addLeadNote(
+        leadId,
+        text
+      );
+
+      setText("");
+
+      await loadNotes();
+
+    } catch (error) {
+
+      console.error(error);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
   }
 
   return (
+
     <div className="space-y-5">
 
       <div className="flex gap-3">
@@ -70,10 +100,15 @@ export default function LeadNotes({
         />
 
         <button
+          disabled={loading}
           onClick={saveNote}
-          className="rounded-xl bg-blue-600 text-white px-6"
+          className="rounded-xl bg-blue-600 px-6 text-white disabled:opacity-50"
         >
-          Save
+
+          {loading
+            ? "Saving..."
+            : "Save"}
+
         </button>
 
       </div>
@@ -97,7 +132,7 @@ export default function LeadNotes({
             className="rounded-xl border p-4"
           >
 
-            <div className="text-xs text-slate-500 mb-2">
+            <div className="mb-2 text-xs text-slate-500">
 
               {new Date(
                 note.createdAt
@@ -118,5 +153,7 @@ export default function LeadNotes({
       </div>
 
     </div>
+
   );
+
 }
