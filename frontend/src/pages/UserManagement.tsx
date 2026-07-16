@@ -1,5 +1,8 @@
 import MainLayout from "../layouts/MainLayout";
+import { Navigate } from "react-router-dom";
+import { isOwner } from "../utils/auth";
 import { useEffect, useState } from "react";
+import UserDialog from "../components/users/UserDialog";
 import AddUserModal from "../components/settings/AddUserModal";
 
 import {
@@ -9,11 +12,25 @@ import {
 
 export default function UserManagement() {
 
+if (!isOwner()) {
+
+  return (
+    <Navigate
+      to="/dashboard"
+      replace
+    />
+  );
+
+}
+
 const [users, setUsers] =
   useState<User[]>([]);
 
 const [loading, setLoading] =
   useState(true);
+
+const [dialogOpen, setDialogOpen] =
+  useState(false);
 
 const [openModal, setOpenModal] =
   useState(false);  
@@ -68,11 +85,13 @@ useEffect(() => {
         </div>
 
         <button
-          onClick={() => setOpenModal(true)}
-          className="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700"
-        >
-          + Add User
-        </button>
+  onClick={() =>
+    setDialogOpen(true)
+  }
+  className="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700"
+>
+  + Add User
+</button>
 
       </div>
 
@@ -168,6 +187,14 @@ useEffect(() => {
       <AddUserModal
   open={openModal}
   onClose={() => setOpenModal(false)}
+  onSuccess={loadUsers}
+/>
+
+<UserDialog
+  open={dialogOpen}
+  onClose={() =>
+    setDialogOpen(false)
+  }
   onSuccess={loadUsers}
 />
 

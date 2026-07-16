@@ -1,8 +1,13 @@
 export interface User {
+
   id: number;
+
   name: string;
+
   email: string;
+
   role: string;
+
 }
 
 export function getCurrentUser(): User | null {
@@ -14,27 +19,50 @@ export function getCurrentUser(): User | null {
     return null;
   }
 
-  return JSON.parse(user);
+  try {
+
+    return JSON.parse(user);
+
+  } catch {
+
+    return null;
+
+  }
+
+}
+
+export function getCurrentRole() {
+
+  return (
+    getCurrentUser()?.role ??
+    ""
+  );
 
 }
 
 export function isOwner() {
+
   return (
-    getCurrentUser()?.role ===
+    getCurrentRole() ===
     "Owner"
   );
+
 }
 
 export function isManager() {
+
   return (
-    getCurrentUser()?.role ===
+    getCurrentRole() ===
     "Manager"
   );
+
 }
 
 export function isSales() {
+
   return (
-    getCurrentUser()?.role ===
+    getCurrentRole() ===
     "Sales"
   );
+
 }

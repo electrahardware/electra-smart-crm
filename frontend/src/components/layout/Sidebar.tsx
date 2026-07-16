@@ -13,6 +13,7 @@ import { Link, useLocation } from "react-router-dom";
 
 import logo from "../../assets/images/electra-logo.png";
 import { useSidebar } from "../../hooks/useSidebar";
+import { isSales } from "../../utils/auth";
 
 const menu = [
   {
@@ -56,6 +57,9 @@ export default function Sidebar() {
     toggle,
     setOpen,
   } = useSidebar();
+
+  const hideSettings =
+  isSales();
 
   return (
     <>
@@ -125,6 +129,13 @@ export default function Sidebar() {
 
             const active =
               location.pathname === item.path;
+
+            if (
+  hideSettings &&
+  item.path === "/settings"
+) {
+  return null;
+}
 
             return (
 
