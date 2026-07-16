@@ -118,6 +118,36 @@ const lead =
     data,
   });
 
+  if (req.body.notes?.trim()) {
+
+  await prisma.leadNote.create({
+
+    data: {
+
+      leadId: lead.id,
+
+      note: req.body.notes.trim(),
+
+    },
+
+  });
+
+  await createTimeline({
+
+    leadId: lead.id,
+
+    type: "NOTE",
+
+    title: "Initial Note Added",
+
+    description: req.body.notes.trim(),
+
+    createdBy: "System",
+
+  });
+
+}
+
     await createTimeline({
       leadId: lead.id,
       type: "LEAD",
