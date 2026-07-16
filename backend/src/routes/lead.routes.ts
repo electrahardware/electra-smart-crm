@@ -1,4 +1,7 @@
 import { Router } from "express";
+import {
+  requireAuth,
+} from "../middleware/auth.middleware";
 
 import {
   createLead,
@@ -14,6 +17,7 @@ import {
 } from "../controllers/lead.controller";
 
 const router = Router();
+router.use(requireAuth);
 
 router.get("/", getAllLeads);
 
