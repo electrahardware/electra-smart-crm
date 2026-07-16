@@ -206,3 +206,95 @@ export async function createUser(
 
   }
 }
+
+export async function updateUser(
+  req: Request,
+  res: Response
+) {
+  try {
+
+    const id =
+      Number(req.params.id);
+
+    const {
+      name,
+      email,
+      role,
+      isActive,
+    } = req.body;
+
+    const existing =
+      await prisma.user.findFirst({
+
+        where: {
+
+          email,
+
+          NOT: {
+            id,
+          },
+
+        },
+
+      });
+
+    if (existing) {
+
+      return res.status(400).json({
+
+        message:
+          "Email already exists.",
+
+      });
+
+    }
+
+    const user =
+      await prisma.user.update({
+
+        where: {
+          id,
+        },
+
+        data: {
+
+          name,
+
+          email,
+
+          role,
+
+          isActive,
+
+        },
+
+      });
+
+    res.json({
+
+      id: user.id,
+
+      name: user.name,
+
+      email: user.email,
+
+      role: user.role,
+
+      isActive: user.isActive,
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+
+      message:
+        "Unable to update user.",
+
+    });
+
+  }
+
+}
