@@ -59,3 +59,27 @@ export async function createUser(
   );
 
 }
+
+export async function updateUser(
+
+  id: number,
+
+  data: Omit<User, "id" | "createdAt">
+
+) {
+
+  return api<User>(
+
+    `/users/${id}`,
+
+    {
+
+      method: "PUT",
+
+      body: JSON.stringify(data),
+
+    }
+
+  );
+
+}
