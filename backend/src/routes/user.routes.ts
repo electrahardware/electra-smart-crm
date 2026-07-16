@@ -3,6 +3,7 @@ import {
   login,
   getUsers,
   createUser,
+  updateUser,
 } from "../controllers/user.controller";
 
 const router = Router();
@@ -20,6 +21,11 @@ router.get(
 router.post(
   "/",
   createUser
+);
+
+router.put(
+  "/:id",
+  updateUser
 );
 
 export default router;
