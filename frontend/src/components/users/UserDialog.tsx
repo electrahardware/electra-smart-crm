@@ -1,11 +1,18 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import {
   createUser,
+  updateUser,
+  type User,
 } from "../../services/userService";
 
 interface Props {
 
   open: boolean;
+
+  user?: User | null;
 
   onClose: () => void;
 
@@ -16,6 +23,8 @@ interface Props {
 export default function UserDialog({
 
   open,
+
+  user,
 
   onClose,
 
@@ -38,28 +47,88 @@ export default function UserDialog({
   const [loading, setLoading] =
   useState(false);
 
+  useEffect(() => {
+
+  if (!user) {
+
+    setName("");
+
+    setEmail("");
+
+    setPassword("");
+
+    setRole("Sales");
+
+    return;
+
+  }
+
+  setName(user.name);
+
+  setEmail(user.email);
+
+  setRole(user.role);
+
+  setPassword("");
+
+}, [user]);
+
   async function handleSave() {
 
   try {
 
     setLoading(true);
 
-    await createUser({
+    const payload = {
 
-      name,
+  name:
+    name.trim(),
 
-      email,
+  email:
+    email
+      .trim()
+      .toLowerCase(),
 
-      password,
+  role,
 
-      role,
+};
 
-    });
+if (user) {
+
+  await updateUser(
+
+    user.id,
+
+    {
+
+      ...payload,
+
+      isActive:
+        user.isActive,
+
+    }
+
+  );
+
+} else {
+
+  await createUser({
+
+    ...payload,
+
+    password,
+
+  });
+
+}
 
     alert(
-      "User created successfully."
-    );
 
+  user
+    ? "User updated successfully."
+    : "User created successfully."
+
+);
     setName("");
 
     setEmail("");
@@ -100,7 +169,9 @@ export default function UserDialog({
 
         <h2 className="mb-6 text-2xl font-bold">
 
-          Create User
+          {user
+  ? "Edit User"
+  : "Add User"}
 
         </h2>
 

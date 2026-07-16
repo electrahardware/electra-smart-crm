@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { isOwner } from "../utils/auth";
 import { useEffect, useState } from "react";
 import UserDialog from "../components/users/UserDialog";
-import AddUserModal from "../components/settings/AddUserModal";
+
 
 import {
   getUsers,
@@ -32,8 +32,8 @@ const [loading, setLoading] =
 const [dialogOpen, setDialogOpen] =
   useState(false);
 
-const [openModal, setOpenModal] =
-  useState(false);  
+const [selectedUser, setSelectedUser] =
+  useState<User | null>(null);
 
 async function loadUsers() {
 
@@ -85,9 +85,13 @@ useEffect(() => {
         </div>
 
         <button
-  onClick={() =>
-    setDialogOpen(true)
-  }
+  onClick={() => {
+
+  setSelectedUser(null);
+
+  setDialogOpen(true);
+
+}}
   className="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700"
 >
   + Add User
@@ -137,6 +141,12 @@ useEffect(() => {
             Status
           </th>
 
+          <th className="px-4 py-3 text-center">
+
+  Action
+
+</th>
+
         </tr>
 
       </thead>
@@ -170,6 +180,28 @@ useEffect(() => {
 
             </td>
 
+            <td className="px-4 py-3 text-center">
+
+  <button
+
+    onClick={() => {
+
+      setSelectedUser(user);
+
+      setDialogOpen(true);
+
+    }}
+
+    className="rounded-lg bg-blue-100 px-3 py-2 text-blue-700 hover:bg-blue-200"
+
+  >
+
+    ✏️ Edit
+
+  </button>
+
+</td>
+
           </tr>
 
         ))}
@@ -184,17 +216,18 @@ useEffect(() => {
 
       </div>
 
-      <AddUserModal
-  open={openModal}
-  onClose={() => setOpenModal(false)}
-  onSuccess={loadUsers}
-/>
+      
 
 <UserDialog
   open={dialogOpen}
-  onClose={() =>
-    setDialogOpen(false)
-  }
+  user={selectedUser}
+  onClose={() => {
+
+    setDialogOpen(false);
+
+    setSelectedUser(null);
+
+  }}
   onSuccess={loadUsers}
 />
 
