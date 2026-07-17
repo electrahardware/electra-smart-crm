@@ -3,10 +3,13 @@ import { Navigate } from "react-router-dom";
 import { isOwner } from "../utils/auth";
 import { useEffect, useState } from "react";
 import UserDialog from "../components/users/UserDialog";
-
+import ResetPasswordDialog from "../components/users/ResetPasswordDialog";
 
 import {
   getUsers,
+  toggleUserStatus,
+  deleteUser,
+  resetPassword,
   type User,
 } from "../services/userService";
 
@@ -34,6 +37,15 @@ const [dialogOpen, setDialogOpen] =
 
 const [selectedUser, setSelectedUser] =
   useState<User | null>(null);
+
+const [passwordUser, setPasswordUser] =
+  useState<User | null>(null);
+
+const [newPassword, setNewPassword] =
+  useState("");
+
+const [confirmPassword, setConfirmPassword] =
+  useState("");
 
 async function loadUsers() {
 
@@ -180,25 +192,122 @@ useEffect(() => {
 
             </td>
 
-            <td className="px-4 py-3 text-center">
+            <td className="px-4 py-3">
+
+  <div className="flex justify-center gap-2">
+
+    <button
+
+      onClick={() => {
+
+        setSelectedUser(user);
+
+        setDialogOpen(true);
+
+      }}
+
+      className="rounded-lg bg-blue-100 px-3 py-2 text-blue-700 hover:bg-blue-200"
+
+    >
+
+      ✏️ Edit
+
+    </button>
+
+    <button
+
+  disabled={user.role === "Owner"}
+
+  onClick={async () => {
+
+    await toggleUserStatus(
+
+      user.id,
+
+      !user.isActive
+
+    );
+
+    await loadUsers();
+
+  }}
+
+  className="rounded-lg bg-amber-500 px-3 py-2 text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+
+>
+
+      {user.role === "Owner"
+  ? "Protected"
+  : user.isActive
+    ? "Disable"
+    : "Enable"}
+
+    </button>
+
+    <button
+
+  onClick={() => {
+
+    setPasswordUser(user);
+
+    setNewPassword("");
+
+    setConfirmPassword("");
+
+  }}
+
+  className="rounded-lg bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700"
+
+>
+
+  🔑 Reset
+
+</button>
+    
+
+    {user.role !== "Owner" && (
+
+
 
   <button
 
-    onClick={() => {
+    onClick={async () => {
 
-      setSelectedUser(user);
+      if (
 
-      setDialogOpen(true);
+        !confirm(
+
+          `Delete ${user.name}?`
+
+        )
+
+      ) {
+
+        return;
+
+      }
+
+      await deleteUser(
+
+        user.id
+
+      );
+
+      await loadUsers();
 
     }}
 
-    className="rounded-lg bg-blue-100 px-3 py-2 text-blue-700 hover:bg-blue-200"
+    className="rounded-lg bg-red-600 px-3 py-2 text-white hover:bg-red-700"
 
   >
 
-    ✏️ Edit
+    🗑 Delete
 
   </button>
+
+)}
+
+  </div>
 
 </td>
 
@@ -229,6 +338,16 @@ useEffect(() => {
 
   }}
   onSuccess={loadUsers}
+/>
+
+<ResetPasswordDialog
+  open={passwordUser !== null}
+  user={passwordUser}
+  onClose={() => {
+
+    setPasswordUser(null);
+
+  }}
 />
 
     </MainLayout>

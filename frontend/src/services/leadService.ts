@@ -4,9 +4,15 @@ import type { Lead } from "../types/lead";
 export type LeadResponse = Lead;
 
 export interface Note {
+
   id: number;
+
   note: string;
+
   createdAt: string;
+
+  createdBy?: string;
+
 }
 
 const API =

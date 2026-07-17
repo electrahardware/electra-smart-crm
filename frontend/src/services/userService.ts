@@ -83,3 +83,79 @@ export async function updateUser(
   );
 
 }
+
+export async function toggleUserStatus(
+
+  id: number,
+
+  isActive: boolean
+
+) {
+
+  return api<User>(
+
+    `/users/${id}/status`,
+
+    {
+
+      method: "PATCH",
+
+      body: JSON.stringify({
+
+        isActive,
+
+      }),
+
+    }
+
+  );
+
+}
+
+export async function deleteUser(
+
+  id: number
+
+) {
+
+  return api<void>(
+
+    `/users/${id}`,
+
+    {
+
+      method: "DELETE",
+
+    }
+
+  );
+
+}
+
+export async function resetPassword(
+
+  id: number,
+
+  password: string
+
+) {
+
+  return api(
+
+    `/users/${id}/password`,
+
+    {
+
+      method: "PATCH",
+
+      body: JSON.stringify({
+
+        password,
+
+      }),
+
+    }
+
+  );
+
+}

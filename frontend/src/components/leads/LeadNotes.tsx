@@ -132,13 +132,23 @@ export default function LeadNotes({
             className="rounded-xl border p-4"
           >
 
-            <div className="mb-2 text-xs text-slate-500">
+            <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
 
-              {new Date(
-                note.createdAt
-              ).toLocaleString()}
+  <span>
 
-            </div>
+    👤 {note.createdBy || "System"}
+
+  </span>
+
+  <span>
+
+    {new Date(
+      note.createdAt
+    ).toLocaleString()}
+
+  </span>
+
+</div>
 
             <div>
 
