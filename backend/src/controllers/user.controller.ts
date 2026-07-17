@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { AuthRequest } from "../middleware/auth.middleware";
 import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -34,6 +35,17 @@ export async function login(
           "Invalid email or password.",
       });
     }
+
+    if (!user.isActive) {
+
+  return res.status(403).json({
+
+    message:
+      "Your account has been disabled. Please contact Administrator.",
+
+  });
+
+}
 
     const valid =
       await bcrypt.compare(
@@ -301,6 +313,201 @@ export async function updateUser(
 
       message:
         "Unable to update user.",
+
+    });
+
+  }
+
+}
+
+export async function toggleUserStatus(
+  req: Request,
+  res: Response
+) {
+
+  try {
+
+    const id =
+      Number(req.params.id);
+
+    const {
+      isActive,
+    } = req.body;
+
+    const user =
+      await prisma.user.update({
+
+        where: {
+          id,
+        },
+
+        data: {
+          isActive,
+        },
+
+      });
+
+    res.json(user);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+
+      message:
+        "Unable to update user status.",
+
+    });
+
+  }
+
+}
+
+export async function deleteUser(
+  req: AuthRequest,
+  res: Response
+) {
+
+  try {
+
+    const id =
+      Number(req.params.id);
+
+    const user =
+      await prisma.user.findUnique({
+
+        where: {
+          id,
+        },
+
+      });
+
+    if (!user) {
+
+      return res.status(404).json({
+
+        message:
+          "User not found.",
+
+      });
+
+    }
+
+    if (user.role === "Owner") {
+
+      return res.status(400).json({
+
+        message:
+          "Owner cannot be deleted.",
+
+      });
+
+    }
+
+    if (req.user?.id === id) {
+
+  return res.status(400).json({
+
+    message:
+      "You cannot delete your own account.",
+
+  });
+
+}
+
+    await prisma.user.delete({
+
+      where: {
+        id,
+      },
+
+    });
+
+    res.json({
+
+      success: true,
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+
+      message:
+        "Unable to delete user.",
+
+    });
+
+  }
+
+}
+
+export async function resetPassword(
+  req: Request,
+  res: Response
+) {
+
+  try {
+
+    const id =
+      Number(req.params.id);
+
+    const {
+      password,
+    } = req.body;
+
+    if (!password) {
+
+      return res.status(400).json({
+
+        message:
+          "Password is required.",
+
+      });
+
+    }
+
+    const hashedPassword =
+      await bcrypt.hash(
+        password,
+        10
+      );
+
+    await prisma.user.update({
+
+      where: {
+        id,
+      },
+
+      data: {
+
+        password:
+          hashedPassword,
+
+      },
+
+    });
+
+    res.json({
+
+      success: true,
+
+      message:
+        "Password reset successfully.",
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+
+      message:
+        "Unable to reset password.",
 
     });
 

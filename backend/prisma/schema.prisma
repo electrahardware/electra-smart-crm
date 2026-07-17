@@ -72,6 +72,7 @@ model LeadNote {
 
   leadId Int
   note   String
+  createdBy String?
 
   createdAt DateTime @default(now())
 

@@ -122,15 +122,19 @@ const lead =
 
   await prisma.leadNote.create({
 
-    data: {
+  data: {
 
-      leadId: lead.id,
+    leadId: lead.id,
 
-      note: req.body.notes.trim(),
+    note: req.body.notes.trim(),
 
-    },
+    createdBy:
+      (req as any).user?.name ||
+      "System",
 
-  });
+  },
+
+});
 
   await createTimeline({
 
@@ -338,12 +342,21 @@ export async function addLeadNote(
       Number(req.params.id);
 
     const note =
-      await prisma.leadNote.create({
-        data: {
-          leadId,
-          note: req.body.note,
-        },
-      });
+  await prisma.leadNote.create({
+
+    data: {
+
+      leadId,
+
+      note: req.body.note,
+
+      createdBy:
+        (req as any).user?.name ||
+        "System",
+
+    },
+
+  });
 
     await createTimeline({
       leadId,
