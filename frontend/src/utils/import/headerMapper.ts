@@ -108,7 +108,7 @@ city: [
 
   leadOwner: [
     "Lead Owner",
-    "Owner",
+    "Admin",
     "Sales Person",
     "Assigned To",
   ],

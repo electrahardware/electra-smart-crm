@@ -33,7 +33,7 @@ async function main() {
       email:
         "admin@electra.com",
       password,
-      role: "Owner",
+      role: "Admin",
     },
   });
 

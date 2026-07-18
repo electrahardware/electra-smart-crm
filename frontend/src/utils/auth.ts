@@ -40,11 +40,11 @@ export function getCurrentRole() {
 
 }
 
-export function isOwner() {
+export function isAdmin() {
 
   return (
     getCurrentRole() ===
-    "Owner"
+    "Admin"
   );
 
 }
@@ -63,6 +63,15 @@ export function isSales() {
   return (
     getCurrentRole() ===
     "Sales"
+  );
+
+}
+
+export function isAdminOrManager() {
+
+  return (
+    isAdmin() ||
+    isManager()
   );
 
 }

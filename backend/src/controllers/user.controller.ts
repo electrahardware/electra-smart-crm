@@ -394,7 +394,7 @@ export async function deleteUser(
 
     }
 
-    if (user.role === "Owner") {
+    if (user.role === "Admin") {
 
       return res.status(400).json({
 

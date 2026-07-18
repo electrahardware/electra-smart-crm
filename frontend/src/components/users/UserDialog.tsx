@@ -214,16 +214,16 @@ if (user) {
           >
 
             <option>
+  Admin
+</option>
 
-              Sales
+<option>
+  Manager
+</option>
 
-            </option>
-
-            <option>
-
-              Manager
-
-            </option>
+<option>
+  Sales
+</option>
 
           </select>
 

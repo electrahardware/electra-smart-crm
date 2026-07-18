@@ -1,6 +1,6 @@
 import MainLayout from "../layouts/MainLayout";
 import { Navigate } from "react-router-dom";
-import { isOwner } from "../utils/auth";
+import { isAdmin } from "../utils/auth";
 import { useEffect, useState } from "react";
 import UserDialog from "../components/users/UserDialog";
 import ResetPasswordDialog from "../components/users/ResetPasswordDialog";
@@ -15,7 +15,7 @@ import {
 
 export default function UserManagement() {
 
-if (!isOwner()) {
+if (!isAdmin()) {
 
   return (
     <Navigate
@@ -216,7 +216,7 @@ useEffect(() => {
 
     <button
 
-  disabled={user.role === "Owner"}
+  disabled={user.role === "Admin"}
 
   onClick={async () => {
 
@@ -236,7 +236,7 @@ useEffect(() => {
 
 >
 
-      {user.role === "Owner"
+      {user.role === "Admin"
   ? "Protected"
   : user.isActive
     ? "Disable"
@@ -265,7 +265,7 @@ useEffect(() => {
 </button>
     
 
-    {user.role !== "Owner" && (
+    {user.role !== "Admin" && (
 
 
 
