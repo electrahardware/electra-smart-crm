@@ -16,6 +16,8 @@ type Props = {
   lead: Lead;
 };
 
+import LeadNotesDialog from "./LeadNotesDialog";
+
 export default function FollowupCard({
   lead,
 }: Props) {
@@ -27,6 +29,9 @@ export default function FollowupCard({
 
   const [loading, setLoading] =
     useState(false);
+
+  const [notesOpen, setNotesOpen] =
+  useState(false);
 
   function handleEdit() {
 
@@ -135,7 +140,9 @@ export default function FollowupCard({
 
   return (
 
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+    <>
+
+<div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
 
       <div className="flex items-start justify-between">
 
@@ -185,6 +192,13 @@ export default function FollowupCard({
           </button>
 
           <button
+  onClick={() => setNotesOpen(true)}
+  className="rounded-xl bg-indigo-600 px-4 py-2 text-white transition hover:bg-indigo-700"
+>
+  📝 Notes
+</button>
+
+          <button
             onClick={handleReschedule}
             disabled={loading}
             className="rounded-xl bg-orange-600 px-4 py-2 text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -207,6 +221,15 @@ export default function FollowupCard({
       </div>
 
     </div>
+
+    <LeadNotesDialog
+  open={notesOpen}
+  leadId={lead.id ?? 0}
+  lead={lead}
+  onClose={() => setNotesOpen(false)}
+/>
+
+</>
 
   );
 

@@ -516,3 +516,303 @@ export async function deleteMultipleLeads(
 
   }
 }
+
+export async function completeFollowup(
+  req: Request,
+  res: Response
+) {
+  try {
+
+    const leadId = Number(req.params.id);
+
+    const {
+      outcome,
+      note,
+      nextFollowupDate,
+      nextFollowupTime,
+    } = req.body;
+
+    if (note?.trim()) {
+
+      await prisma.leadNote.create({
+
+        data: {
+
+          leadId,
+
+          note: note.trim(),
+
+          createdBy:
+            (req as any).user?.name ||
+            "System",
+
+        },
+
+      });
+
+    }
+
+    await prisma.lead.update({
+
+      where: {
+        id: leadId,
+      },
+
+      data: {
+
+        status:
+          outcome || undefined,
+
+        followupCompleted:
+          !nextFollowupDate,
+
+        followupCompletedAt:
+          new Date(),
+
+        followupDate:
+          nextFollowupDate
+            ? new Date(nextFollowupDate)
+            : null,
+
+        followupTime:
+          nextFollowupTime || null,
+
+      },
+
+    });
+
+    await createTimeline({
+
+      leadId,
+
+      type: "FOLLOWUP",
+
+      title: "Follow-up Completed",
+
+      description:
+        note || "Follow-up completed.",
+
+      createdBy:
+        (req as any).user?.name ||
+        "System",
+
+    });
+
+    res.json({
+      success: true,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+
+      message:
+        "Unable to complete follow-up.",
+
+    });
+
+  }
+}
+
+export async function createQuickLead(
+  req: Request,
+  res: Response
+) {
+  try {
+
+    const {
+      mobile,
+      leadOwner,
+      note,
+    } = req.body;
+
+    if (!mobile?.trim()) {
+      return res.status(400).json({
+        message: "Mobile number is required.",
+      });
+    }
+
+    const existing =
+      await prisma.lead.findFirst({
+        where: {
+          mobile,
+        },
+      });
+
+    if (existing) {
+      return res.status(409).json({
+        message: "Lead already exists.",
+        leadId: existing.id,
+      });
+    }
+
+    const lead =
+      await prisma.lead.create({
+
+        data: {
+
+          customerName: "",
+
+          shopName: "",
+
+          mobile,
+
+          whatsapp: mobile,
+
+          leadOwner:
+            leadOwner || "",
+
+          leadSource: "WhatsApp",
+
+          status: "New",
+
+          leadDate: new Date(),
+
+          followupDate: new Date(),
+
+          followupCompleted: false,
+
+        },
+
+      });
+
+    if (note?.trim()) {
+
+      await prisma.leadNote.create({
+
+        data: {
+
+          leadId: lead.id,
+
+          note,
+
+          createdBy:
+            (req as any).user?.name ||
+            "System",
+
+        },
+
+      });
+
+    }
+
+    await createTimeline({
+
+      leadId: lead.id,
+
+      type: "LEAD",
+
+      title: "Quick Lead Created",
+
+      description:
+        "Lead created from WhatsApp.",
+
+      createdBy:
+        (req as any).user?.name ||
+        "System",
+
+    });
+
+    res.status(201).json(lead);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Unable to create quick lead.",
+    });
+
+  }
+}
+
+export async function createQuickBulkLead(
+  req: Request,
+  res: Response
+) {
+  try {
+
+    const {
+  numbers = [],
+  leadOwner,
+} = req.body;
+
+    let created = 0;
+    let duplicates = 0;
+    let invalid = 0;
+
+    for (const raw of numbers) {
+
+      const mobile = raw.trim();
+
+      if (!/^\d{10}$/.test(mobile)) {
+        invalid++;
+        continue;
+      }
+
+      const exists = await prisma.lead.findFirst({
+        where: {
+          mobile,
+        },
+      });
+
+      if (exists) {
+        duplicates++;
+        continue;
+      }
+
+      await prisma.lead.create({
+
+        data: {
+
+          customerName: "",
+
+          shopName: "",
+
+          mobile,
+
+          whatsapp: mobile,
+
+          leadOwner: leadOwner || "",
+
+          leadSource: "WhatsApp",
+
+          status: "New",
+
+          leadDate: new Date(),
+
+          followupDate: new Date(),
+
+          followupCompleted: false,
+
+        },
+
+      });
+
+      created++;
+
+    }
+
+    res.json({
+
+      created,
+      duplicates,
+      invalid,
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+
+      message:
+        "Unable to create quick leads.",
+
+    });
+
+  }
+}

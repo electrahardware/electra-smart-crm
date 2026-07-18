@@ -1,6 +1,7 @@
 import { api } from "../lib/api";
 import type { Lead } from "../types/lead";
 
+
 export type LeadResponse = Lead;
 
 export interface Note {
@@ -92,6 +93,26 @@ export async function markFollowupDone(
 
 }
 
+export async function completeFollowup(
+  id: number,
+  data: {
+    outcome: string;
+    note: string;
+    nextFollowupDate?: string | null;
+    nextFollowupTime?: string | null;
+  }
+) {
+
+  return api<{ success: boolean }>(
+    `/leads/${id}/complete-followup`,
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    }
+  );
+
+}
+
 export async function getLeadNotes(
   leadId: number
 ): Promise<Note[]> {
@@ -146,6 +167,51 @@ export async function deleteMultipleLeads(
       body: JSON.stringify({
         ids,
       }),
+    }
+  );
+
+}
+
+export async function createQuickLead(
+ data: {
+  mobile: string;
+   leadOwner: string;
+}
+) {
+
+  return api(
+    "/leads/quick",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    }
+  );
+
+}
+
+export async function createQuickBulkLead(
+  data: {
+    numbers: string[];
+    leadOwner: string;
+  }
+) {
+
+  return api<{
+
+    created: number;
+
+    duplicates: number;
+
+    invalid: number;
+
+  }>(
+    "/leads/quick-bulk",
+    {
+
+      method: "POST",
+
+      body: JSON.stringify(data),
+
     }
   );
 

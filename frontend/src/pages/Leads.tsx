@@ -8,6 +8,8 @@ import FollowupPanel from "../components/leads/FollowupPanel";
 import ImportPreviewTable from "../components/leads/ImportPreviewTable";
 import { useImport } from "../hooks/useImport";
 import toast from "react-hot-toast";
+import QuickLeadBar from "../components/leads/QuickLeadBar";
+import LeadModeSelector from "../components/leads/LeadModeSelector";
 
 
 export default function Leads() {
@@ -109,7 +111,7 @@ const handleFileChange = async (
   </div>
 )}
 
-  <LeadWizard />
+  <LeadModeSelector />
 
   <div className="my-6">
 

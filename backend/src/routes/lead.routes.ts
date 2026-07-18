@@ -14,6 +14,9 @@ import {
   getLeadNotes,
   deleteLeadNote,
   getTodayFollowups,
+  completeFollowup,
+  createQuickLead,
+  createQuickBulkLead,
 } from "../controllers/lead.controller";
 
 const router = Router();
@@ -31,6 +34,21 @@ router.get("/:id", getLead);
 router.post("/", createLead);
 
 router.put("/:id", updateLead);
+
+router.post(
+  "/quick",
+  createQuickLead
+);
+
+router.post(
+  "/quick-bulk",
+  createQuickBulkLead
+);
+
+router.post(
+  "/:id/complete-followup",
+  completeFollowup
+);
 
 router.delete("/:id", deleteLead);
 
