@@ -24,7 +24,13 @@ import LeadTableHeader from "./LeadTableHeader";
 import LeadStats from "./LeadStats";
 import { exportLeadsExcel } from "../../utils/exportLeadsExcel";
 
-export default function LeadTable() {
+type LeadTableProps = {
+  onEditLead?: () => void;
+};
+
+export default function LeadTable({
+  onEditLead,
+}: LeadTableProps) {
 
   const [leads, setLeads] =
     useState<Lead[]>([]);
@@ -84,24 +90,34 @@ const [toDate, setToDate] =
       .toISOString()
       .slice(0, 10); 
         useEffect(() => {
+  loadLeads();
+
+  const handler = () => {
     loadLeads();
+  };
 
-    const handler = () => {
-      loadLeads();
-    };
+  window.addEventListener(
+    "lead-imported",
+    handler
+  );
 
-    window.addEventListener(
+  window.addEventListener(
+    "lead-updated",
+    handler
+  );
+
+  return () => {
+    window.removeEventListener(
       "lead-imported",
       handler
     );
 
-    return () => {
-      window.removeEventListener(
-        "lead-imported",
-        handler
-      );
-    };
-  }, []);
+    window.removeEventListener(
+      "lead-updated",
+      handler
+    );
+  };
+}, []);
 
   async function loadLeads() {
     try {
@@ -567,29 +583,25 @@ const matchesDate = (() => {
   }
 
   function handleEdit(
-    lead: Lead
-  ) {
+  lead: Lead
+) {
 
-    setEditingId(lead.id!);
+  setEditingId(lead.id!);
 
-    setLead({
-      ...lead,
-      products:
-        Array.isArray(
-          lead.products
-        )
-          ? lead.products
-          : [],
-      followupDate:
-        lead.followupDate ?? "",
-    });
+  setLead({
+    ...lead,
+    products: Array.isArray(
+      lead.products
+    )
+      ? lead.products
+      : [],
+    followupDate:
+      lead.followupDate ?? "",
+  });
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+  onEditLead?.();
 
-  }
+}
 
   function toggleLead(
     id: number

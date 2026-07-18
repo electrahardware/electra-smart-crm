@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import LeadWizard from "../components/leads/LeadWizard";
 import LeadTable from "../components/leads/LeadTable";
@@ -13,6 +14,7 @@ import LeadModeSelector from "../components/leads/LeadModeSelector";
 
 
 export default function Leads() {
+  const [wizardOpen, setWizardOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
  const {
   loading,
@@ -23,6 +25,8 @@ export default function Leads() {
   duplicatePolicy,
   setDuplicatePolicy,
 } = useImport();
+
+const navigate = useNavigate();
 
 const [search, setSearch] =
   useState("");
@@ -125,8 +129,9 @@ const handleFileChange = async (
 <div className="grid grid-cols-4 gap-4">
 
   <button
-    className="rounded-2xl bg-blue-600 text-white p-5 text-left hover:bg-blue-700 transition"
-  >
+  onClick={() => setWizardOpen(true)}
+  className="rounded-2xl bg-blue-600 text-white p-5 text-left transition hover:bg-blue-700"
+>
     <h3 className="text-lg font-bold">
       ➕ New Lead
     </h3>
@@ -210,8 +215,9 @@ const handleFileChange = async (
   />
 
   <button
-    className="rounded-2xl bg-orange-600 text-white p-5 text-left hover:bg-orange-700 transition"
-  >
+  onClick={() => navigate("/followups")}
+  className="rounded-2xl bg-orange-600 text-white p-5 text-left transition hover:bg-orange-700"
+>
     <h3 className="text-lg font-bold">
       🔔 Follow-up
     </h3>
@@ -324,8 +330,40 @@ Failed : ${result.failedRows}`
   </>
 )}
 
+{wizardOpen && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
+  >
+    <div
+  className="relative max-h-[95vh] w-full max-w-6xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
+>
 
-  <LeadTable />
+      <button
+        onClick={() => setWizardOpen(false)}
+        className="absolute right-5 top-5 z-10 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+      >
+        ✕
+      </button>
+
+      <LeadWizard
+  onClose={() => {
+    setWizardOpen(false);
+    window.dispatchEvent(
+      new Event("lead-updated")
+    );
+  }}
+/>
+
+    </div>
+  </div>
+)}
+
+
+  <LeadTable
+  onEditLead={() => setWizardOpen(true)}
+/>
+
+  
 
 </div>
     </MainLayout>

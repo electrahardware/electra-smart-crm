@@ -15,7 +15,13 @@ import Step2Business from "./Step2Business";
 import Step3Followup from "./Step3Followup";
 import Step4Review from "./Step4Review";
 
-export default function LeadWizard() {
+type LeadWizardProps = {
+  onClose?: () => void;
+};
+
+export default function LeadWizard({
+  onClose,
+}: LeadWizardProps) {
 
   const {
     lead,
@@ -89,6 +95,8 @@ export default function LeadWizard() {
       );
 
       setStep(1);
+
+      onClose?.();
 
     } catch (err: any) {
 

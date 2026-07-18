@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 
@@ -12,6 +13,8 @@ import {
 } from "../services/dashboardService";
 
 export default function Dashboard() {
+
+  const navigate = useNavigate();
 
   const [stats, setStats] =
     useState<DashboardData | null>(null);
@@ -42,17 +45,19 @@ export default function Dashboard() {
   const cards = [
 
     {
-      title: "Total Leads",
-      value: stats?.totalLeads ?? 0,
-      color: "text-blue-600",
-      icon: "👥",
-    },
+  title: "Total Leads",
+  value: stats?.totalLeads ?? 0,
+  color: "text-blue-600",
+  icon: "👥",
+  onClick: () => navigate("/leads"),
+},
 
     {
       title: "Today's Follow-ups",
       value: stats?.todayFollowups ?? 0,
       color: "text-orange-600",
       icon: "📅",
+      onClick: () => navigate("/followups"),
     },
 
     {
@@ -60,6 +65,7 @@ export default function Dashboard() {
       value: stats?.hotLeads ?? 0,
       color: "text-red-600",
       icon: "🔥",
+      onClick: () => navigate("/leads?status=Hot"),
     },
 
     {
@@ -67,6 +73,7 @@ export default function Dashboard() {
       value: stats?.wonLeads ?? 0,
       color: "text-emerald-600",
       icon: "🏆",
+      onClick: () => navigate("/leads?status=Won"),
     },
 
     {
@@ -74,6 +81,7 @@ export default function Dashboard() {
       value: stats?.lostLeads ?? 0,
       color: "text-slate-600",
       icon: "❌",
+      onClick: () => navigate("/leads?status=Lost"),
     },
 
     {
@@ -81,6 +89,7 @@ export default function Dashboard() {
       value: stats?.overdueFollowups ?? 0,
       color: "text-rose-600",
       icon: "⏰",
+      onClick: () => navigate("/followups?filter=overdue"),
     },
 
     {
@@ -90,6 +99,7 @@ export default function Dashboard() {
       ).toLocaleString()}`,
       color: "text-green-600",
       icon: "💰",
+      onClick: () => navigate("/leads"),
     },
 
   ];
@@ -115,9 +125,10 @@ export default function Dashboard() {
         {cards.map((card) => (
 
           <div
-            key={card.title}
-            className="rounded-2xl border bg-white p-6 shadow-sm transition hover:shadow-lg"
-          >
+  key={card.title}
+  onClick={card.onClick}
+  className="cursor-pointer rounded-2xl border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+>
 
             <div className="flex items-center justify-between">
 
@@ -140,6 +151,10 @@ export default function Dashboard() {
               </div>
 
             </div>
+
+            <p className="mt-4 text-xs font-medium text-blue-600">
+  View Details →
+</p>
 
           </div>
 
@@ -208,13 +223,14 @@ export default function Dashboard() {
           {stats.recentLeads.map((lead) => (
 
             <tr
-              key={lead.id}
-              className="border-b hover:bg-slate-50"
-            >
+  key={lead.id}
+  onClick={() => navigate("/leads")}
+  className="cursor-pointer border-b transition hover:bg-blue-50"
+>
 
-              <td className="px-4 py-3 font-medium">
-                {lead.customerName}
-              </td>
+              <td className="px-4 py-3 font-medium text-blue-600">
+  {lead.customerName}
+</td>
 
               <td className="px-4 py-3">
                 {lead.shopName || "-"}
