@@ -10,6 +10,7 @@ import DuplicateLeads from "./pages/DuplicateLeads";
 import Settings from "./pages/Settings";
 import UserManagement from "./pages/UserManagement";
 import Login from "./pages/Login";
+import LeadDetailsPage from "./pages/LeadDetailsPage";
 
 function App() {
 
@@ -55,6 +56,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/leads/:id"
+  element={
+    <ProtectedRoute>
+      <LeadDetailsPage />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/duplicates"

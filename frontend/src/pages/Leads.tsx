@@ -10,7 +10,7 @@ import ImportPreviewTable from "../components/leads/ImportPreviewTable";
 import { useImport } from "../hooks/useImport";
 import toast from "react-hot-toast";
 import QuickLeadBar from "../components/leads/QuickLeadBar";
-import LeadModeSelector from "../components/leads/LeadModeSelector";
+import Drawer from "../components/common/Drawer";
 import { useLead } from "../hooks/useLead";
 
 export default function Leads() {
@@ -31,6 +31,8 @@ const navigate = useNavigate();
 
 const [search, setSearch] =
   useState("");
+
+const [quickLeadOpen, setQuickLeadOpen] = useState(false);
 
 const handleImportClick = () => {
   fileInputRef.current?.click();
@@ -116,7 +118,7 @@ const handleFileChange = async (
   </div>
 )}
 
-  <LeadModeSelector />
+ 
 
   <div className="my-6">
 
@@ -130,7 +132,7 @@ const handleFileChange = async (
 <div className="grid grid-cols-4 gap-4">
 
   <button
-  onClick={() => setWizardOpen(true)}
+  onClick={() => setQuickLeadOpen(true)}
   className="rounded-2xl bg-blue-600 text-white p-5 text-left transition hover:bg-blue-700"
 >
     <h3 className="text-lg font-bold">
@@ -230,6 +232,21 @@ const handleFileChange = async (
 
 
 </div>
+
+<Drawer
+  open={quickLeadOpen}
+  title="⚡ Quick Lead"
+  width="lg"
+  onClose={() => setQuickLeadOpen(false)}
+>
+  <QuickLeadBar
+    onClose={() => setQuickLeadOpen(false)}
+    onOpenFull={() => {
+      setQuickLeadOpen(false);
+      setWizardOpen(true);
+    }}
+  />
+</Drawer>
 
 <FollowupPanel />
 {preview && (

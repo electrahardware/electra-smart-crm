@@ -67,7 +67,7 @@ export default function Sidebar() {
 
       <button
         onClick={toggle}
-        className="fixed left-4 top-4 z-50 rounded-xl bg-red-600 p-2 text-white shadow-lg lg:hidden"
+        className="rounded-xl p-2 text-slate-700 transition hover:bg-slate-100"
       >
         {open ? <X size={22} /> : <Menu size={22} />}
       </button>
@@ -76,7 +76,7 @@ export default function Sidebar() {
 
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
           onClick={() => setOpen(false)}
         />
       )}
@@ -100,8 +100,6 @@ export default function Sidebar() {
 
           ${open ? "translate-x-0" : "-translate-x-full"}
 
-          lg:static
-          lg:translate-x-0
         `}
       >
 

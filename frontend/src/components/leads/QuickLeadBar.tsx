@@ -5,13 +5,28 @@ import {
   createQuickBulkLead,
 } from "../../services/leadService";
 
-export default function QuickLeadBar() {
+interface QuickLeadBarProps {
+  onClose: () => void;
+  onOpenFull: () => void;
+}
+
+export default function QuickLeadBar({
+  onClose,
+  onOpenFull,
+}: QuickLeadBarProps) {
+
   const [mobile, setMobile] = useState("");
   const [bulkMode, setBulkMode] = useState(false);
 const [bulkNumbers, setBulkNumbers] = useState("");
   const [loading, setLoading] = useState(false);
-  const [assignedTo, setAssignedTo] =
-  useState("Dharmesh");
+  const [assignedTo, setAssignedTo] = useState(
+  () => localStorage.getItem("quickLeadOwner") || "Dharmesh"
+);
+
+function handleOwnerChange(owner: string) {
+  setAssignedTo(owner);
+  localStorage.setItem("quickLeadOwner", owner);
+}
 
   async function handleSave() {
 
@@ -75,16 +90,18 @@ Invalid : ${result.invalid}`
       return;
     }
 
-    if (mobile.trim().length < 10) {
-      toast.error("Invalid Mobile Number");
-      return;
-    }
+    const cleanMobile = mobile.trim();
+
+if (!/^\d{10}$/.test(cleanMobile)) {
+  toast.error("Mobile Number must be exactly 10 digits");
+  return;
+}
 
     try {
       setLoading(true);
 
       await createQuickLead({
-  mobile: mobile.trim(),
+  mobile: cleanMobile,
   leadOwner: assignedTo,
 });
 
@@ -108,15 +125,11 @@ Invalid : ${result.invalid}`
   }
 
   return (
-    <div className="rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 p-5 shadow-lg">
+  <div className="space-y-6">
 
-      <h2 className="text-xl font-bold text-white">
-        ⚡ Quick Lead
-      </h2>
-
-      <p className="text-green-100 mt-1 mb-4">
-        Save WhatsApp inquiries in 5 seconds
-      </p>
+      <p className="text-sm text-slate-500">
+  Save a WhatsApp inquiry in just a few seconds.
+</p>
 
       <div className="mb-4 flex gap-3">
 
@@ -146,16 +159,16 @@ Invalid : ${result.invalid}`
 
 <div className="mb-4">
 
-  <label className="mb-2 block text-sm font-semibold text-green-50">
+  <label className="mb-2 block text-sm font-semibold text-slate-700">
   Assign To
 </label>
 
   <select
     value={assignedTo}
     onChange={(e) =>
-      setAssignedTo(e.target.value)
-    }
-    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 shadow-sm focus:border-green-500 focus:outline-none"
+  handleOwnerChange(e.target.value)
+}
+    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 shadow-sm focus:border-slate-200 focus:outline-none"
   >
     <option value="Dharmesh">
       Dharmesh
@@ -188,7 +201,7 @@ Invalid : ${result.invalid}`
 9876543210
 9898989898
 9822222222`}
-      className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 placeholder:text-slate-400 shadow-sm focus:border-green-500 focus:outline-none"
+      className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 placeholder:text-slate-400 shadow-sm focus:border-slate-200 focus:outline-none"
     />
 
   ) : (
@@ -196,16 +209,23 @@ Invalid : ${result.invalid}`
     <input
       autoFocus
       value={mobile}
+      maxLength={10}
+inputMode="numeric"
+pattern="[0-9]*"
       onChange={(e) =>
-        setMobile(e.target.value)
-      }
+  setMobile(
+    e.target.value
+      .replace(/\D/g, "")
+      .slice(0, 10)
+  )
+}
       onKeyDown={(e) => {
         if (e.key === "Enter") {
           handleSave();
         }
       }}
       placeholder="Enter WhatsApp Number"
-      className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 placeholder:text-slate-400 shadow-sm focus:border-green-500 focus:outline-none"
+      className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 placeholder:text-slate-400 shadow-sm focus:border-slate-200 focus:outline-none"
     />
 
   )}
@@ -220,6 +240,24 @@ Invalid : ${result.invalid}`
       : bulkMode
       ? "Create Leads"
       : "Save"}
+  </button>
+
+</div>
+
+<div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4">
+
+  <button
+    onClick={onClose}
+    className="text-sm font-medium text-slate-500 hover:text-white"
+  >
+    Close
+  </button>
+
+  <button
+    onClick={onOpenFull}
+    className="text-sm font-semibold text-white underline underline-offset-4"
+  >
+    Open Full Lead Form →
   </button>
 
 </div>
