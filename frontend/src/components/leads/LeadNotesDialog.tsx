@@ -91,27 +91,23 @@ export default function LeadNotesDialog({
       setSaving(true);
 
       await addLeadNote(
-        leadId,
-        note
-      );
+  leadId,
+  note
+);
 
-      toast.success(
-        "Note Added"
-      );
+toast.success(
+  "Note Added"
+);
 
-      setNote("");
+setNote("");
 
-      loadNotes();
+await loadNotes();
 
-      setTimeout(() => {
+window.dispatchEvent(
+  new Event("lead-imported")
+);
 
-  textareaRef.current?.focus();
-
-}, 100);
-
-      window.dispatchEvent(
-        new Event("lead-imported")
-      );
+onClose();
 
     } catch {
 

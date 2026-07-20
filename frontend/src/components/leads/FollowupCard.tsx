@@ -5,27 +5,32 @@ import { EmptyLead } from "../../types/lead";
 
 import { useLead } from "../../hooks/useLead";
 
-import {
-  markFollowupDone,
-  updateLead,
-} from "../../services/leadService";
 
-import toast from "react-hot-toast";
+import CompleteFollowupDialog from "./CompleteFollowupDialog";
+import RescheduleFollowupDialog from "./RescheduleFollowupDialog";
+
+
 
 type Props = {
   lead: Lead;
+  onUpdated: () => void;
 };
 
 import LeadNotesDialog from "./LeadNotesDialog";
 
 export default function FollowupCard({
   lead,
+  onUpdated,
 }: Props) {
 
+  const [currentLead, setCurrentLead] =
+useState(lead);
+
   const {
-    setLead,
-    setEditingId,
-  } = useLead();
+  setLead,
+  setEditingId,
+  setWizardOpen,
+} = useLead();
 
   const [loading, setLoading] =
     useState(false);
@@ -33,110 +38,30 @@ export default function FollowupCard({
   const [notesOpen, setNotesOpen] =
   useState(false);
 
+  const [completeOpen, setCompleteOpen] = useState(false);
+
+const [rescheduleOpen, setRescheduleOpen] = useState(false);
+
   function handleEdit() {
 
-    setEditingId(lead.id!);
+  setEditingId(lead.id!);
 
-    setLead({
-      ...EmptyLead,
-      ...lead,
-    });
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-
-  }
-
-  async function handleDone() {
-
-    if (!lead.id) {
-      return;
-    }
-
-    try {
-
-      setLoading(true);
-
-      await markFollowupDone(
-        lead.id
-      );
-
-      toast.success(
-        "Follow-up completed successfully."
-      );
-
-      window.dispatchEvent(
-        new Event("lead-imported")
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      toast.error(
-        "Unable to complete follow-up."
-      );
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  }
-
-  async function handleReschedule() {
-
-    if (!lead.id) {
-      return;
-    }
-
-    const nextDate =
-      window.prompt(
-        "Enter next follow-up date (YYYY-MM-DD)"
-      );
-
-    if (!nextDate) {
-      return;
-    }
-
-    try {
-
-      setLoading(true);
-
-      await updateLead(
-  lead.id,
-  {
+  setLead({
+    ...EmptyLead,
     ...lead,
-    followupDate: nextDate,
-  }
-);
+  });
 
-      toast.success(
-        "Follow-up rescheduled successfully."
-      );
+  setWizardOpen(true);
 
-      window.dispatchEvent(
-        new Event("lead-imported")
-      );
+}
 
-    } catch (error) {
+  function handleDone() {
+  setCompleteOpen(true);
+}
 
-      console.error(error);
-
-      toast.error(
-        "Unable to reschedule follow-up."
-      );
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  }
+  function handleReschedule() {
+  setRescheduleOpen(true);
+}
 
   return (
 
@@ -207,7 +132,7 @@ export default function FollowupCard({
           </button>
 
           <button
-            onClick={handleDone}
+  onClick={handleDone}
             disabled={loading}
             className="rounded-xl bg-emerald-600 px-4 py-2 text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -228,6 +153,23 @@ export default function FollowupCard({
   lead={lead}
   onClose={() => setNotesOpen(false)}
 />
+
+<CompleteFollowupDialog
+  open={completeOpen}
+  lead={currentLead}
+  onClose={() => setCompleteOpen(false)}
+  onCompleted={onUpdated}
+/>
+
+<RescheduleFollowupDialog
+  open={rescheduleOpen}
+  lead={currentLead}
+  onClose={() => setRescheduleOpen(false)}
+  onUpdated={onUpdated}
+  onLeadUpdated={setCurrentLead}
+/>
+
+
 
 </>
 

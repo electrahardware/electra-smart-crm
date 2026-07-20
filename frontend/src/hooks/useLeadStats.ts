@@ -40,18 +40,22 @@ function calculateLeadStats(
       (lead) => lead.priority === "Cold"
     ).length,
     todayFollowups: filteredLeads.filter(
-      (lead) => lead.followupDate?.slice(0, 10) === today
-    ).length,
+  (lead) =>
+    !lead.followupCompleted &&
+    lead.followupDate?.slice(0, 10) === today
+).length,
     overdueFollowups: filteredLeads.filter(
-      (lead) =>
-        !!lead.followupDate &&
-        lead.followupDate.slice(0, 10) < today
-    ).length,
+  (lead) =>
+    !lead.followupCompleted &&
+    !!lead.followupDate &&
+    lead.followupDate.slice(0, 10) < today
+).length,
     upcomingFollowups: filteredLeads.filter(
-      (lead) =>
-        !!lead.followupDate &&
-        lead.followupDate.slice(0, 10) > today
-    ).length,
+  (lead) =>
+    !lead.followupCompleted &&
+    !!lead.followupDate &&
+    lead.followupDate.slice(0, 10) > today
+).length,
     expectedValue: filteredLeads.reduce(
       (total, lead) =>
         total + Number(lead.expectedValue || 0),

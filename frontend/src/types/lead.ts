@@ -41,6 +41,10 @@ leadDate: string;
   followupDate: string;
   followupTime: string;
 
+  followupCompleted?: boolean;
+
+followupCompletedAt?: string | null;
+
   notes: string;
 
   createdAt?: string;

@@ -83,21 +83,20 @@ export async function createLead(
   city:
     req.body.city || "",
 
-  followupDate:
-    req.body.followupDate
-      ? new Date(req.body.followupDate)
-      : null,
-
   followupCompleted:
-    req.body.followupCompleted ??
-    false,
+  req.body.followupCompleted ?? false,
 
-  followupCompletedAt:
-    req.body.followupCompletedAt
-      ? new Date(
-          req.body.followupCompletedAt
-        )
-      : null,
+followupCompletedAt:
+  req.body.followupCompletedAt
+    ? new Date(req.body.followupCompletedAt)
+    : undefined,
+
+followupDate:
+  req.body.followupCompleted === true
+    ? null
+    : req.body.followupDate
+      ? new Date(req.body.followupDate)
+      : undefined,
 
   expectedValue:
   req.body.expectedValue !== "" &&
@@ -199,21 +198,21 @@ city:
   req.body.city,
 
           followupCompleted:
-            req.body.followupCompleted,
+  req.body.followupDate
+    ? false
+    : req.body.followupCompleted,
 
-          followupCompletedAt:
-            req.body.followupCompletedAt
-              ? new Date(
-                  req.body.followupCompletedAt
-                )
-              : undefined,
+followupCompletedAt:
+  req.body.followupDate
+    ? null
+    : req.body.followupCompletedAt
+      ? new Date(req.body.followupCompletedAt)
+      : undefined,
 
-          followupDate:
-            req.body.followupDate
-              ? new Date(
-                  req.body.followupDate
-                )
-              : undefined,
+followupDate:
+  req.body.followupDate
+    ? new Date(req.body.followupDate)
+    : null,
 
           expectedValue:
   req.body.expectedValue !== undefined
@@ -344,6 +343,7 @@ export async function addLeadNote(
     const note =
   await prisma.leadNote.create({
 
+
     data: {
 
       leadId,
@@ -357,6 +357,15 @@ export async function addLeadNote(
     },
 
   });
+
+  await prisma.lead.update({
+  where: {
+    id: leadId,
+  },
+  data: {
+    notes: req.body.note,
+  },
+});
 
     await createTimeline({
       leadId,
@@ -526,77 +535,122 @@ export async function completeFollowup(
     const leadId = Number(req.params.id);
 
     const {
-      outcome,
       note,
-      nextFollowupDate,
-      nextFollowupTime,
+      followupDate,
     } = req.body;
 
+    // Save latest note
     if (note?.trim()) {
 
-      await prisma.leadNote.create({
+  await prisma.lead.update({
 
-        data: {
+    where: {
+      id: leadId,
+    },
 
-          leadId,
+    data: {
+      notes: note.trim(),
+    },
 
-          note: note.trim(),
+  });
 
-          createdBy:
-            (req as any).user?.name ||
-            "System",
+  await prisma.leadNote.create({
 
-        },
-
-      });
-
-    }
-
-    await prisma.lead.update({
-
-      where: {
-        id: leadId,
-      },
-
-      data: {
-
-        status:
-          outcome || undefined,
-
-        followupCompleted:
-          !nextFollowupDate,
-
-        followupCompletedAt:
-          new Date(),
-
-        followupDate:
-          nextFollowupDate
-            ? new Date(nextFollowupDate)
-            : null,
-
-        followupTime:
-          nextFollowupTime || null,
-
-      },
-
-    });
-
-    await createTimeline({
+    data: {
 
       leadId,
 
-      type: "FOLLOWUP",
-
-      title: "Follow-up Completed",
-
-      description:
-        note || "Follow-up completed.",
+      note: note.trim(),
 
       createdBy:
         (req as any).user?.name ||
         "System",
 
-    });
+    },
+
+  });
+
+}
+
+    // If follow-up date exists,
+    // keep lead active.
+    if (followupDate) {
+
+      await prisma.lead.update({
+
+        where: {
+          id: leadId,
+        },
+
+        data: {
+
+          followupDate: new Date(followupDate),
+
+          followupCompleted: false,
+
+          followupCompletedAt: null,
+
+        },
+
+      });
+
+      await createTimeline({
+
+        leadId,
+
+        type: "FOLLOWUP",
+
+        title: "Follow-up Rescheduled",
+
+        description: `Next Follow-up: ${followupDate}`,
+
+        createdBy:
+          (req as any).user?.name ||
+          "System",
+
+      });
+
+    } else {
+
+      // No next follow-up.
+      // Mark complete.
+
+      await prisma.lead.update({
+
+        where: {
+          id: leadId,
+        },
+
+        data: {
+
+          followupCompleted: true,
+
+          followupCompletedAt: new Date(),
+
+          followupDate: null,
+
+        },
+
+      });
+
+      await createTimeline({
+
+        leadId,
+
+        type: "FOLLOWUP",
+
+        title: "Follow-up Completed",
+
+        description:
+          note || "Follow-up completed.",
+
+        createdBy:
+          (req as any).user?.name ||
+          "System",
+
+      });
+
+    }
 
     res.json({
       success: true,

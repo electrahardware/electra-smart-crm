@@ -96,13 +96,10 @@ export async function markFollowupDone(
 export async function completeFollowup(
   id: number,
   data: {
-    outcome: string;
     note: string;
-    nextFollowupDate?: string | null;
-    nextFollowupTime?: string | null;
+    followupDate?: string | null;
   }
 ) {
-
   return api<{ success: boolean }>(
     `/leads/${id}/complete-followup`,
     {
@@ -110,7 +107,6 @@ export async function completeFollowup(
       body: JSON.stringify(data),
     }
   );
-
 }
 
 export async function getLeadNotes(
@@ -214,5 +210,5 @@ export async function createQuickBulkLead(
 
     }
   );
+  }
 
-}

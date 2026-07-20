@@ -16,6 +16,12 @@ type LeadContextType = {
   setEditingId: React.Dispatch<
     React.SetStateAction<number | null>
   >;
+
+    wizardOpen: boolean;
+
+  setWizardOpen: React.Dispatch<
+    React.SetStateAction<boolean>
+  >;
 };
 
 const LeadContext =
@@ -33,6 +39,9 @@ export function LeadProvider({
   const [editingId, setEditingId] =
     useState<number | null>(null);
 
+  const [wizardOpen, setWizardOpen] =
+  useState(false);
+
   return (
     <LeadContext.Provider
       value={{
@@ -41,6 +50,9 @@ export function LeadProvider({
 
         editingId,
         setEditingId,
+
+        wizardOpen,
+setWizardOpen,
       }}
     >
       {children}

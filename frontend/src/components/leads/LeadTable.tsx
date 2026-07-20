@@ -457,27 +457,30 @@ const matchesDate = (() => {
     ).length;
 
   const todayFollowups =
-    filteredLeads.filter(
-      (lead) =>
-        lead.followupDate?.slice(0, 10) ===
+  filteredLeads.filter(
+    (lead) =>
+      !lead.followupCompleted &&
+      lead.followupDate?.slice(0, 10) ===
         today
-    ).length;
+  ).length;
 
   const overdueLeads =
-    filteredLeads.filter(
-      (lead) =>
-        lead.followupDate &&
-        lead.followupDate.slice(0, 10) <
-          today
-    ).length;
+  filteredLeads.filter(
+    (lead) =>
+      !lead.followupCompleted &&
+      !!lead.followupDate &&
+      lead.followupDate.slice(0, 10) <
+        today
+  ).length;
 
   const upcomingLeads =
-    filteredLeads.filter(
-      (lead) =>
-        lead.followupDate &&
-        lead.followupDate.slice(0, 10) >
-          today
-    ).length;
+  filteredLeads.filter(
+    (lead) =>
+      !lead.followupCompleted &&
+      !!lead.followupDate &&
+      lead.followupDate.slice(0, 10) >
+        today
+  ).length;
 
   const expectedValue =
     filteredLeads.reduce(

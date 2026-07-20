@@ -11,10 +11,11 @@ import { useImport } from "../hooks/useImport";
 import toast from "react-hot-toast";
 import QuickLeadBar from "../components/leads/QuickLeadBar";
 import LeadModeSelector from "../components/leads/LeadModeSelector";
-
+import { useLead } from "../hooks/useLead";
 
 export default function Leads() {
-  const [wizardOpen, setWizardOpen] = useState(false);
+  const { wizardOpen, setWizardOpen } =
+  useLead();
   const fileInputRef = useRef<HTMLInputElement>(null);
  const {
   loading,
