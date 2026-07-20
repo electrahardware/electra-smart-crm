@@ -17,6 +17,7 @@ type Props = {
   leadId: number;
   lead: Lead;
   onClose: () => void;
+  onLeadUpdated: React.Dispatch<React.SetStateAction<Lead>>;
 };
 
 export default function LeadNotesDialog({
@@ -24,6 +25,7 @@ export default function LeadNotesDialog({
   leadId,
   lead,
   onClose,
+  onLeadUpdated,
 }: Props) {
 
   const [loading, setLoading] =
@@ -94,6 +96,11 @@ export default function LeadNotesDialog({
   leadId,
   note
 );
+
+onLeadUpdated({
+  ...lead,
+  notes: note,
+});
 
 toast.success(
   "Note Added"

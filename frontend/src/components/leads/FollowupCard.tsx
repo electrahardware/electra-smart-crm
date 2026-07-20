@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { Lead } from "../../types/lead";
 import { EmptyLead } from "../../types/lead";
@@ -25,6 +25,10 @@ export default function FollowupCard({
 
   const [currentLead, setCurrentLead] =
 useState(lead);
+
+useEffect(() => {
+  setCurrentLead(lead);
+}, [lead]);
 
   const {
   setLead,
@@ -149,9 +153,10 @@ const [rescheduleOpen, setRescheduleOpen] = useState(false);
 
     <LeadNotesDialog
   open={notesOpen}
-  leadId={lead.id ?? 0}
-  lead={lead}
+  leadId={currentLead.id ?? 0}
+  lead={currentLead}
   onClose={() => setNotesOpen(false)}
+  onLeadUpdated={setCurrentLead}
 />
 
 <CompleteFollowupDialog
