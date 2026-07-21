@@ -37,8 +37,8 @@ const menu = [
     icon: FileText,
   },
   {
-    title: "Reports",
-    path: "/reports",
+    title: "Analytics",
+    path: "/analytics",
     icon: BarChart3,
   },
   {

@@ -11,6 +11,7 @@ import Settings from "./pages/Settings";
 import UserManagement from "./pages/UserManagement";
 import Login from "./pages/Login";
 import LeadDetailsPage from "./pages/LeadDetailsPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
 
@@ -76,6 +77,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/analytics"
+  element={
+    <ProtectedRoute>
+      <AnalyticsPage />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/settings"

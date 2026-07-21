@@ -19,6 +19,7 @@ import userRoutes from "./routes/user.routes";
 import duplicateRoutes from "./routes/duplicate.routes";
 import mergeRoutes from "./routes/merge.routes";
 import activityRoutes from "./routes/activity.routes";
+import analyticsRoutes from "./routes/analytics";
 
 const app = express();
 
@@ -56,6 +57,8 @@ app.get("/health", (_req, res) => {
   });
 });
 
+// ================= API Routes =================
+
 app.use("/api/leads", leadRoutes);
 app.use("/api/import", importRoutes);
 app.use("/api/calls", callRoutes);
@@ -67,6 +70,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/duplicates", duplicateRoutes);
 app.use("/api/merge", mergeRoutes);
 app.use("/api/activity", activityRoutes);
+app.use("/api/analytics", analyticsRoutes);
+
+// ==============================================
 
 app.use(
   "/uploads",
@@ -75,11 +81,8 @@ app.use(
   )
 );
 
-const PORT =
-  Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 
 app.listen(PORT, () => {
-  console.log(
-    `🚀 Server running on port ${PORT}`
-  );
+  console.log(`🚀 Server running on port ${PORT}`);
 });

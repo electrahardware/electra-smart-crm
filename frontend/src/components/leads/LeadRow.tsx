@@ -8,6 +8,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface Props {
   lead: Lead;
@@ -47,19 +48,37 @@ export default function LeadRow({
         .replace(/\//g, "-")
     : "-";
 
+  async function copyMobile(
+  e: React.MouseEvent<HTMLButtonElement>,
+  mobile: string
+) {
+  e.stopPropagation();
+
+  try {
+    await navigator.clipboard.writeText(mobile);
+
+    toast.success("Mobile number copied");
+  } catch {
+    toast.error("Unable to copy mobile number");
+  }
+}
+
   return (
 
     <tr
   onClick={onView}
+  onDoubleClick={(e) => {
+    e.stopPropagation();
+    onEdit();
+  }}
   className={`group border-t cursor-pointer transition-all duration-200
     ${
       index % 2 === 0
-  ? "bg-white"
-  : "bg-slate-100"
+        ? "bg-white"
+        : "bg-slate-100"
     }
     hover:bg-sky-50 hover:shadow-sm`}
 >
-
       <td className="p-3">
         <input
   type="checkbox"
@@ -73,13 +92,24 @@ export default function LeadRow({
         {leadDate}
       </td>
 
-      <td className="p-3 font-semibold text-slate-800">
-        {lead.customerName}
-      </td>
+      <td
+  title="Click to view • Double-click to edit"
+  className="p-3 font-semibold text-slate-800 group-hover:text-blue-700 transition-colors"
+>
+  {lead.customerName}
+</td>
 
       <td className="p-3">
-        {lead.mobile}
-      </td>
+  <button
+    onClick={(e) =>
+      copyMobile(e, lead.mobile)
+    }
+    className="font-medium text-blue-600 hover:underline"
+    title="Copy Mobile Number"
+  >
+    {lead.mobile}
+  </button>
+</td>
 
       <td className="p-3">
         {lead.shopName || "-"}
