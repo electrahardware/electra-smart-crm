@@ -788,7 +788,7 @@ function exportFilteredLeads() {
 
         <div className="max-h-[650px] overflow-auto">
 
-          <table className="w-full">
+  <table className="w-full border-separate border-spacing-0">
 
   <LeadTableHeader
   allSelected={
@@ -801,14 +801,15 @@ function exportFilteredLeads() {
 
   <tbody>
 
-    {paginatedLeads.map((lead) => (
+    {paginatedLeads.map((lead, index) => (
 
   <LeadRow
-    key={lead.id}
-    lead={lead}
-    selected={selectedIds.includes(
-      lead.id!
-    )}
+  key={lead.id}
+  index={index}
+  lead={lead}
+  selected={selectedIds.includes(
+    lead.id!
+  )}
     onToggle={() =>
       toggleLead(lead.id!)
     }

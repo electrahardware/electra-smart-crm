@@ -11,11 +11,13 @@ import LeadTimeline from "./LeadTimeline";
 interface Props {
   lead: Lead | null;
   onClose: () => void;
+  onEdit?: (lead: Lead) => void;
 }
 
 export default function LeadDetailsDrawer({
   lead,
   onClose,
+  onEdit,
 }: Props) {
 
   const [activeTab, setActiveTab] =
@@ -164,10 +166,14 @@ export default function LeadDetailsDrawer({
             </a>
 
             <button
-              className="rounded-xl bg-orange-600 py-3 font-semibold text-white transition hover:bg-orange-700"
-            >
-              ✏ Edit
-            </button>
+  onClick={() => {
+    onEdit?.(lead);
+    onClose();
+  }}
+  className="rounded-xl bg-orange-600 py-3 font-semibold text-white transition hover:bg-orange-700"
+>
+  ✏ Edit
+</button>
 
           </div>
 

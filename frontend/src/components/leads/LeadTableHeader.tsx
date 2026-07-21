@@ -16,9 +16,9 @@ export default function LeadTableHeader({
 
   return (
 
-    <thead className="sticky top-0 z-10 bg-slate-100">
+    <thead className="sticky top-0 z-20 bg-white shadow-sm">
 
-      <tr>
+      <tr className="bg-white">
 
         <th className="p-3">
 
