@@ -20,6 +20,7 @@ import duplicateRoutes from "./routes/duplicate.routes";
 import mergeRoutes from "./routes/merge.routes";
 import activityRoutes from "./routes/activity.routes";
 import analyticsRoutes from "./routes/analytics";
+import masterSearchRoutes from "./routes/masterSearch";
 
 const app = express();
 
@@ -71,6 +72,7 @@ app.use("/api/duplicates", duplicateRoutes);
 app.use("/api/merge", mergeRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/master-search", masterSearchRoutes);
 
 // ==============================================
 
