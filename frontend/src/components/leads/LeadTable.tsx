@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   getLeads,
+  getLead,
   deleteLead,
 } from "../../services/leadService";
 
@@ -90,10 +91,15 @@ const [toDate, setToDate] =
       .toISOString()
       .slice(0, 10); 
         useEffect(() => {
+
   loadLeads();
 
-  const handler = () => {
-    loadLeads();
+  const handler = async () => {
+
+    await loadLeads();
+
+    await refreshSelectedLead();
+
   };
 
   window.addEventListener(
@@ -107,6 +113,7 @@ const [toDate, setToDate] =
   );
 
   return () => {
+
     window.removeEventListener(
       "lead-imported",
       handler
@@ -116,18 +123,69 @@ const [toDate, setToDate] =
       "lead-updated",
       handler
     );
+
   };
+
+}, []);useEffect(() => {
+
+  loadLeads();
+
+  const handler = async () => {
+
+    await loadLeads();
+
+    await refreshSelectedLead();
+
+  };
+
+  window.addEventListener(
+    "lead-imported",
+    handler
+  );
+
+  window.addEventListener(
+    "lead-updated",
+    handler
+  );
+
+  return () => {
+
+    window.removeEventListener(
+      "lead-imported",
+      handler
+    );
+
+    window.removeEventListener(
+      "lead-updated",
+      handler
+    );
+
+  };
+
 }, []);
 
   async function loadLeads() {
-    try {
-      const data = await getLeads();
+  try {
+    const data = await getLeads();
 
-      setLeads(data);
-    } catch (error) {
-      console.error(error);
-    }
+    setLeads(data);
+
+    setSelectedLead((current) => {
+      if (!current) {
+        return null;
+      }
+
+      const updated = data.find(
+        (lead) => lead.id === current.id
+      );
+
+      return updated ?? null;
+    });
+
+  } catch (error) {
+    console.error(error);
   }
+}
 
   useEffect(() => {
     setCurrentPage(1);
@@ -604,6 +662,23 @@ const matchesDate = (() => {
 
   onEditLead?.();
 
+}
+
+async function refreshSelectedLead() {
+  if (!selectedLead?.id) {
+    return;
+  }
+
+  try {
+    const latestLead = await getLead(
+      selectedLead.id
+    );
+
+    setSelectedLead(latestLead);
+
+  } catch (error) {
+    console.error(error);
+  }
 }
 
   function toggleLead(

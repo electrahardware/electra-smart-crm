@@ -27,13 +27,35 @@ export default function LeadTimeline({
 
   useEffect(() => {
 
-    if (!lead?.id) {
-      return;
+  if (!lead?.id) {
+    return;
+  }
+
+  loadTimeline(lead.id);
+
+  const handler = () => {
+
+    if (lead.id) {
+      loadTimeline(lead.id);
     }
 
-    loadTimeline(lead.id);
+  };
 
-  }, [lead?.id]);
+  window.addEventListener(
+    "lead-updated",
+    handler
+  );
+
+  return () => {
+
+    window.removeEventListener(
+      "lead-updated",
+      handler
+    );
+
+  };
+
+}, [lead?.id]);
 
   async function loadTimeline(
     leadId: number

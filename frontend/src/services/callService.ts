@@ -25,7 +25,7 @@ export async function addLeadCall(
     nextFollowup?: string;
   }
 ): Promise<LeadCall> {
-  return api<LeadCall>("/calls", {
+  return api<LeadCall>(`/calls/${leadId}`, {
     method: "POST",
     body: JSON.stringify({
       leadId,

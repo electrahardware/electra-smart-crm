@@ -17,13 +17,17 @@ const tabs = [
     icon: "📞",
   },
   {
-    label: "Attachments",
-    icon: "📎",
-  },
-  {
-    label: "Timeline",
-    icon: "🕒",
-  },
+  label: "Attachments",
+  icon: "📎",
+},
+{
+  label: "Follow-up",
+  icon: "📅",
+},
+{
+  label: "Timeline",
+  icon: "🕒",
+},
 ];
 
 export default function LeadTabs({

@@ -1,21 +1,25 @@
 import { useEffect, useState } from "react";
 
-import { useLeadDetails } from "../../contexts/LeadDetailsContext";
+import type { Lead } from "../../types/lead";
 
 import {
   updateLead,
   completeFollowup,
 } from "../../services/leadService";
 
-import type { Lead } from "../../types/lead";
+interface Props {
+  lead: Lead;
+}
 
-export default function FollowupTab() {
-  const { lead, refreshLead } =
-  useLeadDetails();
+export default function FollowupTab({
+  lead,
+}: Props) {
 
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
-  const [note, setNote] = useState("");
+  const [note, setNote] =
+    useState("");
 
   const [followupDate, setFollowupDate] =
     useState("");
@@ -24,13 +28,14 @@ export default function FollowupTab() {
     useState("");
 
   useEffect(() => {
-    if (!lead) return;
 
     setNote(lead.notes || "");
 
     setFollowupDate(
       lead.followupDate
-        ? new Date(lead.followupDate)
+        ? new Date(
+            lead.followupDate
+          )
             .toISOString()
             .slice(0, 10)
         : ""
@@ -39,15 +44,17 @@ export default function FollowupTab() {
     setFollowupTime(
       lead.followupTime || ""
     );
+
   }, [lead]);
 
   async function saveFollowup() {
-    if (!lead) return;
 
     try {
+
       setSaving(true);
 
       const payload: Lead = {
+
         ...lead,
 
         notes: note,
@@ -57,39 +64,48 @@ export default function FollowupTab() {
         followupTime,
 
         followupCompleted: false,
+
       };
 
       await updateLead(
-        lead.id,
-        payload
+  lead.id!,
+  payload
+);
+
+      window.dispatchEvent(
+        new Event(
+          "lead-updated"
+        )
       );
 
-      refreshLead();
+      alert(
+        "Follow-up updated successfully."
+      );
 
-      alert("Follow-up updated successfully.");
+    } catch (error) {
 
-    } catch (err) {
+      console.error(error);
 
-      console.error(err);
-
-      alert("Unable to update follow-up.");
+      alert(
+        "Unable to update follow-up."
+      );
 
     } finally {
 
       setSaving(false);
 
     }
+
   }
 
   async function markCompleted() {
-    if (!lead) return;
 
     try {
 
       setSaving(true);
 
       await completeFollowup(
-        lead.id,
+  lead.id!,
         {
           note,
           followupDate:
@@ -97,88 +113,93 @@ export default function FollowupTab() {
         }
       );
 
-      refreshLead();
+      window.dispatchEvent(
+        new Event(
+          "lead-updated"
+        )
+      );
 
-      alert("Follow-up completed.");
+      alert(
+        "Follow-up completed."
+      );
 
-    } catch (err) {
+    } catch (error) {
 
-      console.error(err);
+      console.error(error);
 
-      alert("Unable to complete follow-up.");
+      alert(
+        "Unable to complete follow-up."
+      );
 
     } finally {
 
       setSaving(false);
 
     }
+
   }
 
-    if (!lead) {
     return (
-      <div className="p-6 text-center text-gray-500">
-        No Lead Selected
-      </div>
-    );
-  }
-
-  return (
     <div className="space-y-6 p-6">
 
-      <div className="rounded-lg border bg-white p-5 shadow-sm">
+      <div className="rounded-xl border bg-white p-5 shadow-sm">
 
-        <h2 className="mb-5 text-lg font-semibold">
-          Follow-up Details
+        <h2 className="mb-5 text-lg font-bold">
+          📅 Follow-up Details
         </h2>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
           <div>
-            <label className="mb-1 block text-sm font-medium">
+
+            <label className="mb-2 block text-sm font-semibold">
               Next Follow-up Date
             </label>
 
             <input
               type="date"
-              className="w-full rounded-md border p-2"
               value={followupDate}
               onChange={(e) =>
                 setFollowupDate(e.target.value)
               }
+              className="w-full rounded-lg border p-3"
             />
+
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">
+
+            <label className="mb-2 block text-sm font-semibold">
               Follow-up Time
             </label>
 
             <input
               type="time"
-              className="w-full rounded-md border p-2"
               value={followupTime}
               onChange={(e) =>
                 setFollowupTime(e.target.value)
               }
+              className="w-full rounded-lg border p-3"
             />
+
           </div>
 
         </div>
 
         <div className="mt-5">
 
-          <label className="mb-1 block text-sm font-medium">
+          <label className="mb-2 block text-sm font-semibold">
             Follow-up Notes
           </label>
 
           <textarea
             rows={5}
-            className="w-full rounded-md border p-3"
-            placeholder="Write follow-up discussion..."
             value={note}
             onChange={(e) =>
               setNote(e.target.value)
             }
+            className="w-full rounded-lg border p-3"
+            placeholder="Write follow-up discussion..."
           />
 
         </div>
@@ -188,32 +209,35 @@ export default function FollowupTab() {
           <button
             onClick={saveFollowup}
             disabled={saving}
-            className="rounded-md bg-blue-600 px-5 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {saving
               ? "Saving..."
-              : "Save Follow-up"}
+              : "💾 Save Follow-up"}
           </button>
 
           <button
             onClick={markCompleted}
             disabled={saving}
-            className="rounded-md bg-green-600 px-5 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+            className="rounded-xl bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700 disabled:opacity-50"
           >
-            Complete Follow-up
+            ✅ Complete
           </button>
-                  </div>
+
+        </div>
+
       </div>
 
-      <div className="rounded-lg border bg-white p-5 shadow-sm">
+      <div className="rounded-xl border bg-white p-5 shadow-sm">
 
-        <h2 className="mb-4 text-lg font-semibold">
+        <h2 className="mb-4 text-lg font-bold">
           Current Follow-up
         </h2>
 
-        <div className="space-y-3 text-sm">
+        <div className="space-y-3">
 
           <div className="flex justify-between border-b pb-2">
+
             <span className="font-medium">
               Status
             </span>
@@ -223,9 +247,11 @@ export default function FollowupTab() {
                 ? "✅ Completed"
                 : "⏳ Pending"}
             </span>
+
           </div>
 
           <div className="flex justify-between border-b pb-2">
+
             <span className="font-medium">
               Date
             </span>
@@ -233,9 +259,11 @@ export default function FollowupTab() {
             <span>
               {followupDate || "-"}
             </span>
+
           </div>
 
           <div className="flex justify-between border-b pb-2">
+
             <span className="font-medium">
               Time
             </span>
@@ -243,24 +271,30 @@ export default function FollowupTab() {
             <span>
               {followupTime || "-"}
             </span>
+
           </div>
 
-          <div className="border rounded-md p-3 bg-gray-50">
+          <div className="rounded-lg bg-slate-50 p-4">
 
-            <div className="font-medium mb-2">
+            <div className="mb-2 font-semibold">
               Latest Note
             </div>
 
-            <div className="whitespace-pre-wrap text-gray-700">
-              {note?.trim()
+            <div className="whitespace-pre-wrap text-slate-700">
+
+              {note.trim()
                 ? note
                 : "No notes available."}
+
             </div>
 
           </div>
 
         </div>
+
       </div>
+
     </div>
   );
+
 }

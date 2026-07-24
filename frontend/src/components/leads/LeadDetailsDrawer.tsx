@@ -7,6 +7,7 @@ import LeadNotes from "./LeadNotes";
 import LeadCalls from "./LeadCalls";
 import LeadAttachments from "./LeadAttachments";
 import LeadTimeline from "./LeadTimeline";
+import FollowupTab from "./FollowupTab";
 
 interface Props {
   lead: Lead | null;
@@ -347,6 +348,15 @@ export default function LeadDetailsDrawer({
 
           )}
 
+          {activeTab === "Follow-up" && (
+
+  <FollowupTab
+    lead={lead}
+  />
+
+)}
+
+        
           {activeTab === "Timeline" && (
 
             <LeadTimeline

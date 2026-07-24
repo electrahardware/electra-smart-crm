@@ -14,6 +14,9 @@ type LeadDetailsContextType = {
 
   loading: boolean;
   setLoading: (loading: boolean) => void;
+
+  refreshKey: number;
+  refreshLead: () => void;
 };
 
 const LeadDetailsContext = createContext<
@@ -25,9 +28,18 @@ export function LeadDetailsProvider({
 }: {
   children: ReactNode;
 }) {
-  const [lead, setLead] = useState<LeadDetails | null>(null);
+  const [lead, setLead] =
+    useState<LeadDetails | null>(null);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
+
+  const [refreshKey, setRefreshKey] =
+    useState(0);
+
+  function refreshLead() {
+    setRefreshKey((v) => v + 1);
+  }
 
   const value = useMemo(
     () => ({
@@ -35,8 +47,10 @@ export function LeadDetailsProvider({
       setLead,
       loading,
       setLoading,
+      refreshKey,
+      refreshLead,
     }),
-    [lead, loading]
+    [lead, loading, refreshKey]
   );
 
   return (

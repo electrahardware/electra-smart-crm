@@ -38,17 +38,21 @@ export default function LeadCalls({
     }
 
     await addLeadCall(leadId, {
-      callType,
-      duration: duration
-        ? Number(duration)
-        : undefined,
-      remarks,
-    });
+  callType,
+  duration: duration
+    ? Number(duration)
+    : undefined,
+  remarks,
+});
 
-    setRemarks("");
-    setDuration("");
+setRemarks("");
+setDuration("");
 
-    loadCalls();
+window.dispatchEvent(
+  new Event("lead-updated")
+);
+
+await loadCalls();
   }
 
   return (
@@ -142,7 +146,11 @@ export default function LeadCalls({
 
                   await deleteLeadCall(call.id);
 
-                  loadCalls();
+window.dispatchEvent(
+  new Event("lead-updated")
+);
+
+await loadCalls();
 
                 }}
                 className="text-red-600"
