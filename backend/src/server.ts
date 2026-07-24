@@ -21,6 +21,7 @@ import mergeRoutes from "./routes/merge.routes";
 import activityRoutes from "./routes/activity.routes";
 import analyticsRoutes from "./routes/analytics";
 import masterSearchRoutes from "./routes/masterSearch";
+import notesRoutes from "./routes/notes";
 
 const app = express();
 
@@ -73,6 +74,7 @@ app.use("/api/merge", mergeRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/master-search", masterSearchRoutes);
+app.use("/api/notes", notesRoutes);
 
 // ==============================================
 

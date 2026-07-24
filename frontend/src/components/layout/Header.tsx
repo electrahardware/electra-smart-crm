@@ -10,6 +10,12 @@ import {
   useSearch,
 } from "../../contexts/SearchContext";
 import { searchLeads } from "../../services/masterSearchService";
+import { useState } from "react";
+import MasterLeadDrawer from "../masterLead/MasterLeadDrawer";
+import MasterLeadTabs from "../masterLead/MasterLeadTabs";
+import { getLeadDetails } from "../../services/leadDetailsService";
+import { useLeadDetails } from "../../contexts/LeadDetailsContext";
+
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -24,6 +30,7 @@ const pageTitles: Record<string, string> = {
 export default function Header() {
   const { toggle } = useSidebar();
   const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const {
   search,
@@ -36,6 +43,11 @@ export default function Header() {
   setDropdownOpen,
   setSelectedLeadId,
 } = useSearch();
+
+const {
+  setLead,
+  setLoading: setLeadLoading,
+} = useLeadDetails();
 
   const title =
     pageTitles[location.pathname] ?? "Electra Smart CRM";
@@ -68,6 +80,7 @@ setDropdownOpen(data.length > 0);
   }, [search, setLoading, setResults]);
 
   return (
+    <>
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
       <div className="flex items-center gap-4">
         <button
@@ -111,12 +124,28 @@ setDropdownOpen(data.length > 0);
             {results.map((lead) => (
               <div
   key={lead.id}
-  onClick={() => {
+  onClick={async () => {
+  try {
+    setLeadLoading(true);
+
+    const data = await getLeadDetails(lead.id);
+
+    setLead(data);
+
     setSelectedLeadId(lead.id);
+
     setDropdownOpen(false);
     setSearch("");
     setResults([]);
-  }}
+
+    setDrawerOpen(true);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLeadLoading(false);
+  }
+}}
+
   className="cursor-pointer border-b p-3 transition hover:bg-slate-50"
 >
                 <div className="font-semibold">
@@ -141,10 +170,18 @@ setDropdownOpen(data.length > 0);
         )}
       </div>
 
-      <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
         <NotificationBell />
         <ProfileMenu />
       </div>
     </header>
-  );
+
+    <MasterLeadDrawer
+  open={drawerOpen}
+  onClose={() => setDrawerOpen(false)}
+>
+  <MasterLeadTabs />
+</MasterLeadDrawer>
+  </>
+);
 }

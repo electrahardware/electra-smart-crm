@@ -6,6 +6,7 @@ import App from "./App";
 
 import { LeadProvider } from "./contexts/LeadContext";
 import { SearchProvider } from "./contexts/SearchContext";
+import { LeadDetailsProvider } from "./contexts/LeadDetailsContext";
 
 import ErrorBoundary from "./components/common/ErrorBoundary";
 
@@ -15,29 +16,29 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-
     <ErrorBoundary>
-
       <SearchProvider>
 
-        <LeadProvider>
+        <LeadDetailsProvider>
 
-          <BrowserRouter>
+          <LeadProvider>
 
-            <App />
+            <BrowserRouter>
 
-            <Toaster
-              position="top-right"
-              reverseOrder={false}
-            />
+              <App />
 
-          </BrowserRouter>
+              <Toaster
+                position="top-right"
+                reverseOrder={false}
+              />
 
-        </LeadProvider>
+            </BrowserRouter>
+
+          </LeadProvider>
+
+        </LeadDetailsProvider>
 
       </SearchProvider>
-
     </ErrorBoundary>
-
   </React.StrictMode>
 );
