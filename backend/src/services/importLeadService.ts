@@ -8,27 +8,70 @@ import type {
   ImportPreviewRow,
 } from "../types/import";
 
+function normalizeMobile(
+  mobile?: string
+): string {
+
+  if (!mobile) {
+    return "";
+  }
+
+  let value = String(mobile).trim();
+
+  // Keep only digits
+  value = value.replace(/\D/g, "");
+
+  // Remove India country code
+  if (
+    value.length === 12 &&
+    value.startsWith("91")
+  ) {
+    value = value.substring(2);
+  }
+
+  // Remove leading zero
+  if (
+    value.length === 11 &&
+    value.startsWith("0")
+  ) {
+    value = value.substring(1);
+  }
+
+  return value;
+}
+
 function validateLead(
   lead: ImportLeadRow
 ): {
   status: ImportPreviewRow["status"];
   errors: ImportPreviewRow["errors"];
 } {
+
+  lead.mobile =
+  normalizeMobile(lead.mobile);
+
+lead.whatsapp =
+  normalizeMobile(
+    lead.whatsapp || lead.mobile
+  );
+
   const errors: ImportPreviewRow["errors"] = [];
 
-  if (!lead.customerName.trim()) {
-    errors.push({
-      field: "customerName",
-      message: "Customer name is required.",
-    });
-  }
+  if (
+  !lead.mobile ||
+  !/^\d{10}$/.test(lead.mobile)
+) {
 
-  if (!lead.mobile.trim()) {
-    errors.push({
-      field: "mobile",
-      message: "Mobile number is required.",
-    });
-  }
+  errors.push({
+
+    field: "mobile",
+
+    message:
+      "Valid 10-digit mobile number is required.",
+
+  });
+
+}
 
   return {
     status:
@@ -178,7 +221,8 @@ export async function commitImportLeads(
             id: existing.id,
           },
           data: {
-            customerName: lead.customerName,
+            customerName:
+  lead.customerName?.trim() || "",
             secondaryMobile: lead.secondaryMobile,
             whatsapp: lead.whatsapp,
             shopName: lead.shopName,
@@ -230,7 +274,8 @@ followupCompletedAt: null,
       const newLead =
   await prisma.lead.create({
     data: {
-      customerName: lead.customerName,
+      customerName:
+  lead.customerName?.trim() || "",
       mobile: lead.mobile,
       secondaryMobile: lead.secondaryMobile,
       whatsapp: lead.whatsapp,
