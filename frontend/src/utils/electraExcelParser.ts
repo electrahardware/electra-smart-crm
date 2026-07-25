@@ -293,19 +293,10 @@ console.log("CITY =", city);
     notes,
   };
 });
-const filteredRows = rows.filter((row) => {
-  if (!row.customerName.trim()) {
-    return false;
-  }
 
-  if (!row.mobile.trim()) {
-    return false;
-  }
 
-  return true;
-});
 return {
-  rows: filteredRows,
+  rows,
   detectedColumns,
   totalRows: dataRows.length,
 };
