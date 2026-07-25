@@ -4,6 +4,7 @@ import type { Lead } from "../../types/lead";
 import type { Timeline } from "../../types/timeline";
 
 import { getTimeline } from "../../services/timelineService";
+import { formatDateTime } from "../../utils/date";
 
 interface Props {
   lead: Lead | null;
@@ -161,9 +162,7 @@ export default function LeadTimeline({
       return `${days} days ago`;
     }
 
-    return new Date(
-      date
-    ).toLocaleDateString();
+    return formatDateTime(date);
 
   }
 
@@ -176,10 +175,7 @@ export default function LeadTimeline({
       item.description || "",
     CreatedBy:
       item.createdBy || "",
-    Date:
-      new Date(
-        item.createdAt
-      ).toLocaleString(),
+    Date: formatDateTime(item.createdAt),
   }));
 
   const csv = [
@@ -453,10 +449,8 @@ export default function LeadTimeline({
                   </span>
 
                   <span>
-                    {new Date(
-                      item.createdAt
-                    ).toLocaleString()}
-                  </span>
+  {formatDateTime(item.createdAt)}
+</span>
 
                 </div>
 

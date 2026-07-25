@@ -1,51 +1,91 @@
 import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { getNotifications } from "../../services/notificationService";
 
 interface Notification {
   id: number;
   title: string;
   color: string;
+  path: string;
 }
 
 export default function NotificationBell() {
+
+  const navigate = useNavigate();
 
   const [open, setOpen] =
     useState(false);
 
   const [items, setItems] =
     useState<Notification[]>([]);
+    
 
   useEffect(() => {
 
-    setItems([
+  async function loadNotifications() {
 
-      {
-        id: 1,
-        title:
-          "12 Overdue Follow-ups",
-        color:
-          "text-red-600",
-      },
+    try {
 
-      {
-        id: 2,
-        title:
-          "5 Today's Follow-ups",
-        color:
-          "text-orange-600",
-      },
+      const data =
+        await getNotifications();
 
-      {
-        id: 3,
-        title:
-          "8 New Leads Today",
-        color:
-          "text-green-600",
-      },
+      
 
-    ]);
+console.log("Notification API =>", data);
 
-  }, []);
+      setItems([
+
+        {
+
+          id: 1,
+
+          title: `${data.overdue} Overdue Follow-ups`,
+
+          color: "text-red-600",
+
+          path: "/followups?filter=overdue",
+
+        },
+
+        {
+
+          id: 2,
+
+          title: `${data.today} Today's Follow-ups`,
+
+          color: "text-orange-600",
+
+          path: "/followups",
+
+        },
+
+        {
+
+          id: 3,
+
+          title: `${data.newLeads} New Leads Today`,
+
+          color: "text-green-600",
+
+          path: "/leads",
+
+        },
+
+      ]);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  loadNotifications();
+
+}, []);
 
   return (
 
@@ -64,7 +104,14 @@ export default function NotificationBell() {
 
           <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
 
-            {items.length}
+            {items.reduce((sum, item) => {
+
+  const count =
+    parseInt(item.title);
+
+  return sum + (isNaN(count) ? 0 : count);
+
+}, 0)}
 
           </span>
 
@@ -86,22 +133,29 @@ export default function NotificationBell() {
 
             {items.map((item) => (
 
-              <div
-                key={item.id}
-                className="rounded-xl bg-slate-50 p-3"
-              >
+  <div
+    key={item.id}
+    onClick={() => {
 
-                <p
-                  className={`font-medium ${item.color}`}
-                >
+      navigate(item.path);
 
-                  {item.title}
+      setOpen(false);
 
-                </p>
+    }}
+    className="cursor-pointer rounded-xl bg-slate-50 p-3 transition hover:bg-blue-50"
+  >
 
-              </div>
+    <p
+      className={`font-medium ${item.color}`}
+    >
 
-            ))}
+      {item.title}
+
+    </p>
+
+  </div>
+
+))}
 
           </div>
 

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 
-import type { Followup } from "../../types/followup";
+import type { Lead } from "../../types/lead";
 import { getTodayFollowups } from "../../services/followupService";
 
 export default function TodayFollowups() {
 
   const [followups, setFollowups] =
-    useState<Followup[]>([]);
+  useState<Lead[]>([]);
 
   useEffect(() => {
 

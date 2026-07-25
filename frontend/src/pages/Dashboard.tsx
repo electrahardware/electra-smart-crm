@@ -65,7 +65,7 @@ export default function Dashboard() {
       value: stats?.hotLeads ?? 0,
       color: "text-red-600",
       icon: "🔥",
-      onClick: () => navigate("/leads?status=Hot"),
+      onClick: () => navigate("/leads?priority=Hot"),
     },
 
     {

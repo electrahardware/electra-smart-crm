@@ -13,7 +13,9 @@ import {
   addLeadNote,
   getLeadNotes,
   deleteLeadNote,
-  getTodayFollowups,
+ getFollowups,
+ getNewLeadsToday,
+ getNotifications,
   completeFollowup,
   createQuickLead,
   createQuickBulkLead,
@@ -25,8 +27,18 @@ router.use(requireAuth);
 router.get("/", getAllLeads);
 
 router.get(
-  "/today-followups",
-  getTodayFollowups
+  "/followups",
+  getFollowups
+);
+
+router.get(
+  "/new-today",
+  getNewLeadsToday
+);
+
+router.get(
+  "/notifications",
+  getNotifications
 );
 
 router.get("/:id", getLead);

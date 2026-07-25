@@ -423,61 +423,68 @@ export async function deleteLeadNote(
   }
 }
 
-export async function getTodayFollowups(
+export async function getFollowups(
   req: Request,
   res: Response
 ) {
   try {
 
+    const filter =
+      (req.query.filter as string) || "today";
+
     const today = new Date();
 
-    today.setHours(
-      0,
-      0,
-      0,
-      0
-    );
+    today.setHours(0, 0, 0, 0);
 
-    const tomorrow =
-      new Date(today);
+    const tomorrow = new Date(today);
 
-    tomorrow.setDate(
-      tomorrow.getDate() + 1
-    );
+    tomorrow.setDate(today.getDate() + 1);
+
+    let where: any = {
+      followupCompleted: false,
+    };
+
+    if (filter === "today") {
+
+      where.followupDate = {
+        gte: today,
+        lt: tomorrow,
+      };
+
+    }
+
+    if (filter === "overdue") {
+
+      where.followupDate = {
+        lt: today,
+      };
+
+    }
 
     const followups =
       await prisma.lead.findMany({
-        where: {
-          followupDate: {
-            gte: today,
-            lt: tomorrow,
+
+        where,
+
+        orderBy: [
+          {
+            followupDate: "asc",
           },
-          followupCompleted: false,
-        },
-        orderBy: {
-          followupDate: "asc",
-        },
-        select: {
-          id: true,
-          customerName: true,
-          mobile: true,
-          shopName: true,
-          followupDate: true,
-          followupTime: true,
-          priority: true,
-          status: true,
-        },
+          {
+            followupTime: "asc",
+          },
+        ],
+
       });
 
-    res.json(followups);
+    return res.json(followups);
 
   } catch (error) {
 
     console.error(error);
 
-    res.status(500).json({
-      message:
-        "Unable to load today's followups.",
+    return res.status(500).json({
+      message: "Failed to load followups",
     });
 
   }
@@ -868,5 +875,111 @@ export async function createQuickBulkLead(
 
     });
 
+  }
+}
+
+export async function getNewLeadsToday(
+  req: Request,
+  res: Response
+) {
+  try {
+
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+
+    tomorrow.setDate(today.getDate() + 1);
+
+    const leads = await prisma.lead.findMany({
+
+      where: {
+
+        createdAt: {
+
+          gte: today,
+
+          lt: tomorrow,
+
+        },
+
+      },
+
+      orderBy: {
+
+        createdAt: "desc",
+
+      },
+
+    });
+
+    return res.json(leads);
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+
+      message: "Failed to load today's leads",
+
+    });
+
+  }
+}
+
+export async function getNotifications(
+  req: Request,
+  res: Response
+) {
+  try {
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+
+    tomorrow.setDate(today.getDate() + 1);
+
+    const overdue = await prisma.lead.count({
+      where: {
+        followupCompleted: false,
+        followupDate: {
+          lt: today,
+        },
+      },
+    });
+
+    const todayFollowups = await prisma.lead.count({
+      where: {
+        followupCompleted: false,
+        followupDate: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+    });
+
+    const newLeads = await prisma.lead.count({
+      where: {
+        createdAt: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+    });
+
+    return res.json({
+      overdue,
+      today: todayFollowups,
+      newLeads,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to load notifications",
+    });
   }
 }

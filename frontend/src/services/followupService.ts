@@ -1,13 +1,14 @@
 import { api } from "../lib/api";
+import type { Lead } from "../types/lead";
 
-import type {
-  Followup,
-} from "../types/followup";
-
-export async function getTodayFollowups(): Promise<Followup[]> {
-
-  return api<Followup[]>(
-    "/leads/today-followups"
+export async function getFollowups(
+  filter: "today" | "overdue"
+): Promise<Lead[]> {
+  return api<Lead[]>(
+    `/leads/followups?filter=${filter}`
   );
+}
 
+export async function getTodayFollowups(): Promise<Lead[]> {
+  return getFollowups("today");
 }

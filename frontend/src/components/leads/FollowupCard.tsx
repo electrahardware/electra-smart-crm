@@ -4,7 +4,7 @@ import type { Lead } from "../../types/lead";
 import { EmptyLead } from "../../types/lead";
 
 import { useLead } from "../../hooks/useLead";
-
+import { formatDate } from "../../utils/date";
 
 import CompleteFollowupDialog from "./CompleteFollowupDialog";
 import RescheduleFollowupDialog from "./RescheduleFollowupDialog";
@@ -78,20 +78,39 @@ const [rescheduleOpen, setRescheduleOpen] = useState(false);
         <div>
 
           <h3 className="text-lg font-bold text-slate-800">
-            {lead.shopName || "-"}
-          </h3>
+  {lead.shopName || "-"}
+</h3>
 
-          <p className="mt-2 text-slate-600">
-            👤 {lead.customerName}
-          </p>
+<p className="mt-2 text-slate-600">
+  👤 {lead.customerName}
+</p>
 
-          <p className="mt-1 text-slate-500">
-            📞 {lead.mobile}
-          </p>
+{/* Priority + Lead Owner */}
+<div className="mt-3 flex flex-wrap gap-2">
 
-          <p className="mt-1 text-sm text-orange-600 font-medium">
-            📅 {lead.followupDate?.slice(0, 10) || "-"}
-          </p>
+  {lead.priority && (
+    <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+      🔥 {lead.priority}
+    </span>
+  )}
+
+  {lead.leadOwner && (
+    <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+      👨 {lead.leadOwner}
+    </span>
+  )}
+
+</div>
+
+<p className="mt-3 text-slate-500">
+  📞 {lead.mobile}
+</p>
+
+<p className="mt-1 text-sm font-medium text-orange-600">
+  📅 {lead.followupDate
+      ? formatDate(lead.followupDate)
+      : "-"}
+</p>
 
         </div>
 

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { formatDate } from "../../utils/date";
+import Toast from "../common/Toast";
 
 import type { Lead } from "../../types/lead";
 
@@ -26,6 +28,12 @@ export default function FollowupTab({
 
   const [followupTime, setFollowupTime] =
     useState("");
+
+  const [toast, setToast] = useState("");
+
+const [toastType, setToastType] = useState<
+  "success" | "error"
+>("success");
 
   useEffect(() => {
 
@@ -78,17 +86,23 @@ export default function FollowupTab({
         )
       );
 
-      alert(
-        "Follow-up updated successfully."
-      );
+      setToastType("success");
+setToast("Follow-up saved successfully.");
+
+setTimeout(() => {
+  setToast("");
+}, 2500);
 
     } catch (error) {
 
       console.error(error);
 
-      alert(
-        "Unable to update follow-up."
-      );
+      setToastType("error");
+setToast("Unable to update follow-up.");
+
+setTimeout(() => {
+  setToast("");
+}, 2500);
 
     } finally {
 
@@ -119,17 +133,23 @@ export default function FollowupTab({
         )
       );
 
-      alert(
-        "Follow-up completed."
-      );
+      setToastType("success");
+setToast("Follow-up completed.");
+
+setTimeout(() => {
+  setToast("");
+}, 2500);
 
     } catch (error) {
 
       console.error(error);
 
-      alert(
-        "Unable to complete follow-up."
-      );
+      setToastType("error");
+setToast("Unable to complete follow-up.");
+
+setTimeout(() => {
+  setToast("");
+}, 2500);
 
     } finally {
 
@@ -140,6 +160,13 @@ export default function FollowupTab({
   }
 
     return (
+  <>
+    <Toast
+      show={toast !== ""}
+      message={toast}
+      type={toastType}
+    />
+
     <div className="space-y-6 p-6">
 
       <div className="rounded-xl border bg-white p-5 shadow-sm">
@@ -257,8 +284,10 @@ export default function FollowupTab({
             </span>
 
             <span>
-              {followupDate || "-"}
-            </span>
+  {followupDate
+    ? formatDate(followupDate)
+    : "-"}
+</span>
 
           </div>
 
@@ -294,7 +323,8 @@ export default function FollowupTab({
 
       </div>
 
-    </div>
-  );
+        </div>
+  </>
+);
 
 }
