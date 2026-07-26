@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { SearchResult } from "../contexts/SearchContext";
 
-const API = "http://localhost:5000/api/master-search";
+const API =
+  `${import.meta.env.VITE_API_URL}/master-search`;
 
 export async function searchLeads(
   query: string
