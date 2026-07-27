@@ -7,7 +7,7 @@ type Props = {
   lead: Lead;
   onClose: () => void;
   onUpdated: () => void;
-  onLeadUpdated: (lead: Lead) => void;
+  onLeadUpdated: React.Dispatch<React.SetStateAction<Lead>>;
 };
 
 export default function RescheduleFollowupDialog({
@@ -124,6 +124,15 @@ onClose();
               }
               className="mt-2 w-full rounded-xl border p-3"
             />
+
+            <button
+  type="button"
+  disabled={saving}
+  onClick={() => handleDateChange("")}
+  className="mt-3 rounded-lg border border-slate-300 px-3 py-2 text-sm hover:bg-slate-100"
+>
+  None
+</button>
 
           </div>
 

@@ -41,15 +41,6 @@ export default function LeadWizard({
 
   async function save() {
 
-    if (!lead.customerName.trim()) {
-
-      toast.error(
-        "Customer Name is required."
-      );
-
-      return;
-
-    }
 
     if (!lead.mobile.trim()) {
 
@@ -72,17 +63,13 @@ export default function LeadWizard({
           lead
         );
 
-        toast.success(
-          `Lead "${lead.customerName}" updated successfully.`
-        );
+        toast.success("Lead updated successfully.");
 
       } else {
 
         await saveLead(lead);
 
-        toast.success(
-          `Lead "${lead.customerName}" saved successfully.`
-        );
+       toast.success("Lead saved successfully.");
 
       }
 

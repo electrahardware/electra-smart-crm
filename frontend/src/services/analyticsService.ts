@@ -49,6 +49,7 @@ export interface AnalyticsResponse {
   hotLeads: number;
   warmLeads: number;
   coldLeads: number;
+  noReqLeads: number;
 
   overdue: number;
   todayFollowups: number;

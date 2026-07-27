@@ -7,6 +7,7 @@ export interface LeadStats {
   hotLeads: number;
   warmLeads: number;
   coldLeads: number;
+  noReqLeads: number;
   overdueFollowups: number;
   todayFollowups: number;
   upcomingFollowups: number;
@@ -18,6 +19,7 @@ export const EMPTY_LEAD_STATS: LeadStats = {
   hotLeads: 0,
   warmLeads: 0,
   coldLeads: 0,
+  noReqLeads: 0,
   overdueFollowups: 0,
   todayFollowups: 0,
   upcomingFollowups: 0,
@@ -39,6 +41,9 @@ function calculateLeadStats(
     coldLeads: filteredLeads.filter(
       (lead) => lead.priority === "Cold"
     ).length,
+    noReqLeads: filteredLeads.filter(
+  (lead) => lead.priority === "No Req."
+).length,
     todayFollowups: filteredLeads.filter(
   (lead) =>
     !lead.followupCompleted &&

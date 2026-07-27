@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { Lead } from "../../types/lead";
 
@@ -24,6 +24,36 @@ export default function LeadDetailsDrawer({
   const [activeTab, setActiveTab] =
     useState("Details");
 
+  useEffect(() => {
+
+  function handleKeyDown(
+    event: KeyboardEvent
+  ) {
+
+    if (event.key === "Escape") {
+
+      onClose();
+
+    }
+
+  }
+
+  window.addEventListener(
+    "keydown",
+    handleKeyDown
+  );
+
+  return () => {
+
+    window.removeEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+  };
+
+}, [onClose]);
+
   if (!lead) {
     return null;
   }
@@ -43,6 +73,9 @@ export default function LeadDetailsDrawer({
     case "Cold":
       return "bg-blue-100 text-blue-700";
 
+    case "No Req.":
+  return "⚪";
+
     default:
       return "bg-slate-100 text-slate-700";
 
@@ -52,14 +85,14 @@ export default function LeadDetailsDrawer({
 
   return (
 
-    <div className="fixed inset-0 z-50 flex">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
 
-      <div
-        className="flex-1 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
+  <div
+    className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+    onClick={onClose}
+  />
 
-      <div className="flex h-full w-[700px] flex-col overflow-hidden bg-slate-50 shadow-2xl">
+  <div className="relative z-10 flex h-[90vh] w-[950px] max-w-[95vw] flex-col overflow-hidden rounded-3xl bg-slate-50 shadow-2xl">
 
         {/* Header */}
 

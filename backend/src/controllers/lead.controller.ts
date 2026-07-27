@@ -181,6 +181,12 @@ export async function updateLead(
     const leadId =
       Number(req.params.id);
 
+    const oldLead = await prisma.lead.findUnique({
+  where: {
+    id: leadId,
+  },
+});
+
     const lead =
       await prisma.lead.update({
         where: {
@@ -202,17 +208,22 @@ city:
     ? false
     : req.body.followupCompleted,
 
-followupCompletedAt:
-  req.body.followupDate
-    ? null
-    : req.body.followupCompletedAt
-      ? new Date(req.body.followupCompletedAt)
-      : undefined,
-
 followupDate:
   req.body.followupDate
     ? new Date(req.body.followupDate)
     : null,
+
+followupTime:
+  req.body.followupDate
+    ? req.body.followupTime
+    : null,
+
+followupCompletedAt:
+  req.body.followupCompleted
+    ? new Date()
+    : req.body.followupDate
+      ? null
+      : undefined,
 
           expectedValue:
   req.body.expectedValue !== undefined
@@ -232,35 +243,82 @@ probability:
       });
 
     if (
-      req.body.followupCompleted === true
-    ) {
+  req.body.notes?.trim() &&
+  req.body.notes !== oldLead?.notes
+) {
 
-      await createTimeline({
-        leadId,
-        type: "FOLLOWUP",
-        title: "Follow-up Completed",
-        description:
-          "Customer follow-up marked as completed.",
-        createdBy: "System",
-      });
+  let latestNote = req.body.notes.trim();
 
-    }
+  if (oldLead?.notes?.trim()) {
+
+    latestNote = req.body.notes
+      .replace(oldLead.notes, "")
+      .trim();
+
+  }
+
+  if (latestNote.trim()) {
+
+  await prisma.leadNote.create({
+
+    data: {
+
+      leadId,
+
+      note: latestNote,
+
+      createdBy:
+        (req as any).user?.name ||
+        "System",
+
+    },
+
+  });
+
+}
+
+  await createTimeline({
+
+    leadId,
+
+    type: "NOTE",
+
+    title: "Note Added",
+
+    description: latestNote,
+
+    createdBy: "System",
+
+  });
+
+}
 
     if (
-      req.body.followupDate &&
-      !req.body.followupCompleted
-    ) {
+  oldLead?.followupDate &&
+  !req.body.followupDate
+) {
 
-      await createTimeline({
-        leadId,
-        type: "FOLLOWUP",
-        title: "Follow-up Rescheduled",
-        description:
-          `Next Follow-up: ${req.body.followupDate}`,
-        createdBy: "System",
-      });
+  await createTimeline({
+    leadId,
+    type: "FOLLOWUP",
+    title: "Follow-up Date Removed",
+    description: "Follow-up Date set to None.",
+    createdBy: "System",
+  });
 
-    }
+}
+
+else if (req.body.followupDate) {
+
+  await createTimeline({
+    leadId,
+    type: "FOLLOWUP",
+    title: "Follow-up Updated",
+    description: `Next Follow-up Date: ${req.body.followupDate}`,
+    createdBy: "System",
+  });
+
+}
 
     res.json(lead);
 
@@ -399,6 +457,32 @@ export async function deleteLeadNote(
         id: Number(req.params.noteId),
       },
     });
+
+    const latestNote = await prisma.leadNote.findFirst({
+
+  where: {
+    leadId: Number(req.params.id),
+  },
+
+  orderBy: {
+    createdAt: "desc",
+  },
+
+});
+
+await prisma.lead.update({
+
+  where: {
+    id: Number(req.params.id),
+  },
+
+  data: {
+
+    notes: latestNote?.note || "",
+
+  },
+
+});
 
     await createTimeline({
       leadId: Number(req.params.id),
@@ -577,6 +661,22 @@ export async function completeFollowup(
 
   });
 
+  await createTimeline({
+
+  leadId,
+
+  type: "NOTE",
+
+  title: "Note Added",
+
+  description: note.trim(),
+
+  createdBy:
+    (req as any).user?.name ||
+    "System",
+
+});
+
 }
 
     // If follow-up date exists,
@@ -607,9 +707,9 @@ export async function completeFollowup(
 
         type: "FOLLOWUP",
 
-        title: "Follow-up Rescheduled",
+        title: "Follow-up Updated",
 
-        description: `Next Follow-up: ${followupDate}`,
+        description: `Next Follow-up Date: ${followupDate}`,
 
         createdBy:
           (req as any).user?.name ||
@@ -636,26 +736,12 @@ export async function completeFollowup(
 
           followupDate: null,
 
+          followupTime: null,
+
         },
 
       });
 
-      await createTimeline({
-
-        leadId,
-
-        type: "FOLLOWUP",
-
-        title: "Follow-up Completed",
-
-        description:
-          note || "Follow-up completed.",
-
-        createdBy:
-          (req as any).user?.name ||
-          "System",
-
-      });
 
     }
 
@@ -735,6 +821,8 @@ export async function createQuickLead(
 
           followupCompleted: false,
 
+          notes: note?.trim() || "",
+
         },
 
       });
@@ -757,7 +845,24 @@ export async function createQuickLead(
 
       });
 
+      await createTimeline({
+
+  leadId: lead.id,
+
+  type: "NOTE",
+
+  title: "Initial Note Added",
+
+  description: note.trim(),
+
+  createdBy:
+    (req as any).user?.name ||
+    "System",
+
+});
+
     }
+    
 
     await createTimeline({
 

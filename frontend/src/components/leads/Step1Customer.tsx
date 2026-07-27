@@ -240,7 +240,6 @@ useEffect(() => {
 
           <TextInput
   label="Customer Name"
-  required
   value={lead.customerName}
   field="customerName"
   placeholder="Enter customer name"
@@ -261,7 +260,6 @@ useEffect(() => {
 
           <SelectInput
   label="Customer Type"
-  required
   value={lead.customerType}
   field="customerType"
   options={customerTypes}
@@ -305,7 +303,6 @@ useEffect(() => {
 
           <TextInput
   label="Pincode"
-  required
   value={lead.pincode}
   field="pincode"
   placeholder="360001"

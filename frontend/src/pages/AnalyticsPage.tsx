@@ -70,6 +70,11 @@ export default function AnalyticsPage() {
       />
 
       <Card
+        title="No Requirement"
+value={data?.noReqLeads ?? 0}
+      />
+
+      <Card
         title="Overdue Follow-ups"
         value={data?.overdue ?? 0}
       />

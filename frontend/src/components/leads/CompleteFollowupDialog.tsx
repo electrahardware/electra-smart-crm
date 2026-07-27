@@ -20,6 +20,7 @@ export default function CompleteFollowupDialog({
   const [loading, setLoading] = useState(false);
 
   const [note, setNote] = useState("");
+  const [noteChanged, setNoteChanged] = useState(false);
 
   const [noteId, setNoteId] = useState<number | null>(null);
 
@@ -48,6 +49,8 @@ export default function CompleteFollowupDialog({
   );
 
   setEditingDate(false);
+  setDateChanged(false);
+  setNoteChanged(false);
 
 }, [lead]);
 
@@ -60,10 +63,15 @@ export default function CompleteFollowupDialog({
       if (!lead.id) return;
 
 await completeFollowup(lead.id, {
-  note,
+
+  note: noteChanged
+    ? note
+    : "",
+
   followupDate: dateChanged
     ? followupDate
     : null,
+
 });
 
       onCompleted();
@@ -129,9 +137,13 @@ await completeFollowup(lead.id, {
             <textarea
               rows={5}
               value={note}
-              onChange={(e) =>
-                setNote(e.target.value)
-              }
+              onChange={(e) => {
+
+  setNote(e.target.value);
+
+  setNoteChanged(true);
+
+}}
               placeholder="Write today's discussion..."
               className="w-full rounded-xl border p-3"
             />

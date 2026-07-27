@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { QUICK_NOTES } from "../../constants/quickNotes";
 import { formatDate } from "../../utils/date";
 import Toast from "../common/Toast";
 
@@ -6,7 +7,6 @@ import type { Lead } from "../../types/lead";
 
 import {
   updateLead,
-  completeFollowup,
 } from "../../services/leadService";
 
 interface Props {
@@ -112,53 +112,6 @@ setTimeout(() => {
 
   }
 
-  async function markCompleted() {
-
-    try {
-
-      setSaving(true);
-
-      await completeFollowup(
-  lead.id!,
-        {
-          note,
-          followupDate:
-            followupDate || null,
-        }
-      );
-
-      window.dispatchEvent(
-        new Event(
-          "lead-updated"
-        )
-      );
-
-      setToastType("success");
-setToast("Follow-up completed.");
-
-setTimeout(() => {
-  setToast("");
-}, 2500);
-
-    } catch (error) {
-
-      console.error(error);
-
-      setToastType("error");
-setToast("Unable to complete follow-up.");
-
-setTimeout(() => {
-  setToast("");
-}, 2500);
-
-    } finally {
-
-      setSaving(false);
-
-    }
-
-  }
-
     return (
   <>
     <Toast
@@ -183,14 +136,29 @@ setTimeout(() => {
               Next Follow-up Date
             </label>
 
-            <input
-              type="date"
-              value={followupDate}
-              onChange={(e) =>
-                setFollowupDate(e.target.value)
-              }
-              className="w-full rounded-lg border p-3"
-            />
+            <div className="flex gap-2">
+
+  <input
+    type="date"
+    className="flex-1 rounded-md border p-2"
+    value={followupDate}
+    onChange={(e) =>
+      setFollowupDate(e.target.value)
+    }
+  />
+
+  <button
+    type="button"
+    onClick={() => {
+      setFollowupDate("");
+      setFollowupTime("");
+    }}
+    className="rounded-md border border-red-300 bg-red-50 px-4 text-red-600 hover:bg-red-100"
+  >
+    None
+  </button>
+
+</div>
 
           </div>
 
@@ -231,6 +199,29 @@ setTimeout(() => {
 
         </div>
 
+        <div className="mt-4 flex flex-wrap gap-2">
+
+  {QUICK_NOTES.map((item) => (
+
+    <button
+      key={item}
+      type="button"
+      onClick={() =>
+        setNote((prev) =>
+          prev
+            ? `${prev}\n${item}`
+            : item
+        )
+      }
+      className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-sm hover:bg-blue-100 hover:border-blue-400"
+    >
+      {item}
+    </button>
+
+  ))}
+
+</div>
+
         <div className="mt-6 flex flex-wrap gap-3">
 
           <button
@@ -243,13 +234,7 @@ setTimeout(() => {
               : "💾 Save Follow-up"}
           </button>
 
-          <button
-            onClick={markCompleted}
-            disabled={saving}
-            className="rounded-xl bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700 disabled:opacity-50"
-          >
-            ✅ Complete
-          </button>
+      
 
         </div>
 

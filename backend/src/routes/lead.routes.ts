@@ -80,7 +80,7 @@ router.post(
 );
 
 router.delete(
-  "/notes/:noteId",
+  "/:id/notes/:noteId",
   deleteLeadNote
 );
 

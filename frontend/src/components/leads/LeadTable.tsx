@@ -647,6 +647,8 @@ const matchesDate = (() => {
   lead: Lead
 ) {
 
+  setSelectedLead(null);
+
   setEditingId(lead.id!);
 
   setLead({
@@ -938,11 +940,12 @@ function exportFilteredLeads() {
       </div>
 
       <LeadDetailsDrawer
-        lead={selectedLead}
-        onClose={() =>
-          setSelectedLead(null)
-        }
-      />
+  lead={selectedLead}
+  onClose={() =>
+    setSelectedLead(null)
+  }
+  onEdit={handleEdit}
+/>
 
     </>
   );

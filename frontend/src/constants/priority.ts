@@ -1,7 +1,8 @@
-const priority = [
-  "🔥 Hot",
-  "🟠 Warm",
-  "🔵 Cold",
+export const priorities = [
+  "Hot",
+  "Warm",
+  "Cold",
+  "No Req.",
 ];
 
-export default priority;
+export default priorities;

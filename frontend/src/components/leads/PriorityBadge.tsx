@@ -26,6 +26,13 @@ export default function PriorityBadge({
       classes =
         "bg-blue-100 text-blue-700";
       break;
+
+    case "No Req.":
+  return (
+    <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">
+      ⚪ No Req.
+    </span>
+  );
   }
 
   return (
