@@ -4,12 +4,23 @@ import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  "electra_secret";
+function getJwtSecret(): string {
 
-console.log("LOGIN SECRET =", JWT_SECRET);
-console.log("TOKEN WILL BE CREATED");
+  const secret =
+    process.env.JWT_SECRET;
+
+  if (!secret) {
+
+    throw new Error(
+      "JWT_SECRET is missing in environment variables."
+    );
+
+  }
+
+  return secret;
+
+}
+
 
 export async function login(
   req: Request,
@@ -60,11 +71,6 @@ export async function login(
       });
     }
 
-    console.log(
-  "LOGIN SECRET:",
-  JWT_SECRET
-);
-
     const token =
   jwt.sign(
     {
@@ -72,7 +78,7 @@ export async function login(
       name: user.name,
       role: user.role,
     },
-        JWT_SECRET,
+        getJwtSecret(),
         {
           expiresIn: "7d",
         }

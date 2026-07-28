@@ -13,7 +13,9 @@ import { Link, useLocation } from "react-router-dom";
 
 import logo from "../../assets/images/electra-logo.png";
 import { useSidebar } from "../../hooks/useSidebar";
-import { isSales } from "../../utils/auth";
+import {
+  isAdminOrManager,
+} from "../../utils/auth";
 
 const menu = [
   {
@@ -58,8 +60,8 @@ export default function Sidebar() {
     setOpen,
   } = useSidebar();
 
-  const hideSettings =
-  isSales();
+  const canManageSettings =
+  isAdminOrManager();
 
   return (
     <>
@@ -129,7 +131,7 @@ export default function Sidebar() {
               location.pathname === item.path;
 
             if (
-  hideSettings &&
+  !canManageSettings &&
   item.path === "/settings"
 ) {
   return null;

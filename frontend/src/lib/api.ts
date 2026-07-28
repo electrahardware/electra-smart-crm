@@ -38,23 +38,51 @@ export async function api<T>(
 
   if (!response.ok) {
 
-    let message =
-      "Something went wrong.";
+  if (
+    response.status === 401
+  ) {
 
-    try {
+    localStorage.removeItem(
+      "token"
+    );
 
-      const data =
-        await response.json();
+    localStorage.removeItem(
+      "user"
+    );
 
-      message =
-        data.message ||
-        message;
+    if (
+      window.location.pathname !==
+      "/login"
+    ) {
 
-    } catch {}
+      window.location.href =
+        "/login";
 
-    throw new Error(message);
+    }
+
+    throw new Error(
+      "Session expired."
+    );
 
   }
+
+  let message =
+    "Something went wrong.";
+
+  try {
+
+    const data =
+      await response.json();
+
+    message =
+      data.message ||
+      message;
+
+  } catch {}
+
+  throw new Error(message);
+
+}
 
   if (response.status === 204) {
 

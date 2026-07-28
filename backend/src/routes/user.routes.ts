@@ -1,4 +1,8 @@
 import { Router } from "express";
+import {
+  requireAuth,
+  requireAdminOrManager,
+} from "../middleware/auth.middleware";
 
 import {
   login,
@@ -17,33 +21,41 @@ router.post(
   login
 );
 
+router.use(requireAuth);
+
 router.get(
   "/",
+  requireAdminOrManager,
   getUsers
 );
 
 router.post(
   "/",
+  requireAdminOrManager,
   createUser
 );
 
 router.put(
   "/:id",
+  requireAdminOrManager,
   updateUser
 );
 
 router.patch(
   "/:id/password",
+  requireAdminOrManager,
   resetPassword
 );
 
 router.patch(
   "/:id/status",
+  requireAdminOrManager,
   toggleUserStatus
 );
 
 router.delete(
   "/:id",
+  requireAdminOrManager,
   deleteUser
 );
 

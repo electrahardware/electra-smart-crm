@@ -1,6 +1,6 @@
 import MainLayout from "../layouts/MainLayout";
 import { Navigate } from "react-router-dom";
-import { isAdmin } from "../utils/auth";
+import { isAdminOrManager } from "../utils/auth";
 import { useEffect, useState } from "react";
 import UserDialog from "../components/users/UserDialog";
 import ResetPasswordDialog from "../components/users/ResetPasswordDialog";
@@ -15,7 +15,7 @@ import {
 
 export default function UserManagement() {
 
-if (!isAdmin()) {
+if (!isAdminOrManager()) {
 
   return (
     <Navigate

@@ -92,10 +92,10 @@ export default function FollowupPanel() {
         <div className="space-y-4">
           {todayLeads.map((lead) => (
             <FollowupCard
-  key={lead.id}
-  lead={lead}
-  onUpdated={loadLeads}
-/>
+              key={lead.id}
+              lead={lead}
+              onUpdated={loadLeads}
+            />
           ))}
         </div>
       )}

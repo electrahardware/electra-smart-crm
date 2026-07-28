@@ -3,6 +3,7 @@ dotenv.config();
 
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import prisma from "../lib/prisma";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -12,7 +13,7 @@ export interface AuthRequest extends Request {
   };
 }
 
-export function requireAuth(
+export async function requireAuth(
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -63,13 +64,35 @@ export function requireAuth(
         role: string;
       };
 
-    req.user = {
-      id: decoded.id,
-      name: decoded.name,
-      role: decoded.role,
-    };
+    const user = await prisma.user.findUnique({
+  where: {
+    id: decoded.id,
+  },
+});
 
-    next();
+if (!user) {
+
+  return res.status(401).json({
+    message: "User not found.",
+  });
+
+}
+
+if (!user.isActive) {
+
+  return res.status(401).json({
+    message: "Your account has been disabled.",
+  });
+
+}
+
+req.user = {
+  id: user.id,
+  name: user.name,
+  role: user.role,
+};
+
+next();
 
   } catch (error) {
 
@@ -83,4 +106,33 @@ export function requireAuth(
     });
 
   }
+}
+
+export function requireAdminOrManager(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+
+  if (!req.user) {
+
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+
+  }
+
+  if (
+    req.user.role !== "Admin" &&
+    req.user.role !== "Manager"
+  ) {
+
+    return res.status(403).json({
+      message: "Access denied.",
+    });
+
+  }
+
+  next();
+
 }

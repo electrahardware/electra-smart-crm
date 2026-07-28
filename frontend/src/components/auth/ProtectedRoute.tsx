@@ -12,18 +12,27 @@ export default function ProtectedRoute({
 }: Props) {
 
   const token =
-    localStorage.getItem("token");
+  localStorage.getItem("token");
 
-  if (!token) {
+const user =
+  localStorage.getItem("user");
 
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
+if (
+  !token ||
+  !user
+) {
 
-  }
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  return (
+    <Navigate
+      to="/login"
+      replace
+    />
+  );
+
+}
 
   return (
 

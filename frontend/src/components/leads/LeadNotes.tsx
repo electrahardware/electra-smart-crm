@@ -66,6 +66,10 @@ export default function LeadNotes({
       );
 
       setText("");
+      
+      window.dispatchEvent(
+  new Event("lead-updated")
+);
 
       await loadNotes();
 

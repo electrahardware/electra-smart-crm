@@ -1,10 +1,37 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export default function Login() {
 
   const navigate = useNavigate();
+
+useEffect(() => {
+
+  const token =
+    localStorage.getItem("token");
+
+  const user =
+    localStorage.getItem("user");
+
+  if (
+    token &&
+    user
+  ) {
+
+    navigate(
+      "/dashboard",
+      {
+        replace: true,
+      }
+    );
+
+  }
+
+}, [navigate]);
   
   const [email, setEmail] =
     useState("");

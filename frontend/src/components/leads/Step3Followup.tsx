@@ -60,6 +60,31 @@ const updateLead = (field: string, value: string) => {
   }
 />
 
+<div className="flex flex-col gap-2">
+
+  <TextInput
+    label="Next Follow-up Date"
+    type="date"
+    value={lead.followupDate}
+    field="followupDate"
+    onChange={(e) =>
+      updateLead("followupDate", e.target.value)
+    }
+  />
+
+  <button
+    type="button"
+    onClick={() => {
+      updateLead("followupDate", "");
+      updateLead("followupTime", "");
+    }}
+    className="self-start rounded-lg border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100"
+  >
+    None
+  </button>
+
+</div>
+
           <TextInput
   label="Next Follow-up Time"
   type="time"

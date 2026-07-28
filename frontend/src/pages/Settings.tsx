@@ -1,5 +1,7 @@
 import MainLayout from "../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+import { isAdminOrManager } from "../utils/auth";
 
 const menus = [
 
@@ -48,6 +50,18 @@ const menus = [
 ];
 
 export default function Settings() {
+
+  if (!isAdminOrManager()) {
+
+  return (
+    <Navigate
+      to="/dashboard"
+      replace
+    />
+  );
+
+}
+
   const navigate = useNavigate();
 
   return (

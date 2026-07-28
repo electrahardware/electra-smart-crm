@@ -187,13 +187,26 @@ export async function updateLead(
   },
 });
 
+const {
+  notesHistory,
+  timeline,
+  activities,
+  attachments,
+  calls,
+  quotations,
+  createdAt,
+  updatedAt,
+  id,
+  ...leadData
+} = req.body;
+
     const lead =
       await prisma.lead.update({
         where: {
           id: leadId,
         },
         data: {
-          ...req.body,
+          ...leadData,
 
           leadDate:
   req.body.leadDate
@@ -749,18 +762,21 @@ export async function completeFollowup(
       success: true,
     });
 
-  } catch (error) {
+  } catch (error: any) {
 
-    console.error(error);
+  console.error("========== UPDATE ERROR ==========");
+  console.error(error);
+  console.error(error.message);
+  console.error(error.code);
+  console.error(error.meta);
 
-    res.status(500).json({
+  return res.status(500).json({
+    message: error.message,
+    code: error.code,
+    meta: error.meta,
+  });
 
-      message:
-        "Unable to complete follow-up.",
-
-    });
-
-  }
+}
 }
 
 export async function createQuickLead(
@@ -794,6 +810,8 @@ export async function createQuickLead(
         leadId: existing.id,
       });
     }
+
+    
 
     const lead =
       await prisma.lead.create({

@@ -11,9 +11,8 @@ import {
 } from "../../contexts/SearchContext";
 import { searchLeads } from "../../services/masterSearchService";
 import { useState } from "react";
-import MasterLeadDrawer from "../masterLead/MasterLeadDrawer";
-import MasterLeadTabs from "../masterLead/MasterLeadTabs";
-import { getLeadDetails } from "../../services/leadDetailsService";
+import LeadDetailsDrawer from "../leads/LeadDetailsDrawer";
+import { useLead } from "../../hooks/useLead";import { getLeadDetails } from "../../services/leadDetailsService";
 import { useLeadDetails } from "../../contexts/LeadDetailsContext";
 
 
@@ -31,6 +30,14 @@ export default function Header() {
   const { toggle } = useSidebar();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const {
+  setLead: setEditingLead,
+  setEditingId,
+  setWizardOpen,
+} = useLead();
+
+const [selectedLead, setSelectedLead] =
+  useState<any>(null);
 
   const {
   search,
@@ -132,13 +139,15 @@ setDropdownOpen(data.length > 0);
 
     setLead(data);
 
-    setSelectedLeadId(lead.id);
+setSelectedLead(data);
 
-    setDropdownOpen(false);
-    setSearch("");
-    setResults([]);
+setSelectedLeadId(lead.id);
 
-    setDrawerOpen(true);
+setDropdownOpen(false);
+setSearch("");
+setResults([]);
+
+setDrawerOpen(true);
   } catch (error) {
     console.error(error);
   } finally {
@@ -176,12 +185,29 @@ setDropdownOpen(data.length > 0);
       </div>
     </header>
 
-    <MasterLeadDrawer
-  open={drawerOpen}
-  onClose={() => setDrawerOpen(false)}
->
-  <MasterLeadTabs />
-</MasterLeadDrawer>
+    <LeadDetailsDrawer
+  lead={selectedLead}
+  onClose={() => {
+    setDrawerOpen(false);
+    setSelectedLead(null);
+  }}
+  onEdit={(lead) => {
+  setDrawerOpen(false);
+
+  setEditingId(lead.id!);
+
+  setEditingLead({
+    ...lead,
+    products: Array.isArray(lead.products)
+      ? lead.products
+      : [],
+    followupDate:
+      lead.followupDate ?? "",
+  });
+
+  setWizardOpen(true);
+}}
+/>
   </>
 );
 }

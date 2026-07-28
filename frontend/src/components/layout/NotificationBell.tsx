@@ -31,6 +31,11 @@ export default function NotificationBell() {
       const data =
         await getNotifications();
 
+console.log("TYPE:", typeof data);
+console.log("DATA:", data);
+console.log("TODAY:", data.today);
+console.log("IS ARRAY:", Array.isArray(data.today));
+
       
 
 console.log("Notification API =>", data);
