@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getLeads } from "../../services/leadService";
 import type { Lead } from "../../types/lead";
 import FollowupCard from "./FollowupCard";
@@ -9,19 +9,19 @@ export default function FollowupPanel() {
 
   const loadLeads = useCallback(async () => {
     try {
-      const leads = await getLeads();
+      const response = await getLeads();
 
-      const today = new Date()
-        .toISOString()
-        .slice(0, 10);
+      const leads = response.data;
+
+      const today = new Date().toISOString().slice(0, 10);
 
       setTodayLeads(
         leads.filter(
           (lead) =>
             !lead.followupCompleted &&
             lead.followupDate &&
-            lead.followupDate.slice(0, 10) === today
-        )
+            lead.followupDate.slice(0, 10) === today,
+        ),
       );
 
       setOverdueLeads(
@@ -29,8 +29,8 @@ export default function FollowupPanel() {
           (lead) =>
             !lead.followupCompleted &&
             lead.followupDate &&
-            lead.followupDate.slice(0, 10) < today
-        )
+            lead.followupDate.slice(0, 10) < today,
+        ),
       );
     } catch (err) {
       console.error(err);
@@ -51,11 +51,8 @@ export default function FollowupPanel() {
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow">
-
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold">
-          🔔 Follow-ups
-        </h2>
+        <h2 className="text-2xl font-bold">🔔 Follow-ups</h2>
 
         <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
           Today : {todayLeads.length}
@@ -70,19 +67,13 @@ export default function FollowupPanel() {
 
           <div className="space-y-4 mb-8">
             {overdueLeads.map((lead) => (
-              <FollowupCard
-                key={lead.id}
-                lead={lead}
-                onUpdated={loadLeads}
-              />
+              <FollowupCard key={lead.id} lead={lead} onUpdated={loadLeads} />
             ))}
           </div>
         </>
       )}
 
-      <h3 className="mb-4 text-xl font-bold">
-        🟢 Today's Follow-ups
-      </h3>
+      <h3 className="mb-4 text-xl font-bold">🟢 Today's Follow-ups</h3>
 
       {todayLeads.length === 0 ? (
         <div className="py-8 text-center text-slate-500">
@@ -91,11 +82,7 @@ export default function FollowupPanel() {
       ) : (
         <div className="space-y-4">
           {todayLeads.map((lead) => (
-            <FollowupCard
-              key={lead.id}
-              lead={lead}
-              onUpdated={loadLeads}
-            />
+            <FollowupCard key={lead.id} lead={lead} onUpdated={loadLeads} />
           ))}
         </div>
       )}

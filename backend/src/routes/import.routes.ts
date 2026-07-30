@@ -1,5 +1,7 @@
 import { Router } from "express";
 
+import { authorize, requireAuth } from "../middleware/auth.middleware";
+
 import {
   commitLeadImport,
   previewLeadImport,
@@ -7,8 +9,18 @@ import {
 
 const router = Router();
 
-router.post("/leads/preview", previewLeadImport);
+router.use(requireAuth);
 
-router.post("/leads/commit", commitLeadImport);
+router.post(
+  "/leads/preview",
+  authorize("Owner", "Sales Manager", "Sales Executive"),
+  previewLeadImport,
+);
+
+router.post(
+  "/leads/commit",
+  authorize("Owner", "Sales Manager", "Sales Executive"),
+  commitLeadImport,
+);
 
 export default router;

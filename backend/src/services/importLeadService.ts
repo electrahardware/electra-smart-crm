@@ -8,10 +8,12 @@ import type {
   ImportPreviewRow,
 } from "../types/import";
 
-function normalizeMobile(
-  mobile?: string
-): string {
+type ImportUser = {
+  name: string;
+  role: string;
+};
 
+function normalizeMobile(mobile?: string): string {
   if (!mobile) {
     return "";
   }
@@ -22,81 +24,62 @@ function normalizeMobile(
   value = value.replace(/\D/g, "");
 
   // Remove India country code
-  if (
-    value.length === 12 &&
-    value.startsWith("91")
-  ) {
+  if (value.length === 12 && value.startsWith("91")) {
     value = value.substring(2);
   }
 
   // Remove leading zero
-  if (
-    value.length === 11 &&
-    value.startsWith("0")
-  ) {
+  if (value.length === 11 && value.startsWith("0")) {
     value = value.substring(1);
   }
 
   return value;
 }
 
-function validateLead(
-  lead: ImportLeadRow
-): {
+function validateLead(lead: ImportLeadRow): {
   status: ImportPreviewRow["status"];
   errors: ImportPreviewRow["errors"];
 } {
+  lead.mobile = normalizeMobile(lead.mobile);
 
-  lead.mobile =
-  normalizeMobile(lead.mobile);
-
-lead.whatsapp =
-  normalizeMobile(
-    lead.whatsapp || lead.mobile
-  );
+  lead.whatsapp = normalizeMobile(lead.whatsapp || lead.mobile);
 
   const errors: ImportPreviewRow["errors"] = [];
 
-  if (
-  !lead.mobile ||
-  !/^\d{10}$/.test(lead.mobile)
-) {
+  if (!lead.mobile || !/^\d{10}$/.test(lead.mobile)) {
+    errors.push({
+      field: "mobile",
 
-  errors.push({
-
-    field: "mobile",
-
-    message:
-      "Valid 10-digit mobile number is required.",
-
-  });
-
-}
+      message: "Valid 10-digit mobile number is required.",
+    });
+  }
 
   return {
-    status:
-      errors.length === 0
-        ? "ready"
-        : "invalid",
+    status: errors.length === 0 ? "ready" : "invalid",
     errors,
   };
 }
 
 export async function previewImportLeads(
-  rows: ImportLeadRow[]
+  rows: ImportLeadRow[],
+  user: ImportUser,
 ): Promise<ImportPreviewResponse> {
-  const previewRows: ImportPreviewRow[] =
-    rows.map((lead) => {
-      const validation =
-        validateLead(lead);
+  for (const lead of rows) {
+    if (user.role === "Sales Executive") {
+      lead.leadOwner = user.name;
+    }
+  }
 
-      return {
-        rowNumber: lead.rowNumber,
-        lead,
-        status: validation.status,
-        errors: validation.errors,
-      };
-    });
+  const previewRows: ImportPreviewRow[] = rows.map((lead) => {
+    const validation = validateLead(lead);
+
+    return {
+      rowNumber: lead.rowNumber,
+      lead,
+      status: validation.status,
+      errors: validation.errors,
+    };
+  });
 
   const seen = new Set<string>();
 
@@ -110,8 +93,7 @@ export async function previewImportLeads(
 
       row.errors.push({
         field: "mobile",
-        message:
-          "Duplicate mobile found in Excel.",
+        message: "Duplicate mobile found in Excel.",
       });
 
       return;
@@ -121,29 +103,23 @@ export async function previewImportLeads(
   });
 
   const mobiles = previewRows
-    .filter(
-      (row) => row.status === "ready"
-    )
+    .filter((row) => row.status === "ready")
     .map((row) => row.lead.mobile);
 
-  const existingLeads =
-    await prisma.lead.findMany({
-      where: {
-        mobile: {
-          in: mobiles,
-        },
+  const existingLeads = await prisma.lead.findMany({
+    where: {
+      mobile: {
+        in: mobiles,
       },
-      select: {
-        id: true,
-        mobile: true,
-      },
-    });
+    },
+    select: {
+      id: true,
+      mobile: true,
+    },
+  });
 
   const existingMap = new Map(
-    existingLeads.map((lead) => [
-      lead.mobile,
-      lead.id,
-    ])
+    existingLeads.map((lead) => [lead.mobile, lead.id]),
   );
 
   previewRows.forEach((row) => {
@@ -151,9 +127,7 @@ export async function previewImportLeads(
       return;
     }
 
-    const id = existingMap.get(
-      row.lead.mobile
-    );
+    const id = existingMap.get(row.lead.mobile);
 
     if (!id) {
       return;
@@ -165,20 +139,17 @@ export async function previewImportLeads(
 
     row.errors.push({
       field: "mobile",
-      message:
-        "Mobile already exists in CRM.",
+      message: "Mobile already exists in CRM.",
     });
   });
-    const readyRows = previewRows.filter(
-    (row) => row.status === "ready"
-  ).length;
+  const readyRows = previewRows.filter((row) => row.status === "ready").length;
 
   const duplicateRows = previewRows.filter(
-    (row) => row.status === "duplicate"
+    (row) => row.status === "duplicate",
   ).length;
 
   const invalidRows = previewRows.filter(
-    (row) => row.status === "invalid"
+    (row) => row.status === "invalid",
   ).length;
 
   return {
@@ -195,7 +166,8 @@ export async function previewImportLeads(
 
 export async function commitImportLeads(
   rows: ImportLeadRow[],
-  duplicatePolicy: DuplicatePolicy
+  duplicatePolicy: DuplicatePolicy,
+  user: ImportUser,
 ): Promise<ImportCommitResponse> {
   let insertedRows = 0;
   let updatedRows = 0;
@@ -203,6 +175,9 @@ export async function commitImportLeads(
   let failedRows = 0;
 
   for (const lead of rows) {
+    if (user.role === "Sales Executive") {
+      lead.leadOwner = user.name;
+    }
     try {
       const existing = await prisma.lead.findFirst({
         where: {
@@ -221,8 +196,7 @@ export async function commitImportLeads(
             id: existing.id,
           },
           data: {
-            customerName:
-  lead.customerName?.trim() || "",
+            customerName: lead.customerName?.trim() || "",
             secondaryMobile: lead.secondaryMobile,
             whatsapp: lead.whatsapp,
             shopName: lead.shopName,
@@ -231,95 +205,111 @@ export async function commitImportLeads(
             state: lead.state,
             district: lead.district,
             city: lead.city,
-area: lead.area,
-pincode: lead.pincode,
+            area: lead.area,
+            pincode: lead.pincode,
 
-leadDate: lead.leadDate
-  ? new Date(lead.leadDate)
-  : new Date(),
+            leadDate: lead.leadDate ? new Date(lead.leadDate) : new Date(),
             addressLine1: lead.addressLine1,
             addressLine2: lead.addressLine2,
-            leadOwner: lead.leadOwner,
+            leadOwner:
+              user.role === "Sales Executive"
+                ? existing.leadOwner
+                : lead.leadOwner,
             leadSource: lead.leadSource,
             language: lead.language,
             priority: lead.priority,
             status: lead.status,
             followupDate: null,
 
-followupCompleted: false,
+            followupCompleted: false,
 
-followupCompletedAt: null,
+            followupCompletedAt: null,
             notes: lead.notes,
           },
         });
 
-        if (
-  lead.notes &&
-  lead.notes.trim() !== ""
-) {
+        if (lead.notes && lead.notes.trim() !== "") {
+          await prisma.leadNote.create({
+            data: {
+              leadId: existing.id,
+              note: lead.notes,
+            },
+          });
+        }
 
-  await prisma.leadNote.create({
-    data: {
-      leadId: existing.id,
-      note: lead.notes,
-    },
-  });
+        await prisma.leadTimeline.create({
+          data: {
+            leadId: existing.id,
 
-}
+            type: "IMPORT",
+
+            title: "Lead Updated via Import",
+
+            description: `Existing lead updated from Excel import by ${user.name}`,
+          },
+        });
 
         updatedRows++;
         continue;
       }
 
-      const newLead =
-  await prisma.lead.create({
-    data: {
-      customerName:
-  lead.customerName?.trim() || "",
-      mobile: lead.mobile,
-      secondaryMobile: lead.secondaryMobile,
-      whatsapp: lead.whatsapp,
-      shopName: lead.shopName,
-      email: lead.email,
-      gst: lead.gst,
-      state: lead.state,
-      district: lead.district,
-      city: lead.city,
-area: lead.area,
-pincode: lead.pincode,
+      const newLead = await prisma.lead.create({
+        data: {
+          customerName: lead.customerName?.trim() || "",
+          mobile: lead.mobile,
+          secondaryMobile: lead.secondaryMobile,
+          whatsapp: lead.whatsapp,
+          shopName: lead.shopName,
+          email: lead.email,
+          gst: lead.gst,
+          state: lead.state,
+          district: lead.district,
+          city: lead.city,
+          area: lead.area,
+          pincode: lead.pincode,
 
-leadDate: lead.leadDate
-  ? new Date(lead.leadDate)
-  : new Date(),
-      addressLine1: lead.addressLine1,
-      addressLine2: lead.addressLine2,
-      leadOwner: lead.leadOwner,
-      leadSource: lead.leadSource,
-      language: lead.language,
-      priority: lead.priority,
-      status: lead.status,
-      followupDate: null,
+          leadDate: lead.leadDate ? new Date(lead.leadDate) : new Date(),
+          addressLine1: lead.addressLine1,
+          addressLine2: lead.addressLine2,
+          leadOwner:
+            user.role === "Sales Executive" ? user.name : lead.leadOwner,
+          leadSource: lead.leadSource,
+          language: lead.language,
+          priority: lead.priority,
+          status: lead.status,
+          followupDate: null,
 
-followupCompleted: false,
+          followupCompleted: false,
 
-followupCompletedAt: null,
-      notes: lead.notes,
-    },
-  });
+          followupCompletedAt: null,
+          notes: lead.notes,
+        },
+      });
 
-if (
-  lead.notes &&
-  lead.notes.trim() !== ""
-) {
+      if (lead.notes && lead.notes.trim() !== "") {
+        await prisma.leadNote.create({
+          data: {
+            leadId: newLead.id,
+            note: lead.notes,
+            createdBy: user.name,
+          },
+        });
+      }
 
-  await prisma.leadNote.create({
-    data: {
-      leadId: newLead.id,
-      note: lead.notes,
-    },
-  });
+      await prisma.leadTimeline.create({
+        data: {
+          leadId: newLead.id,
 
-}
+          type: "IMPORT",
+
+          title: "Lead Imported",
+
+          description: "Lead imported from Excel",
+
+          createdBy: user.name,
+        },
+      });
+
       insertedRows++;
     } catch (error) {
       console.error(error);

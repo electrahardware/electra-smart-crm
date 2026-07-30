@@ -1,91 +1,75 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 
-export async function getDashboard(
-  req: Request,
-  res: Response
-) {
+export async function getDashboard(req: Request, res: Response) {
   try {
+    const totalLeads = await prisma.lead.count();
 
-    const totalLeads =
-      await prisma.lead.count();
+    const hotLeads = await prisma.lead.count({
+      where: {
+        priority: "Hot",
+      },
+    });
 
-    const hotLeads =
-      await prisma.lead.count({
-        where: {
-          priority: "Hot",
-        },
-      });
+    const wonLeads = await prisma.lead.count({
+      where: {
+        status: "Won",
+      },
+    });
 
-    const wonLeads =
-      await prisma.lead.count({
-        where: {
-          status: "Won",
-        },
-      });
+    const lostLeads = await prisma.lead.count({
+      where: {
+        status: "Lost",
+      },
+    });
 
-    const lostLeads =
-      await prisma.lead.count({
-        where: {
-          status: "Lost",
-        },
-      });
-
-    const today =
-      new Date();
+    const today = new Date();
 
     today.setHours(0, 0, 0, 0);
 
-    const tomorrow =
-      new Date(today);
+    const tomorrow = new Date(today);
 
-    tomorrow.setDate(
-      tomorrow.getDate() + 1
-    );
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const todayFollowups =
-      await prisma.lead.count({
-        where: {
-          followupDate: {
-            gte: today,
-            lt: tomorrow,
-          },
+    const todayFollowups = await prisma.lead.count({
+      where: {
+        followupDate: {
+          gte: today,
+          lt: tomorrow,
         },
-      });
+      },
+    });
 
-    const overdueFollowups =
-      await prisma.lead.count({
-        where: {
-          followupDate: {
-            lt: today,
-          },
-          followupCompleted: false,
+    const overdueFollowups = await prisma.lead.count({
+      where: {
+        followupDate: {
+          lt: today,
         },
-      });
+        followupCompleted: false,
+      },
+    });
 
-    const pipeline =
-      await prisma.lead.aggregate({
-        _sum: {
-          expectedValue: true,
-        },
-      });
+    const pipeline = await prisma.lead.aggregate({
+      _sum: {
+        expectedValue: true,
+      },
+    });
 
-      const recentLeads =
-  await prisma.lead.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 5,
-    select: {
-      id: true,
-      customerName: true,
-      shopName: true,
-      mobile: true,
-      status: true,
-      priority: true,
-      createdAt: true,
-    },
-  });
+    const recentLeads = await prisma.lead.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5,
+      select: {
+        id: true,
+        customerName: true,
+        shopName: true,
+        mobile: true,
+        status: true,
+        priority: true,
+        createdAt: true,
+      },
+    });
 
     res.json({
       totalLeads,
@@ -94,21 +78,16 @@ export async function getDashboard(
       lostLeads,
       todayFollowups,
       overdueFollowups,
-      pipelineValue:
-        pipeline._sum.expectedValue || 0,
+      pipelineValue: pipeline._sum.expectedValue || 0,
 
-        recentLeads,
+      recentLeads,
     });
-
   } catch (error) {
+    console.error("Dashboard Error:", error);
 
-  console.error("Dashboard Error:", error);
-
-  res.status(500).json({
-    message: "Unable to load dashboard.",
-    error,
-  });
-
+    res.status(500).json({
+      message: "Unable to load dashboard.",
+      error,
+    });
+  }
 }
-}
-

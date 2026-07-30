@@ -11,9 +11,9 @@ export function useLeads() {
     try {
       setLoading(true);
 
-      const data = await getLeads();
+      const response = await getLeads();
 
-      setLeads(data);
+      setLeads(response.data);
     } catch (error) {
       console.error(error);
     } finally {

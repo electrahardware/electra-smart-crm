@@ -1,14 +1,17 @@
 import { Router } from "express";
 
-import {
-  getActivities,
-} from "../controllers/activity.controller";
+import { authorize, requireAuth } from "../middleware/auth.middleware";
+
+import { getActivities } from "../controllers/activity.controller";
 
 const router = Router();
 
+router.use(requireAuth);
+
 router.get(
   "/",
-  getActivities
+  authorize("Owner", "Sales Manager", "Sales Executive"),
+  getActivities,
 );
 
 export default router;

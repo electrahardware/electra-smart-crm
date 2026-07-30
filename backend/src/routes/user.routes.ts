@@ -1,62 +1,44 @@
 import { Router } from "express";
-import {
-  requireAuth,
-  requireAdminOrManager,
-} from "../middleware/auth.middleware";
+import { authorize, requireAuth } from "../middleware/auth.middleware";
 
 import {
-  login,
-  getUsers,
   createUser,
-  updateUser,
   deleteUser,
-  toggleUserStatus,
+  getUsers,
+  login,
   resetPassword,
+  toggleUserStatus,
+  updateUser,
 } from "../controllers/user.controller";
 
 const router = Router();
 
-router.post(
-  "/login",
-  login
-);
+/* --------------------------------------------------
+   Public
+--------------------------------------------------- */
+
+router.post("/login", login);
+
+/* --------------------------------------------------
+   Authentication
+--------------------------------------------------- */
 
 router.use(requireAuth);
 
-router.get(
-  "/",
-  requireAdminOrManager,
-  getUsers
-);
+/* --------------------------------------------------
+   User Management (Owner Only)
+--------------------------------------------------- */
 
-router.post(
-  "/",
-  requireAdminOrManager,
-  createUser
-);
+router.get("/", authorize("Owner"), getUsers);
 
-router.put(
-  "/:id",
-  requireAdminOrManager,
-  updateUser
-);
+router.post("/", authorize("Owner"), createUser);
 
-router.patch(
-  "/:id/password",
-  requireAdminOrManager,
-  resetPassword
-);
+router.put("/:id", authorize("Owner"), updateUser);
 
-router.patch(
-  "/:id/status",
-  requireAdminOrManager,
-  toggleUserStatus
-);
+router.patch("/:id/password", authorize("Owner"), resetPassword);
 
-router.delete(
-  "/:id",
-  requireAdminOrManager,
-  deleteUser
-);
+router.patch("/:id/status", authorize("Owner"), toggleUserStatus);
+
+router.delete("/:id", authorize("Owner"), deleteUser);
 
 export default router;

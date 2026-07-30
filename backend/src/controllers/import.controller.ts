@@ -1,17 +1,18 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthRequest } from "../middleware/auth.middleware";
 import {
-  previewImportLeads,
   commitImportLeads,
+  previewImportLeads,
 } from "../services/importLeadService";
 
 export async function previewLeadImport(
-  req: Request,
-  res: Response
+  req: AuthRequest,
+  res: Response,
 ): Promise<void> {
   try {
     const { rows } = req.body;
 
-    const result = await previewImportLeads(rows ?? []);
+    const result = await previewImportLeads(rows ?? [], req.user!);
 
     res.status(200).json(result);
   } catch (error) {
@@ -24,15 +25,16 @@ export async function previewLeadImport(
 }
 
 export async function commitLeadImport(
-  req: Request,
-  res: Response
+  req: AuthRequest,
+  res: Response,
 ): Promise<void> {
   try {
     const { rows, duplicatePolicy } = req.body;
 
     const result = await commitImportLeads(
       rows ?? [],
-      duplicatePolicy
+      duplicatePolicy,
+      req.user!,
     );
 
     res.status(200).json(result);
