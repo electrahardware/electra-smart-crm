@@ -13,6 +13,13 @@ type ImportUser = {
   role: string;
 };
 
+const VALID_OWNERS = [
+  "Nirav Sir",
+  "Harnish Bhai",
+  "Dharmesh Bhai",
+  "Dhiren Bhai",
+];
+
 function normalizeMobile(mobile?: string): string {
   if (!mobile) {
     return "";
@@ -54,6 +61,15 @@ function validateLead(lead: ImportLeadRow): {
     });
   }
 
+  const owner = (lead.leadOwner ?? "").trim();
+
+  if (owner && !VALID_OWNERS.includes(owner)) {
+    errors.push({
+      field: "leadOwner",
+      message: `Invalid Owner. Allowed: ${VALID_OWNERS.join(", ")}`,
+    });
+  }
+
   return {
     status: errors.length === 0 ? "ready" : "invalid",
     errors,
@@ -65,7 +81,13 @@ export async function previewImportLeads(
   user: ImportUser,
 ): Promise<ImportPreviewResponse> {
   for (const lead of rows) {
+    const owner = (lead.leadOwner ?? "").trim();
+
     if (user.role === "Sales Executive") {
+      lead.leadOwner = user.name;
+    } else if (owner && VALID_OWNERS.includes(owner)) {
+      lead.leadOwner = owner;
+    } else {
       lead.leadOwner = user.name;
     }
   }
@@ -175,9 +197,16 @@ export async function commitImportLeads(
   let failedRows = 0;
 
   for (const lead of rows) {
+    const owner = (lead.leadOwner ?? "").trim();
+
     if (user.role === "Sales Executive") {
       lead.leadOwner = user.name;
+    } else if (owner && VALID_OWNERS.includes(owner)) {
+      lead.leadOwner = owner;
+    } else {
+      lead.leadOwner = user.name;
     }
+
     try {
       const existing = await prisma.lead.findFirst({
         where: {
@@ -211,10 +240,7 @@ export async function commitImportLeads(
             leadDate: lead.leadDate ? new Date(lead.leadDate) : new Date(),
             addressLine1: lead.addressLine1,
             addressLine2: lead.addressLine2,
-            leadOwner:
-              user.role === "Sales Executive"
-                ? existing.leadOwner
-                : lead.leadOwner,
+            leadOwner: lead.leadOwner,
             leadSource: lead.leadSource,
             language: lead.language,
             priority: lead.priority,
@@ -233,6 +259,7 @@ export async function commitImportLeads(
             data: {
               leadId: existing.id,
               note: lead.notes,
+              createdBy: user.name,
             },
           });
         }
@@ -245,7 +272,9 @@ export async function commitImportLeads(
 
             title: "Lead Updated via Import",
 
-            description: `Existing lead updated from Excel import by ${user.name}`,
+            description: `Lead updated from Excel and assigned to ${lead.leadOwner} by ${user.name}`,
+
+            createdBy: user.name,
           },
         });
 
@@ -271,8 +300,7 @@ export async function commitImportLeads(
           leadDate: lead.leadDate ? new Date(lead.leadDate) : new Date(),
           addressLine1: lead.addressLine1,
           addressLine2: lead.addressLine2,
-          leadOwner:
-            user.role === "Sales Executive" ? user.name : lead.leadOwner,
+          leadOwner: lead.leadOwner,
           leadSource: lead.leadSource,
           language: lead.language,
           priority: lead.priority,
@@ -304,7 +332,7 @@ export async function commitImportLeads(
 
           title: "Lead Imported",
 
-          description: "Lead imported from Excel",
+          description: `Lead imported from Excel by ${user.name} and assigned to ${lead.leadOwner}`,
 
           createdBy: user.name,
         },

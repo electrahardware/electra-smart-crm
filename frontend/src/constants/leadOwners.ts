@@ -1,7 +1,8 @@
 const leadOwners = [
-  "Harnishbhai",
-  "Dharmeshbhai",
-  "Dhirenbhai",
+  "Nirav Sir",
+  "Harnish Bhai",
+  "Dharmesh Bhai",
+  "Dhiren Bhai",
 ];
 
 export default leadOwners;

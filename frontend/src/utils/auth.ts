@@ -55,3 +55,47 @@ export function isSales() {
 export function isAdminOrManager() {
   return isOwnerOrManager();
 }
+
+export function canDeleteLead(): boolean {
+  return isOwnerOrManager();
+}
+
+export function canManageUsers(): boolean {
+  return isOwner();
+}
+
+export function canChangeLeadOwner(): boolean {
+  return isOwnerOrManager();
+}
+
+export function canBulkDelete(): boolean {
+  return isOwnerOrManager();
+}
+
+export function canImportLeads(): boolean {
+  return isOwnerOrManager();
+}
+
+export function canExportLeads(): boolean {
+  return isOwnerOrManager();
+}
+
+export function canViewAnalytics(): boolean {
+  return isOwnerOrManager();
+}
+
+export function canEditLead(): boolean {
+  return true;
+}
+
+export function canViewLead(): boolean {
+  return true;
+}
+
+export function canCallCustomer(): boolean {
+  return true;
+}
+
+export function canAddNote(): boolean {
+  return true;
+}

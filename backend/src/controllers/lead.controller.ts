@@ -3,6 +3,29 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { createTimeline } from "../services/timeline.service";
 
+async function verifyLeadAccess(req: Request, leadId: number) {
+  const currentUser = (req as any).user;
+
+  if (currentUser.role === "Owner" || currentUser.role === "Sales Manager") {
+    return true;
+  }
+
+  const lead = await prisma.lead.findUnique({
+    where: {
+      id: leadId,
+    },
+    select: {
+      leadOwner: true,
+    },
+  });
+
+  if (!lead) {
+    return false;
+  }
+
+  return lead.leadOwner === currentUser.name;
+}
+
 export async function getAllLeads(req: Request, res: Response) {
   try {
     const page = Number(req.query.page) || 1;
@@ -35,6 +58,16 @@ export async function getAllLeads(req: Request, res: Response) {
     const followup = (req.query.followup as string)?.trim() || "";
 
     const where: Prisma.LeadWhereInput = {};
+
+    const currentUser = (req as any).user;
+
+    // ------------------------
+    // Role Based Access
+    // ------------------------
+
+    if (currentUser.role === "Sales Executive") {
+      where.leadOwner = currentUser.name;
+    }
 
     if (search) {
       where.OR = [
@@ -200,9 +233,18 @@ export async function getAllLeads(req: Request, res: Response) {
 
 export async function getLead(req: Request, res: Response) {
   try {
+    const leadId = Number(req.params.id);
+
+    const allowed = await verifyLeadAccess(req, leadId);
+
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Access denied.",
+      });
+    }
     const lead = await prisma.lead.findUnique({
       where: {
-        id: Number(req.params.id),
+        id: leadId,
       },
       include: {
         notesHistory: {
@@ -305,6 +347,14 @@ export async function createLead(req: Request, res: Response) {
 export async function updateLead(req: Request, res: Response) {
   try {
     const leadId = Number(req.params.id);
+
+    const allowed = await verifyLeadAccess(req, leadId);
+
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Access denied.",
+      });
+    }
 
     const oldLead = await prisma.lead.findUnique({
       where: {
@@ -428,9 +478,18 @@ export async function updateLead(req: Request, res: Response) {
 
 export async function deleteLead(req: Request, res: Response) {
   try {
+    const leadId = Number(req.params.id);
+
+    const allowed = await verifyLeadAccess(req, leadId);
+
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Access denied.",
+      });
+    }
     await prisma.lead.delete({
       where: {
-        id: Number(req.params.id),
+        id: leadId,
       },
     });
 
@@ -448,9 +507,18 @@ export async function deleteLead(req: Request, res: Response) {
 
 export async function getLeadNotes(req: Request, res: Response) {
   try {
+    const leadId = Number(req.params.id);
+
+    const allowed = await verifyLeadAccess(req, leadId);
+
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Access denied.",
+      });
+    }
     const notes = await prisma.leadNote.findMany({
       where: {
-        leadId: Number(req.params.id),
+        leadId: leadId,
       },
       orderBy: {
         createdAt: "desc",
@@ -470,6 +538,14 @@ export async function getLeadNotes(req: Request, res: Response) {
 export async function addLeadNote(req: Request, res: Response) {
   try {
     const leadId = Number(req.params.id);
+
+    const allowed = await verifyLeadAccess(req, leadId);
+
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Access denied.",
+      });
+    }
 
     const note = await prisma.leadNote.create({
       data: {
@@ -510,6 +586,15 @@ export async function addLeadNote(req: Request, res: Response) {
 
 export async function deleteLeadNote(req: Request, res: Response) {
   try {
+    const leadId = Number(req.params.id);
+
+    const allowed = await verifyLeadAccess(req, leadId);
+
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Access denied.",
+      });
+    }
     await prisma.leadNote.delete({
       where: {
         id: Number(req.params.noteId),
@@ -518,7 +603,7 @@ export async function deleteLeadNote(req: Request, res: Response) {
 
     const latestNote = await prisma.leadNote.findFirst({
       where: {
-        leadId: Number(req.params.id),
+        leadId: leadId,
       },
 
       orderBy: {
@@ -528,7 +613,7 @@ export async function deleteLeadNote(req: Request, res: Response) {
 
     await prisma.lead.update({
       where: {
-        id: Number(req.params.id),
+        id: leadId,
       },
 
       data: {
@@ -537,7 +622,7 @@ export async function deleteLeadNote(req: Request, res: Response) {
     });
 
     await createTimeline({
-      leadId: Number(req.params.id),
+      leadId: leadId,
       type: "NOTE",
       title: "Note Deleted",
       description: "Lead note deleted.",
@@ -642,7 +727,13 @@ export async function deleteMultipleLeads(req: Request, res: Response) {
 export async function completeFollowup(req: Request, res: Response) {
   try {
     const leadId = Number(req.params.id);
+    const allowed = await verifyLeadAccess(req, leadId);
 
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Access denied.",
+      });
+    }
     const { note, followupDate } = req.body;
 
     // Save latest note

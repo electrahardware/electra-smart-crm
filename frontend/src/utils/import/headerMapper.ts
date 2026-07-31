@@ -19,141 +19,82 @@ export type CanonicalColumn =
   | "followupDate"
   | "notes";
 
-export const HEADER_SYNONYMS: Record<
-  CanonicalColumn,
-  string[]
-> = {
+export const HEADER_SYNONYMS: Record<CanonicalColumn, string[]> = {
   customerName: [
-  "Customer Name",
-  "Customer",
-  "Name",
-  "Party Name",
-  "Dealer Name",
-  "Shop / Company Name",
-],
+    "Customer Name",
+    "Customer",
+    "Name",
+    "Party Name",
+    "Dealer Name",
+    "Shop / Company Name",
+  ],
 
   shopName: [
-  "Shop Name",
-  "Firm Name",
-  "Company Name",
-  "Business Name",
-  "Shop / Company Name",
-],
+    "Shop Name",
+    "Firm Name",
+    "Company Name",
+    "Business Name",
+    "Shop / Company Name",
+  ],
 
   mobile: [
-  "Mobile",
-  "Mobile No",
-  "Mobile Number",
-  "Phone",
-  "Phone Number",
-  "Contact",
-  "Contact No",
-  "Contact Number",
-  "Whatsapp Number",
-  "WhatsApp Number",
-],
+    "Mobile",
+    "Mobile No",
+    "Mobile Number",
+    "Phone",
+    "Phone Number",
+    "Contact",
+    "Contact No",
+    "Contact Number",
+    "Whatsapp Number",
+    "WhatsApp Number",
+  ],
 
   whatsapp: [
-  "Whatsapp",
-  "WhatsApp",
-  "WhatsApp No",
-  "WhatsApp Number",
-  "Whatsapp Number",
-],
-
-  email: [
-    "Email",
-    "Email ID",
-    "Mail",
+    "Whatsapp",
+    "WhatsApp",
+    "WhatsApp No",
+    "WhatsApp Number",
+    "Whatsapp Number",
   ],
 
-  gst: [
-    "GST",
-    "GSTIN",
-    "GST No",
-    "GST Number",
-  ],
+  email: ["Email", "Email ID", "Mail"],
 
-  address: [
-    "Address",
-    "Address 1",
-    "Full Address",
-  ],
+  gst: ["GST", "GSTIN", "GST No", "GST Number"],
 
-  area: [
-    "Area",
-    "Locality",
-  ],
+  address: ["Address", "Address 1", "Full Address"],
 
-  district: [
-  "District",
-],
+  area: ["Area", "Locality"],
 
-city: [
-  "City",
-  "Town",
-  "Village",
-],
+  district: ["District"],
 
-  state: [
-    "State",
-  ],
+  city: ["City", "Town", "Village"],
 
-  pincode: [
-    "Pincode",
-    "Pin",
-    "Zip",
-    "Zip Code",
-  ],
+  state: ["State"],
 
-  leadOwner: [
-    "Lead Owner",
-    "Admin",
-    "Sales Person",
-    "Assigned To",
-  ],
+  pincode: ["Pincode", "Pin", "Zip", "Zip Code"],
 
-  leadSource: [
-    "Lead Source",
-    "Source",
-    "Inquiry Source",
-  ],
+  leadOwner: ["Lead Owner", "Owner", "Admin", "Sales Person", "Assigned To"],
 
+  leadSource: ["Lead Source", "Source", "Inquiry Source"],
 
-  priority: [
-    "Priority",
-  ],
+  priority: ["Priority"],
 
-  status: [
-    "Status",
-  ],
+  status: ["Status"],
 
   followupDate: [
-  "Follow-up Date",
-  "Followup Date",
-  "Next Followup",
-  "Next Follow-up",
-],
-
-leadDate: [
-  "Lead Date",
-  "Created Date",
-  "Entry Date",
-  "Date",
-],
-
-  notes: [
-    "Notes",
-    "Remark",
-    "Remarks",
-    "Comment",
-    "Comments",
+    "Follow-up Date",
+    "Followup Date",
+    "Next Followup",
+    "Next Follow-up",
   ],
+
+  leadDate: ["Lead Date", "Created Date", "Entry Date", "Date"],
+
+  notes: ["Notes", "Remark", "Remarks", "Comment", "Comments"],
 };
 
-export function normalizeHeader(
-  value: string
-): string {
+export function normalizeHeader(value: string): string {
   return value
     .toLowerCase()
     .trim()
@@ -161,16 +102,10 @@ export function normalizeHeader(
     .replace(/\s+/g, " ");
 }
 
-export function detectColumns(
-  headers: string[]
-): {
-  detectedColumns: Partial<
-    Record<CanonicalColumn, string>
-  >;
+export function detectColumns(headers: string[]): {
+  detectedColumns: Partial<Record<CanonicalColumn, string>>;
 
-  columnIndexes: Partial<
-    Record<CanonicalColumn, number>
-  >;
+  columnIndexes: Partial<Record<CanonicalColumn, number>>;
 } {
   const lookup = new Map<string, number>();
 
@@ -182,21 +117,13 @@ export function detectColumns(
     }
   });
 
-  const detectedColumns: Partial<
-    Record<CanonicalColumn, string>
-  > = {};
+  const detectedColumns: Partial<Record<CanonicalColumn, string>> = {};
 
-  const columnIndexes: Partial<
-    Record<CanonicalColumn, number>
-  > = {};
+  const columnIndexes: Partial<Record<CanonicalColumn, number>> = {};
 
-  (
-    Object.keys(HEADER_SYNONYMS) as CanonicalColumn[]
-  ).forEach((field) => {
+  (Object.keys(HEADER_SYNONYMS) as CanonicalColumn[]).forEach((field) => {
     for (const synonym of HEADER_SYNONYMS[field]) {
-      const index = lookup.get(
-        normalizeHeader(synonym)
-      );
+      const index = lookup.get(normalizeHeader(synonym));
 
       if (index !== undefined) {
         detectedColumns[field] = headers[index];

@@ -7,6 +7,7 @@ import type { Lead } from "../../types/lead";
 import { useLead } from "../../hooks/useLead";
 
 import toast from "react-hot-toast";
+import { isOwnerOrManager } from "../../utils/auth";
 import { exportLeadsExcel } from "../../utils/exportLeadsExcel";
 import FollowupDashboard from "./FollowupDashboard";
 import LeadBulkActions from "./LeadBulkActions";
@@ -22,6 +23,8 @@ type LeadTableProps = {
 };
 
 export default function LeadTable({ onEditLead }: LeadTableProps) {
+  const canManage = isOwnerOrManager();
+
   const [leads, setLeads] = useState<Lead[]>([]);
 
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -386,12 +389,14 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
 
       <div className="h-6" />
       <div className="bg-white rounded-2xl shadow border border-slate-200">
-        <LeadBulkActions
-          selectedCount={selectedIds.length}
-          onDelete={deleteSelected}
-          onExport={exportSelected}
-          onClear={() => setSelectedIds([])}
-        />
+        {canManage && (
+          <LeadBulkActions
+            selectedCount={selectedIds.length}
+            onDelete={deleteSelected}
+            onExport={exportSelected}
+            onClear={() => setSelectedIds([])}
+          />
+        )}
 
         <div className="border-b p-6">
           <h2 className="text-2xl font-bold">Saved Leads</h2>

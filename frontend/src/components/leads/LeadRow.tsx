@@ -1,14 +1,9 @@
-import StatusBadge from "./StatusBadge";
-import PriorityBadge from "./PriorityBadge";
-import type { Lead } from "../../types/lead";
-import {
-  Phone,
-  MessageCircle,
-  Eye,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { Eye, MessageCircle, Pencil, Phone, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import type { Lead } from "../../types/lead";
+import { canEditLead, isOwnerOrManager } from "../../utils/auth";
+import PriorityBadge from "./PriorityBadge";
+import StatusBadge from "./StatusBadge";
 
 interface Props {
   lead: Lead;
@@ -24,7 +19,6 @@ interface Props {
   onEdit: () => void;
 
   onDelete: () => void;
-  
 }
 
 export default function LeadRow({
@@ -36,11 +30,11 @@ export default function LeadRow({
   onEdit,
   onDelete,
 }: Props) {
+  const canDelete = isOwnerOrManager();
 
-  const rawDate =
-    lead.leadDate ||
-    lead.createdAt ||
-    "";
+  const canEdit = canEditLead();
+
+  const rawDate = lead.leadDate || lead.createdAt || "";
 
   const leadDate = rawDate
     ? new Intl.DateTimeFormat("en-GB")
@@ -49,99 +43,78 @@ export default function LeadRow({
     : "-";
 
   async function copyMobile(
-  e: React.MouseEvent<HTMLButtonElement>,
-  mobile: string
-) {
-  e.stopPropagation();
+    e: React.MouseEvent<HTMLButtonElement>,
+    mobile: string,
+  ) {
+    e.stopPropagation();
 
-  try {
-    await navigator.clipboard.writeText(mobile);
+    try {
+      await navigator.clipboard.writeText(mobile);
 
-    toast.success("Mobile number copied");
-  } catch {
-    toast.error("Unable to copy mobile number");
+      toast.success("Mobile number copied");
+    } catch {
+      toast.error("Unable to copy mobile number");
+    }
   }
-}
 
   return (
-
     <tr
-  onClick={onView}
-  onDoubleClick={(e) => {
-    e.stopPropagation();
-    onEdit();
-  }}
-  className={`group border-t cursor-pointer transition-all duration-200
-    ${
-      index % 2 === 0
-        ? "bg-white"
-        : "bg-slate-100"
-    }
+      onClick={onView}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        onEdit();
+      }}
+      className={`group border-t cursor-pointer transition-all duration-200
+    ${index % 2 === 0 ? "bg-white" : "bg-slate-100"}
     hover:bg-sky-50 hover:shadow-sm`}
->
+    >
       <td className="p-3">
         <input
-  type="checkbox"
-  checked={selected}
-  onClick={(e) => e.stopPropagation()}
-  onChange={onToggle}
-/>
+          type="checkbox"
+          checked={selected}
+          onClick={(e) => e.stopPropagation()}
+          onChange={onToggle}
+        />
       </td>
 
-      <td className="p-3 whitespace-nowrap">
-        {leadDate}
-      </td>
+      <td className="p-3 whitespace-nowrap">{leadDate}</td>
 
       <td
-  title="Click to view • Double-click to edit"
-  className="p-3 font-semibold text-slate-800 group-hover:text-blue-700 transition-colors"
->
-  {lead.customerName}
-</td>
-
-      <td className="p-3">
-  <button
-    onClick={(e) =>
-      copyMobile(e, lead.mobile)
-    }
-    className="font-medium text-blue-600 hover:underline"
-    title="Copy Mobile Number"
-  >
-    {lead.mobile}
-  </button>
-</td>
-
-      <td className="p-3">
-        {lead.shopName || "-"}
+        title="Click to view • Double-click to edit"
+        className="p-3 font-semibold text-slate-800 group-hover:text-blue-700 transition-colors"
+      >
+        {lead.customerName}
       </td>
 
       <td className="p-3">
-        {lead.city || "-"}
+        <button
+          onClick={(e) => copyMobile(e, lead.mobile)}
+          className="font-medium text-blue-600 hover:underline"
+          title="Copy Mobile Number"
+        >
+          {lead.mobile}
+        </button>
+      </td>
+
+      <td className="p-3">{lead.shopName || "-"}</td>
+
+      <td className="p-3">{lead.city || "-"}</td>
+
+      <td className="p-3">{lead.leadOwner || "-"}</td>
+
+      <td className="p-3">
+        <StatusBadge status={lead.status} />
       </td>
 
       <td className="p-3">
-        {lead.leadOwner || "-"}
+        <PriorityBadge priority={lead.priority} />
       </td>
 
       <td className="p-3">
-        <StatusBadge
-          status={lead.status}
-        />
-      </td>
-
-      <td className="p-3">
-        <PriorityBadge
-          priority={lead.priority}
-        />
-      </td>
-
-      <td className="p-3">
-
         <div className="flex items-center gap-2 opacity-70 transition-all group-hover:opacity-100">
-
           <a
-  href={`tel:${lead.mobile}`}
-  onClick={(e) => e.stopPropagation()}
+            href={`tel:${lead.mobile}`}
+            onClick={(e) => e.stopPropagation()}
             className="rounded-lg p-2 transition-colors hover:bg-blue-100"
             title="Call"
           >
@@ -149,8 +122,8 @@ export default function LeadRow({
           </a>
 
           <a
-  href={`https://wa.me/91${lead.mobile}`}
-  onClick={(e) => e.stopPropagation()}
+            href={`https://wa.me/91${lead.mobile}`}
+            onClick={(e) => e.stopPropagation()}
             target="_blank"
             rel="noreferrer"
             className="rounded-lg p-2 transition-colors hover:bg-green-100"
@@ -159,45 +132,46 @@ export default function LeadRow({
             <MessageCircle size={18} />
           </a>
 
-          <button
-  onClick={(e) => {
-    e.stopPropagation();
-    onView();
-  }}
-  className="rounded-lg p-2 transition-colors hover:bg-slate-100"
-  title="View"
->
-  <Eye size={18} />
-</button>
+          {canEditLead() && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onView();
+              }}
+              className="rounded-lg p-2 transition-colors hover:bg-slate-100"
+              title="View"
+            >
+              <Eye size={18} />
+            </button>
+          )}
 
-          <button
-  onClick={(e) => {
-    e.stopPropagation();
-    onEdit();
-  }}
-  className="rounded-lg p-2 transition-colors hover:bg-orange-100"
-  title="Edit"
->
-  <Pencil size={18} />
-</button>
+          {canEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              className="rounded-lg p-2 transition-colors hover:bg-orange-100"
+              title="Edit"
+            >
+              <Pencil size={18} />
+            </button>
+          )}
 
-          <button
-  onClick={(e) => {
-    e.stopPropagation();
-    onDelete();
-  }}
-  className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-100"
-  title="Delete"
->
-  <Trash2 size={18} />
-</button>
-
+          {canDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-100"
+              title="Delete"
+            >
+              <Trash2 size={18} />
+            </button>
+          )}
         </div>
-
       </td>
-
     </tr>
-
   );
-
 }

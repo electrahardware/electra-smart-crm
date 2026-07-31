@@ -49,6 +49,7 @@ export async function login(req: Request, res: Response) {
       {
         id: user.id,
         name: user.name,
+        role: user.role,
       },
       getJwtSecret(),
       {
@@ -254,7 +255,7 @@ export async function updateUser(req: AuthRequest, res: Response) {
   }
 }
 
-export async function toggleUserStatus(req: Request, res: Response) {
+export async function toggleUserStatus(req: AuthRequest, res: Response) {
   try {
     const id = Number(req.params.id);
 
