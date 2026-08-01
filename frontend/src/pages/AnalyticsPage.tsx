@@ -1,306 +1,307 @@
 import { useEffect, useState } from "react";
-import { getAnalytics, type AnalyticsResponse } from "../services/analyticsService";
 import MainLayout from "../layouts/MainLayout";
+
+import {
+  getAnalytics,
+  type AnalyticsResponse,
+} from "../services/analyticsService";
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsResponse | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await getAnalytics();
-        setData(res);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     load();
   }, []);
 
+  async function load() {
+    try {
+      const res = await getAnalytics();
+
+      setData(res);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (loading) {
     return (
-      <div className="p-6 text-slate-500">
-        Loading analytics...
-      </div>
+      <MainLayout>
+        <div className="rounded-2xl bg-white p-10 text-center shadow">
+          <p className="text-lg text-slate-500">Loading Analytics...</p>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!data) {
+    return (
+      <MainLayout>
+        <div className="rounded-2xl bg-white p-10 text-center shadow">
+          <p className="text-red-500">Unable to load analytics.</p>
+        </div>
+      </MainLayout>
     );
   }
 
   return (
-  <MainLayout>
+    <MainLayout>
+      {/* Header */}
 
-    <div className="mb-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-800">
+          Analytics Dashboard
+        </h1>
 
-      <h1 className="text-3xl font-bold text-slate-800">
-        Analytics
-      </h1>
+        <p className="mt-2 text-slate-500">Live overview of CRM performance</p>
+      </div>
 
-      <p className="mt-2 text-slate-500">
-        Business insights and performance
-      </p>
+      {/* KPI Cards */}
 
-    </div>
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <Card
+          title="Total Leads"
+          value={data.totalLeads}
+          color="text-blue-600"
+        />
 
-    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <Card
+          title="Today's Leads"
+          value={data.newToday}
+          color="text-green-600"
+        />
 
-      <Card
-        title="Total Leads"
-        value={data?.totalLeads ?? 0}
-      />
+        <Card
+          title="This Week"
+          value={data.weekLeads}
+          color="text-purple-600"
+        />
 
-      <Card
-        title="Today's Leads"
-        value={data?.newToday ?? 0}
-      />
+        <Card
+          title="This Month"
+          value={data.monthLeads}
+          color="text-orange-600"
+        />
+      </div>
 
-      <Card
-        title="Hot Leads"
-        value={data?.hotLeads ?? 0}
-      />
+      {/* Second Row */}
 
-      <Card
-        title="Warm Leads"
-        value={data?.warmLeads ?? 0}
-      />
+      <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <Card title="Hot Leads" value={data.hotLeads} color="text-red-600" />
 
-      <Card
-        title="Cold Leads"
-        value={data?.coldLeads ?? 0}
-      />
+        <Card
+          title="Warm Leads"
+          value={data.warmLeads}
+          color="text-amber-600"
+        />
 
-      <Card
-        title="No Requirement"
-value={data?.noReqLeads ?? 0}
-      />
+        <Card title="Cold Leads" value={data.coldLeads} color="text-cyan-600" />
 
-      <Card
-        title="Overdue Follow-ups"
-        value={data?.overdue ?? 0}
-      />
+        <Card
+          title="No Requirement"
+          value={data.noReqLeads}
+          color="text-slate-600"
+        />
+      </div>
 
-    </div>
+      {/* Third Row */}
 
-    <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid gap-6 sm:grid-cols-3">
+        <Card
+          title="Today's Follow-ups"
+          value={data.todayFollowups}
+          color="text-indigo-600"
+        />
 
-  {/* Top Cities */}
+        <Card
+          title="Completed Today"
+          value={data.completedToday}
+          color="text-emerald-600"
+        />
 
-  <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <Card title="Overdue" value={data.overdue} color="text-rose-600" />
+      </div>
 
-    <h2 className="mb-6 text-xl font-bold">
-      🏙 Top Cities
-    </h2>
+      {/* Charts Section */}
 
-    <div className="space-y-4">
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        {/* Top Cities */}
 
-      {data?.cityWise?.length ? (
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="mb-6 text-xl font-bold">🏙 Top Cities</h2>
 
-        data.cityWise.map((item) => {
+          <div className="space-y-4">
+            {data.cityWise.map((item) => {
+              const max = data.cityWise[0]?._count.city || 1;
 
-          const max =
-            data.cityWise[0]._count.city;
+              const width = (item._count.city / max) * 100;
 
-          const width =
-            (item._count.city / max) * 100;
+              return (
+                <div key={item.city ?? "Unknown"}>
+                  <div className="mb-1 flex justify-between">
+                    <span>{item.city || "Unknown"}</span>
 
-          return (
+                    <span className="font-semibold">{item._count.city}</span>
+                  </div>
 
-            <div key={item.city ?? "Unknown"}>
+                  <div className="h-3 rounded-full bg-slate-200">
+                    <div
+                      className="h-3 rounded-full bg-blue-600"
+                      style={{
+                        width: `${width}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
-              <div className="mb-1 flex justify-between">
+        {/* Top States */}
 
-                <span>{item.city || "Not Available"}</span>
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="mb-6 text-xl font-bold">🌍 States</h2>
 
-                <span className="font-semibold">
-                  {item._count.city}
-                </span>
+          <div className="space-y-4">
+            {data.stateWise.map((item) => {
+              const max = data.stateWise[0]?._count.state || 1;
 
-              </div>
+              const width = (item._count.state / max) * 100;
 
-              <div className="h-3 rounded-full bg-slate-200">
+              return (
+                <div key={item.state ?? "Unknown"}>
+                  <div className="mb-1 flex justify-between">
+                    <span>{item.state || "Unknown"}</span>
 
-                <div
-                  className="h-3 rounded-full bg-blue-600"
-                  style={{
-                    width: `${width}%`,
-                  }}
-                />
+                    <span className="font-semibold">{item._count.state}</span>
+                  </div>
 
-              </div>
+                  <div className="h-3 rounded-full bg-slate-200">
+                    <div
+                      className="h-3 rounded-full bg-green-600"
+                      style={{
+                        width: `${width}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
+      {/* Owner Performance */}
+
+      <div className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
+        <h2 className="mb-6 text-xl font-bold">👨‍💼 Lead Owner Performance</h2>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {data.ownerWise.map((item) => (
+            <div
+              key={item.leadOwner ?? "Unknown"}
+              className="rounded-xl border bg-slate-50 p-5"
+            >
+              <p className="text-slate-500">{item.leadOwner || "Unknown"}</p>
+
+              <h3 className="mt-3 text-4xl font-bold text-blue-600">
+                {item._count.leadOwner}
+              </h3>
+
+              <p className="mt-2 text-sm text-slate-400">Assigned Leads</p>
             </div>
+          ))}
+        </div>
+      </div>
 
-          );
+      {/* Bottom Section */}
 
-        })
+      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+        {/* Lead Sources */}
 
-      ) : (
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="mb-5 text-xl font-bold">📌 Lead Sources</h2>
 
-        <p className="text-slate-500">
-          No city data available.
-        </p>
+          <div className="space-y-3">
+            {data.sourceWise.map((item) => (
+              <div
+                key={item.leadSource ?? "Unknown"}
+                className="flex items-center justify-between rounded-lg border-b pb-2"
+              >
+                <span>{item.leadSource || "Unknown"}</span>
 
-      )}
-
-    </div>
-
-  </div>
-
-  {/* Lead Sources */}
-
-  <div className="rounded-2xl border bg-white p-6 shadow-sm">
-
-    <h2 className="mb-6 text-xl font-bold">
-      📌 Lead Sources
-    </h2>
-
-    <div className="space-y-3">
-
-      {data?.sourceWise?.length ? (
-
-        data.sourceWise.map((item) => (
-
-          <div
-            key={item.leadSource ?? "Unknown"}
-            className="flex justify-between border-b pb-2"
-          >
-
-            <span>{item.leadSource || "Not Assigned"}</span>
-
-            <span className="font-semibold">
-              {item._count.leadSource}
-            </span>
-
+                <span className="font-bold text-blue-600">
+                  {item._count.leadSource}
+                </span>
+              </div>
+            ))}
           </div>
+        </div>
 
-        ))
+        {/* Lead Status */}
 
-      ) : (
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="mb-5 text-xl font-bold">📊 Lead Status</h2>
 
-        <p className="text-slate-500">
-          No lead source data.
-        </p>
+          <div className="space-y-3">
+            {data.statusWise.map((item) => (
+              <div
+                key={item.status ?? "Unknown"}
+                className="flex items-center justify-between rounded-lg border-b pb-2"
+              >
+                <span>{item.status || "Unknown"}</span>
 
-      )}
-
-    </div>
-
-  </div>
-
-</div>
-
-<div className="mt-6 grid gap-6 lg:grid-cols-2">
-
-  {/* Lead Status */}
-
-  <div className="rounded-2xl border bg-white p-6 shadow-sm">
-
-    <h2 className="mb-6 text-xl font-bold">
-      📊 Lead Status
-    </h2>
-
-    <div className="space-y-3">
-
-      {data?.statusWise?.length ? (
-
-        data.statusWise.map((item) => (
-
-          <div
-            key={item.status ?? "Unknown"}
-            className="flex justify-between border-b pb-2"
-          >
-
-            <span>{item.status || "Not Assigned"}</span>
-
-            <span className="font-semibold">
-              {item._count.status}
-            </span>
-
+                <span className="font-bold text-green-600">
+                  {item._count.status}
+                </span>
+              </div>
+            ))}
           </div>
+        </div>
 
-        ))
+        {/* Priority */}
 
-      ) : (
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="mb-5 text-xl font-bold">⭐ Priority</h2>
 
-        <p className="text-slate-500">
-          No status data.
-        </p>
+          <div className="space-y-3">
+            {data.priorityWise.map((item) => (
+              <div
+                key={item.priority ?? "Unknown"}
+                className="flex items-center justify-between rounded-lg border-b pb-2"
+              >
+                <span>{item.priority || "Unknown"}</span>
 
-      )}
-
-    </div>
-
-  </div>
-
-  {/* Priority */}
-
-  <div className="rounded-2xl border bg-white p-6 shadow-sm">
-
-    <h2 className="mb-6 text-xl font-bold">
-      ⭐ Priority
-    </h2>
-
-    <div className="space-y-3">
-
-      {data?.priorityWise?.length ? (
-
-        data.priorityWise.map((item) => (
-
-          <div
-            key={item.priority ?? "Unknown"}
-            className="flex justify-between border-b pb-2"
-          >
-
-            <span>{item.priority ?? "Unknown"}</span>
-
-            <span className="font-semibold">
-              {item._count.priority}
-            </span>
-
+                <span className="font-bold text-red-600">
+                  {item._count.priority}
+                </span>
+              </div>
+            ))}
           </div>
-
-        ))
-
-      ) : (
-
-        <p className="text-slate-500">
-          No priority data.
-        </p>
-
-      )}
-
-    </div>
-
-  </div>
-
-</div>
-
-  </MainLayout>
-);
+        </div>
+      </div>
+    </MainLayout>
+  );
 }
 
-function Card({
-  title,
-  value,
-}: {
+interface CardProps {
   title: string;
   value: number;
-}) {
+  color: string;
+}
+
+function Card({ title, value, color }: CardProps) {
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <div className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+      <p className="text-sm text-slate-500">{title}</p>
 
-      <p className="text-sm text-slate-500">
-        {title}
-      </p>
+      <h2 className={`mt-3 text-4xl font-bold ${color}`}>{value}</h2>
 
-      <h2 className="mt-3 text-4xl font-bold text-blue-600">
-        {value}
-      </h2>
-
-      <p className="mt-4 text-xs font-medium text-blue-600">
-        Live Data
-      </p>
-
+      <p className="mt-4 text-xs text-slate-400">Live CRM Data</p>
     </div>
   );
 }

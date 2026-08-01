@@ -8,6 +8,7 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import AuditLogs from "./pages/AuditLogs";
 import Dashboard from "./pages/Dashboard";
 import DuplicateLeads from "./pages/DuplicateLeads";
+import Followups from "./pages/Followups";
 import LeadDetailsPage from "./pages/LeadDetailsPage";
 import Leads from "./pages/Leads";
 import Login from "./pages/Login";
@@ -36,6 +37,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Leads />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/followups"
+          element={
+            <ProtectedRoute>
+              <Followups />
             </ProtectedRoute>
           }
         />

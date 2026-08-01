@@ -42,10 +42,19 @@ export interface PriorityWiseItem {
   };
 }
 
+export interface MonthlyLeadItem {
+  month: string;
+  count: number;
+}
+
 export interface AnalyticsResponse {
   totalLeads: number;
 
   newToday: number;
+  yesterdayLeads: number;
+  weekLeads: number;
+  monthLeads: number;
+
   hotLeads: number;
   warmLeads: number;
   coldLeads: number;
@@ -55,7 +64,7 @@ export interface AnalyticsResponse {
   todayFollowups: number;
   completedToday: number;
 
-  monthlyLeads: unknown[];
+  monthlyLeads: MonthlyLeadItem[];
 
   cityWise: CityWiseItem[];
   stateWise: StateWiseItem[];
