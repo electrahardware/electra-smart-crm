@@ -66,6 +66,8 @@ model Lead {
   calls        LeadCall[]
   timeline     LeadTimeline[]
   quotations   Quotation[]
+
+
 }
 
 model LeadNote {
@@ -178,13 +180,15 @@ model User {
 
   password String
 
-  role String @default("Sales")
+  role String @default("Sales Executive")
 
   isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
+
+  auditLogs AuditLog[]
 }
 
 model LeadActivity {
@@ -203,5 +207,32 @@ model LeadActivity {
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([leadId])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id Int @id @default(autoincrement())
+
+  module String
+  action String
+
+  userId Int?
+  userName String
+
+  entityId Int?
+  entityName String?
+
+  oldValues Json?
+  newValues Json?
+
+  ipAddress String?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([module])
+  @@index([action])
+  @@index([userId])
   @@index([createdAt])
 }

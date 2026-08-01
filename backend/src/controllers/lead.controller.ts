@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
+import { createAuditLog } from "../services/audit.service";
 import { createTimeline } from "../services/timeline.service";
 
 async function verifyLeadAccess(req: Request, leadId: number) {
@@ -334,6 +335,21 @@ export async function createLead(req: Request, res: Response) {
       createdBy: "System",
     });
 
+    await createAuditLog({
+      module: "Lead",
+      action: "CREATE",
+
+      userId: (req as any).user?.id,
+      userName: (req as any).user?.name || "System",
+
+      entityId: lead.id,
+      entityName: lead.customerName,
+
+      newValues: lead,
+
+      ipAddress: req.ip,
+    });
+
     res.status(201).json(lead);
   } catch (error) {
     console.error(error);
@@ -466,6 +482,22 @@ export async function updateLead(req: Request, res: Response) {
       });
     }
 
+    await createAuditLog({
+      module: "Lead",
+      action: "UPDATE",
+
+      userId: (req as any).user?.id,
+      userName: (req as any).user?.name || "System",
+
+      entityId: lead.id,
+      entityName: lead.customerName,
+
+      oldValues: oldLead,
+      newValues: lead,
+
+      ipAddress: req.ip,
+    });
+
     res.json(lead);
   } catch (error) {
     console.error(error);
@@ -487,10 +519,37 @@ export async function deleteLead(req: Request, res: Response) {
         message: "Access denied.",
       });
     }
+    const lead = await prisma.lead.findUnique({
+      where: {
+        id: leadId,
+      },
+    });
+
+    if (!lead) {
+      return res.status(404).json({
+        message: "Lead not found.",
+      });
+    }
+
     await prisma.lead.delete({
       where: {
         id: leadId,
       },
+    });
+
+    await createAuditLog({
+      module: "Lead",
+      action: "DELETE",
+
+      userId: (req as any).user?.id,
+      userName: (req as any).user?.name || "System",
+
+      entityId: lead?.id,
+      entityName: lead?.customerName,
+
+      oldValues: lead,
+
+      ipAddress: req.ip,
     });
 
     res.json({

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+
 import {
-  createQuickLead,
   createQuickBulkLead,
+  createQuickLead,
 } from "../../services/leadService";
 
 interface QuickLeadBarProps {
@@ -10,258 +11,205 @@ interface QuickLeadBarProps {
   onOpenFull: () => void;
 }
 
+const DEFAULT_OWNER = "Dharmesh Bhai";
+
 export default function QuickLeadBar({
   onClose,
   onOpenFull,
 }: QuickLeadBarProps) {
-
   const [mobile, setMobile] = useState("");
-  const [bulkMode, setBulkMode] = useState(false);
-const [bulkNumbers, setBulkNumbers] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [assignedTo, setAssignedTo] = useState(
-  () => localStorage.getItem("quickLeadOwner") || "Dharmesh"
-);
 
-function handleOwnerChange(owner: string) {
-  setAssignedTo(owner);
-  localStorage.setItem("quickLeadOwner", owner);
-}
+  const [bulkMode, setBulkMode] = useState(false);
+
+  const [bulkNumbers, setBulkNumbers] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  // Owner preference permanently remember
+  const [assignedTo, setAssignedTo] = useState(
+    () => localStorage.getItem("quickLeadOwner") ?? DEFAULT_OWNER,
+  );
+
+  function handleOwnerChange(owner: string) {
+    setAssignedTo(owner);
+
+    localStorage.setItem("quickLeadOwner", owner);
+  }
 
   async function handleSave() {
-
     if (bulkMode) {
+      const numbers = bulkNumbers
+        .split("\n")
+        .map((n) => n.trim())
+        .filter(Boolean);
 
-  const numbers = bulkNumbers
-    .split("\n")
-    .map((n) => n.trim())
-    .filter((n) => n.length > 0);
+      if (numbers.length === 0) {
+        toast.error("Enter WhatsApp Numbers");
+        return;
+      }
 
-  if (numbers.length === 0) {
-    toast.error("Enter WhatsApp Numbers");
-    return;
-  }
+      try {
+        setLoading(true);
 
-  try {
+        const result = await createQuickBulkLead({
+          numbers,
+          leadOwner: assignedTo,
+        });
 
-    setLoading(true);
-
-    const result =
-      await createQuickBulkLead({
-  numbers,
-  leadOwner: assignedTo,
-});
-
-    toast.success(
-      `Created : ${result.created}
+        toast.success(`Created : ${result.created}
 Duplicate : ${result.duplicates}
-Invalid : ${result.invalid}`
-    );
+Invalid : ${result.invalid}`);
 
-    setBulkNumbers("");
+        setBulkNumbers("");
+        setBulkMode(false);
+        setMobile("");
 
-    setBulkMode(false);
-    setMobile("");
+        window.dispatchEvent(new Event("lead-imported"));
+      } catch (err: any) {
+        console.error(err);
 
-    window.dispatchEvent(
-      new Event("lead-imported")
-    );
+        toast.error(err?.message ?? "Unable to create leads.");
+      } finally {
+        setLoading(false);
+      }
 
-  } catch (err: any) {
-
-    console.error(err);
-
-    toast.error(
-      err?.message ??
-      "Unable to create leads."
-    );
-
-  } finally {
-
-    setLoading(false);
-
-  }
-
-  return;
-}
-
-    if (!mobile.trim()) {
-      toast.error("Enter WhatsApp Number");
       return;
     }
 
     const cleanMobile = mobile.trim();
 
-if (!/^\d{10}$/.test(cleanMobile)) {
-  toast.error("Mobile Number must be exactly 10 digits");
-  return;
-}
+    if (!cleanMobile) {
+      toast.error("Enter WhatsApp Number");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(cleanMobile)) {
+      toast.error("Mobile Number must be exactly 10 digits");
+      return;
+    }
 
     try {
       setLoading(true);
 
       await createQuickLead({
-  mobile: cleanMobile,
-  leadOwner: assignedTo,
-});
+        mobile: cleanMobile,
+        leadOwner: assignedTo,
+      });
 
       toast.success("Quick Lead Created");
 
       setMobile("");
 
-      window.dispatchEvent(
-        new Event("lead-imported")
-      );
+      window.dispatchEvent(new Event("lead-imported"));
     } catch (err: any) {
       console.error(err);
 
-      toast.error(
-        err?.message ||
-        "Unable to create lead."
-      );
+      toast.error(err?.message ?? "Unable to create lead.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-  <div className="space-y-6">
-
+    <div className="space-y-6">
       <p className="text-sm text-slate-500">
-  Save a WhatsApp inquiry in just a few seconds.
-</p>
+        Save a WhatsApp inquiry in just a few seconds.
+      </p>
 
       <div className="mb-4 flex gap-3">
+        <button
+          onClick={() => setBulkMode(false)}
+          className={`rounded-xl px-4 py-2 transition ${
+            !bulkMode ? "bg-white text-green-700" : "bg-green-700 text-white"
+          }`}
+        >
+          Single
+        </button>
 
-  <button
-    onClick={() => setBulkMode(false)}
-    className={`rounded-xl px-4 py-2 transition ${
-      !bulkMode
-        ? "bg-white text-green-700"
-        : "bg-green-700 text-white"
-    }`}
-  >
-    Single
-  </button>
+        <button
+          onClick={() => setBulkMode(true)}
+          className={`rounded-xl px-4 py-2 transition ${
+            bulkMode ? "bg-white text-green-700" : "bg-green-700 text-white"
+          }`}
+        >
+          Bulk
+        </button>
+      </div>
 
-  <button
-    onClick={() => setBulkMode(true)}
-    className={`rounded-xl px-4 py-2 transition ${
-      bulkMode
-        ? "bg-white text-green-700"
-        : "bg-green-700 text-white"
-    }`}
-  >
-    Bulk
-  </button>
+      <div>
+        <label className="mb-2 block text-sm font-semibold text-slate-700">
+          Assign To
+        </label>
 
-</div>
-
-<div className="mb-4">
-
-  <label className="mb-2 block text-sm font-semibold text-slate-700">
-  Assign To
-</label>
-
-  <select
-    value={assignedTo}
-    onChange={(e) =>
-  handleOwnerChange(e.target.value)
-}
-    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 shadow-sm focus:border-slate-200 focus:outline-none"
-  >
-    <option value="Dharmesh">
-      Dharmesh
-    </option>
-
-    <option value="Dhiren">
-      Dhiren
-    </option>
-
-    <option value="Harnish">
-      Harnish
-    </option>
-  </select>
-
-</div>
+        <select
+          value={assignedTo}
+          onChange={(e) => handleOwnerChange(e.target.value)}
+          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 shadow-sm focus:outline-none"
+        >
+          <option value="Dharmesh Bhai">Dharmesh Bhai</option>
+          <option value="Dhiren Bhai">Dhiren Bhai</option>
+          <option value="Harnish Bhai">Harnish Bhai</option>
+        </select>
+      </div>
 
       <div className="flex gap-3">
-
-  {bulkMode ? (
-
-    <textarea
-      autoFocus
-      rows={8}
-      value={bulkNumbers}
-      onChange={(e) =>
-        setBulkNumbers(e.target.value)
-      }
-      placeholder={`Enter one number per line
+        {bulkMode ? (
+          <textarea
+            autoFocus
+            rows={8}
+            value={bulkNumbers}
+            onChange={(e) => setBulkNumbers(e.target.value)}
+            placeholder={`Enter one number per line
 
 9876543210
 9898989898
 9822222222`}
-      className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 placeholder:text-slate-400 shadow-sm focus:border-slate-200 focus:outline-none"
-    />
+            className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 shadow-sm focus:outline-none"
+          />
+        ) : (
+          <input
+            autoFocus
+            value={mobile}
+            maxLength={10}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            onChange={(e) =>
+              setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSave();
+              }
+            }}
+            placeholder="Enter WhatsApp Number"
+            className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 shadow-sm focus:outline-none"
+          />
+        )}
 
-  ) : (
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="h-[52px] min-w-[120px] rounded-xl bg-white px-6 py-3 font-semibold text-green-700 shadow-sm hover:bg-slate-100 disabled:opacity-60"
+        >
+          {loading ? "Saving..." : bulkMode ? "Create Leads" : "Save"}
+        </button>
+      </div>
 
-    <input
-      autoFocus
-      value={mobile}
-      maxLength={10}
-inputMode="numeric"
-pattern="[0-9]*"
-      onChange={(e) =>
-  setMobile(
-    e.target.value
-      .replace(/\D/g, "")
-      .slice(0, 10)
-  )
-}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          handleSave();
-        }
-      }}
-      placeholder="Enter WhatsApp Number"
-      className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 placeholder:text-slate-400 shadow-sm focus:border-slate-200 focus:outline-none"
-    />
+      <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+        <button
+          onClick={onClose}
+          className="text-sm text-slate-500 hover:text-white"
+        >
+          Close
+        </button>
 
-  )}
-
-  <button
-    onClick={handleSave}
-    disabled={loading}
-   className="h-[52px] min-w-[120px] rounded-xl bg-white px-6 py-3 font-semibold text-green-700 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-  >
-    {loading
-      ? "Saving..."
-      : bulkMode
-      ? "Create Leads"
-      : "Save"}
-  </button>
-
-</div>
-
-<div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4">
-
-  <button
-    onClick={onClose}
-    className="text-sm font-medium text-slate-500 hover:text-white"
-  >
-    Close
-  </button>
-
-  <button
-    onClick={onOpenFull}
-    className="text-sm font-semibold text-white underline underline-offset-4"
-  >
-    Open Full Lead Form →
-  </button>
-
-</div>
-
+        <button
+          onClick={onOpenFull}
+          className="text-sm font-semibold text-white underline"
+        >
+          Open Full Lead Form →
+        </button>
+      </div>
     </div>
   );
 }

@@ -7,41 +7,17 @@ interface Props {
   children: ReactNode;
 }
 
-export default function ProtectedRoute({
-  children,
-}: Props) {
+export default function ProtectedRoute({ children }: Props) {
+  const token = sessionStorage.getItem("token");
 
-  const token =
-  localStorage.getItem("token");
+  const user = sessionStorage.getItem("user");
 
-const user =
-  localStorage.getItem("user");
+  if (!token || !user) {
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
 
-if (
-  !token ||
-  !user
-) {
+    return <Navigate to="/login" replace />;
+  }
 
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-
-  return (
-    <Navigate
-      to="/login"
-      replace
-    />
-  );
-
-}
-
-  return (
-
-    <AuthGuard>
-
-      {children}
-
-    </AuthGuard>
-
-  );
-
+  return <AuthGuard>{children}</AuthGuard>;
 }

@@ -4,45 +4,29 @@ import { LeadProvider } from "./contexts/LeadContext";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
+import AnalyticsPage from "./pages/AnalyticsPage";
+import AuditLogs from "./pages/AuditLogs";
 import Dashboard from "./pages/Dashboard";
-import Leads from "./pages/Leads";
 import DuplicateLeads from "./pages/DuplicateLeads";
+import LeadDetailsPage from "./pages/LeadDetailsPage";
+import Leads from "./pages/Leads";
+import Login from "./pages/Login";
 import Settings from "./pages/Settings";
 import UserManagement from "./pages/UserManagement";
-import Login from "./pages/Login";
-import LeadDetailsPage from "./pages/LeadDetailsPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
-
   return (
-
     <LeadProvider>
-
       <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        <Route
-          path="/"
-          element={
-            <Navigate
-              to="/dashboard"
-              replace
-            />
-          }
-        />
-
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+        <Route path="/login" element={<Login />} />
 
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-
               <Dashboard />
-
             </ProtectedRoute>
           }
         />
@@ -51,80 +35,69 @@ function App() {
           path="/leads"
           element={
             <ProtectedRoute>
-
               <Leads />
-
             </ProtectedRoute>
           }
         />
 
         <Route
-  path="/leads/:id"
-  element={
-    <ProtectedRoute>
-      <LeadDetailsPage />
-    </ProtectedRoute>
-  }
-/>
+          path="/leads/:id"
+          element={
+            <ProtectedRoute>
+              <LeadDetailsPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/duplicates"
           element={
             <ProtectedRoute>
-
               <DuplicateLeads />
-
             </ProtectedRoute>
           }
         />
 
         <Route
-  path="/analytics"
-  element={
-    <ProtectedRoute>
-      <AnalyticsPage />
-    </ProtectedRoute>
-  }
-/>
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <AnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/audit-logs"
+          element={
+            <ProtectedRoute>
+              <AuditLogs />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/settings"
           element={
             <ProtectedRoute>
-
               <Settings />
-
             </ProtectedRoute>
           }
         />
 
         <Route
-  path="/settings/users"
-  element={
-    <ProtectedRoute>
-
-      <UserManagement />
-
-    </ProtectedRoute>
-  }
-/>
-
-        <Route
-          path="*"
+          path="/settings/users"
           element={
-            <Navigate
-              to="/dashboard"
-              replace
-            />
+            <ProtectedRoute>
+              <UserManagement />
+            </ProtectedRoute>
           }
         />
 
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-
     </LeadProvider>
-
   );
-
 }
 
 export default App;

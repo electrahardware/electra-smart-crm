@@ -1,21 +1,19 @@
 import {
-  LayoutDashboard,
-  Users,
-  PhoneCall,
-  FileText,
   BarChart3,
-  Settings,
+  FileText,
+  LayoutDashboard,
   Menu,
-  X,
+  PhoneCall,
+  Settings,
+  Users,
+  X
 } from "lucide-react";
 
 import { Link, useLocation } from "react-router-dom";
 
 import logo from "../../assets/images/electra-logo.png";
 import { useSidebar } from "../../hooks/useSidebar";
-import {
-  isAdminOrManager,
-} from "../../utils/auth";
+import { isAdminOrManager } from "../../utils/auth";
 
 const menu = [
   {
@@ -43,6 +41,13 @@ const menu = [
     path: "/analytics",
     icon: BarChart3,
   },
+
+  {
+    title: "Audit Logs",
+    path: "/audit-logs",
+    icon: FileText,
+  },
+
   {
     title: "Settings",
     path: "/settings",
@@ -51,17 +56,11 @@ const menu = [
 ];
 
 export default function Sidebar() {
-
   const location = useLocation();
 
-  const {
-    open,
-    toggle,
-    setOpen,
-  } = useSidebar();
+  const { open, toggle, setOpen } = useSidebar();
 
-  const canManageSettings =
-  isAdminOrManager();
+  const canManageSettings = isAdminOrManager();
 
   return (
     <>
@@ -104,9 +103,7 @@ export default function Sidebar() {
 
         `}
       >
-
         <div className="border-b border-slate-800 bg-slate-950 p-3">
-
           <img
             src={logo}
             alt="Electra"
@@ -114,31 +111,24 @@ export default function Sidebar() {
           />
 
           <p className="mt-2 text-center text-sm text-slate-400">
-
             Smart CRM v1.0
-
           </p>
-
         </div>
 
         <div className="mt-6 flex-1 px-3">
-
           {menu.map((item) => {
-
             const Icon = item.icon;
 
-            const active =
-              location.pathname === item.path;
+            const active = location.pathname === item.path;
 
             if (
-  !canManageSettings &&
-  item.path === "/settings"
-) {
-  return null;
-}
+              !canManageSettings &&
+              (item.path === "/settings" || item.path === "/audit-logs")
+            ) {
+              return null;
+            }
 
             return (
-
               <Link
                 key={item.title}
                 to={item.path}
@@ -153,28 +143,17 @@ export default function Sidebar() {
                   py-3
                   transition
 
-                  ${
-                    active
-                      ? "bg-red-600 text-white"
-                      : "hover:bg-slate-800"
-                  }
+                  ${active ? "bg-red-600 text-white" : "hover:bg-slate-800"}
                 `}
               >
-
                 <Icon size={20} />
 
                 {item.title}
-
               </Link>
-
             );
-
           })}
-
         </div>
-
       </aside>
     </>
   );
-
 }
