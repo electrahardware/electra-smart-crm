@@ -111,7 +111,7 @@ setNote("");
 await loadNotes();
 
 window.dispatchEvent(
-  new Event("lead-imported")
+  new Event("lead-updated")
 );
 
 onClose();

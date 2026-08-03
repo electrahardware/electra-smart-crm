@@ -67,11 +67,6 @@ export default function CompleteFollowupDialog({
       setLoading(true);
 
       if (!lead.id) return;
-      if (!status) {
-        alert("Lead Status is required.");
-        return;
-      }
-
       await completeFollowup(lead.id, {
 
   note: noteChanged
@@ -123,7 +118,6 @@ export default function CompleteFollowupDialog({
 
             <SelectInput
               label="Lead Status"
-              required
               value={status}
               options={leadStatus}
               onChange={(event) => setStatus(event.target.value)}

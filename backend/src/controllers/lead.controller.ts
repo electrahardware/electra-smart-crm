@@ -886,9 +886,26 @@ export async function completeFollowup(req: Request, res: Response) {
     }
     const { note, followupDate, followupTime, status } = req.body;
 
-    if (!isLeadStatus(status)) {
-      return res.status(400).json({ message: "A valid Lead Status is required." });
+    if (status && !isLeadStatus(status)) {
+      return res.status(400).json({ message: "A valid Lead Status is required when provided." });
     }
+
+    const existingLead = await prisma.lead.findUnique({
+      where: { id: leadId },
+      select: { status: true },
+    });
+
+    if (!existingLead) {
+      return res.status(404).json({ message: "Lead not found." });
+    }
+
+    // Status is optional in the Done dialog. If it is not supplied, preserve
+    // the lead's existing valid status instead of blocking completion.
+    const finalStatus = isLeadStatus(status)
+      ? status
+      : isLeadStatus(existingLead.status)
+        ? existingLead.status
+        : "None";
 
     // Save latest note
     if (note?.trim()) {
@@ -944,14 +961,14 @@ export async function completeFollowup(req: Request, res: Response) {
           // A Card Pending action is completed for the current day only.
           // The Today query will include it again tomorrow while the status
           // remains Card Pending.
-          followupCompleted: status === CARD_PENDING_STATUS,
+          followupCompleted: finalStatus === CARD_PENDING_STATUS,
 
           followupCompletedAt:
-            status === CARD_PENDING_STATUS ? new Date() : null,
+            finalStatus === CARD_PENDING_STATUS ? new Date() : null,
 
           followupTime: followupTime || null,
-          status,
-          listPriority: getListPriority(status),
+          status: finalStatus,
+          listPriority: getListPriority(finalStatus),
         },
       });
 
@@ -987,8 +1004,8 @@ export async function completeFollowup(req: Request, res: Response) {
 
           followupTime: null,
 
-          status,
-          listPriority: getListPriority(status),
+          status: finalStatus,
+          listPriority: getListPriority(finalStatus),
         },
       });
 

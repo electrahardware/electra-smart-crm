@@ -33,6 +33,16 @@ export default function Followups() {
 
   useEffect(() => {
     loadFollowups();
+
+    const refreshFollowups = () => {
+      void loadFollowups();
+    };
+
+    window.addEventListener("lead-updated", refreshFollowups);
+
+    return () => {
+      window.removeEventListener("lead-updated", refreshFollowups);
+    };
   }, [filter]);
 
   async function loadFollowups() {
