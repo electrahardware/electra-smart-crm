@@ -1,4 +1,5 @@
 import { Eye, MessageCircle, Pencil, Phone, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 import type { Lead } from "../../types/lead";
 import { canEditLead, isOwnerOrManager } from "../../utils/auth";
 import StatusBadge from "./StatusBadge";
@@ -81,6 +82,16 @@ export default function LeadRow({
     .filter((number): number is string => Boolean(number))
     .filter((number, index, numbers) => numbers.indexOf(number) === index);
 
+  async function copyMobile(event: React.MouseEvent<HTMLButtonElement>, mobile: string) {
+    event.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(mobile);
+      toast.success("Mobile number copied");
+    } catch {
+      toast.error("Unable to copy mobile number");
+    }
+  }
+
   return (
     <tr
       onClick={onView}
@@ -112,16 +123,15 @@ export default function LeadRow({
 
       <td className="p-3 align-top">
         <div className="space-y-1">
-          {mobileNumbers.map((mobile, mobileIndex) => (
-            <a
+          {mobileNumbers.map((mobile) => (
+            <button
               key={mobile}
-              href={`tel:${mobile}`}
-              onClick={(event) => event.stopPropagation()}
+              onClick={(event) => copyMobile(event, mobile)}
               className="block font-medium text-blue-600 hover:underline"
-              title={`Call ${mobile}`}
+              title="Copy Mobile Number"
             >
-              {mobileIndex + 1}. {mobile}
-            </a>
+              {mobile}
+            </button>
           ))}
         </div>
       </td>

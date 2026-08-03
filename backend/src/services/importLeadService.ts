@@ -49,6 +49,8 @@ function validateLead(lead: ImportLeadRow): {
 } {
   lead.mobile = normalizeMobile(lead.mobile);
 
+  lead.secondaryMobile = normalizeMobile(lead.secondaryMobile);
+
   lead.whatsapp = normalizeMobile(lead.whatsapp || lead.mobile);
 
   const errors: ImportPreviewRow["errors"] = [];
@@ -110,7 +112,10 @@ export async function previewImportLeads(
       return;
     }
 
-    if (seen.has(row.lead.mobile)) {
+    const contactNumbers = [row.lead.mobile, row.lead.secondaryMobile, row.lead.whatsapp]
+      .filter((number): number is string => Boolean(number));
+
+    if (contactNumbers.some((number) => seen.has(number))) {
       row.status = "duplicate";
 
       row.errors.push({
@@ -121,35 +126,46 @@ export async function previewImportLeads(
       return;
     }
 
-    seen.add(row.lead.mobile);
+    contactNumbers.forEach((number) => seen.add(number));
   });
 
-  const mobiles = previewRows
+  const contactNumbers = previewRows
     .filter((row) => row.status === "ready")
-    .map((row) => row.lead.mobile);
+    .flatMap((row) => [row.lead.mobile, row.lead.secondaryMobile, row.lead.whatsapp])
+    .filter((number): number is string => Boolean(number));
 
   const existingLeads = await prisma.lead.findMany({
     where: {
-      mobile: {
-        in: mobiles,
-      },
+      OR: [
+        { mobile: { in: contactNumbers } },
+        { secondaryMobile: { in: contactNumbers } },
+        { whatsapp: { in: contactNumbers } },
+      ],
     },
     select: {
       id: true,
       mobile: true,
+      secondaryMobile: true,
+      whatsapp: true,
     },
   });
 
-  const existingMap = new Map(
-    existingLeads.map((lead) => [lead.mobile, lead.id]),
-  );
+  const existingMap = new Map<string, number>();
+  existingLeads.forEach((lead) => {
+    [lead.mobile, lead.secondaryMobile, lead.whatsapp]
+      .filter((number): number is string => Boolean(number))
+      .forEach((number) => existingMap.set(number, lead.id));
+  });
 
   previewRows.forEach((row) => {
     if (row.status !== "ready") {
       return;
     }
 
-    const id = existingMap.get(row.lead.mobile);
+    const id = [row.lead.mobile, row.lead.secondaryMobile, row.lead.whatsapp]
+      .filter((number): number is string => Boolean(number))
+      .map((number) => existingMap.get(number))
+      .find(Boolean);
 
     if (!id) {
       return;

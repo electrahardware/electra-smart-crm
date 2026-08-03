@@ -720,6 +720,7 @@ export async function deleteLeadNote(req: Request, res: Response) {
 export async function getFollowups(req: Request, res: Response) {
   try {
     const filter = (req.query.filter as string) || "today";
+    const currentUser = (req as any).user;
 
     const today = new Date();
 
@@ -752,6 +753,10 @@ export async function getFollowups(req: Request, res: Response) {
       where.followupDate = {
         lt: today,
       };
+    }
+
+    if (currentUser.role === "Sales Executive") {
+      where = { AND: [where, { leadOwner: currentUser.name }] };
     }
 
     const followups = await prisma.lead.findMany({

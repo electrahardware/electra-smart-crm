@@ -62,7 +62,8 @@ export async function parseElectraExcel(
 
   const workbook = XLSX.read(buffer, {
     type: "array",
-    cellDates: true,
+    // Keep Excel dates as raw serial values so parseExcelDate can apply DMY rules.
+    cellDates: false,
   });
 
   const firstSheet = workbook.SheetNames[0];
