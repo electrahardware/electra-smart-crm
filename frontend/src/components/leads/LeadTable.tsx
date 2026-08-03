@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { deleteLead, getLead, getLeads } from "../../services/leadService";
+import { getFollowups } from "../../services/followupService";
 
 import type { Lead } from "../../types/lead";
 
@@ -57,6 +58,7 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [totalRecords, setTotalRecords] = useState(0);
+  const [todayQueueCount, setTodayQueueCount] = useState(0);
 
   const { setLead, setEditingId } = useLead();
 
@@ -96,22 +98,26 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
 
   async function loadLeads() {
     try {
-      const response = await getLeads(
-        currentPage,
-        pageSize,
-        search,
-        statusFilter === "All" ? "" : statusFilter,
-        ownerFilter === "All" ? "" : ownerFilter,
-        stateFilter === "All" ? "" : stateFilter,
-        sourceFilter === "All" ? "" : sourceFilter,
-        cityFilter,
-        fromDate,
-        toDate,
-        followupFilter === "All" ? "" : followupFilter,
-      );
+      const [response, todayQueue] = await Promise.all([
+        getLeads(
+          currentPage,
+          pageSize,
+          search,
+          statusFilter === "All" ? "" : statusFilter,
+          ownerFilter === "All" ? "" : ownerFilter,
+          stateFilter === "All" ? "" : stateFilter,
+          sourceFilter === "All" ? "" : sourceFilter,
+          cityFilter,
+          fromDate,
+          toDate,
+          followupFilter === "All" ? "" : followupFilter,
+        ),
+        getFollowups("today"),
+      ]);
       setLeads(response.data);
 
       setTotalRecords(response.total);
+      setTodayQueueCount(todayQueue.length);
 
       setSelectedLead((current) => {
         if (!current) {
@@ -374,7 +380,7 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
     <>
       <FollowupDashboard
         overdue={dashboard.overdue}
-        today={dashboard.today}
+        today={todayQueueCount}
         upcoming={dashboard.upcoming}
         expectedValue={dashboard.expectedValue}
       />
@@ -403,7 +409,7 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
         <LeadStats
           totalLeads={totalLeads}
           hotLeads={hotLeads}
-          todayFollowups={todayFollowups}
+          todayFollowups={todayQueueCount}
           expectedValue={expectedValue}
           overdueLeads={overdueLeads}
           upcomingLeads={upcomingLeads}

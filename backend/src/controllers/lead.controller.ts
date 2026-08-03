@@ -29,6 +29,8 @@ async function verifyLeadAccess(req: Request, leadId: number) {
   return lead.leadOwner === currentUser.name;
 }
 
+const CARD_PENDING_STATUS = "Card Pending";
+
 export async function getAllLeads(req: Request, res: Response) {
   try {
     const page = Number(req.query.page) || 1;
@@ -418,6 +420,12 @@ export async function updateLead(req: Request, res: Response) {
       req.body,
       "followupDate",
     );
+    const isCardPending = req.body.status === CARD_PENDING_STATUS;
+    const movedAwayFromCardPending =
+      oldLead?.status === CARD_PENDING_STATUS &&
+      req.body.status !== undefined &&
+      req.body.status !== CARD_PENDING_STATUS;
+    const hasNewFollowupDate = hasFollowupDate && Boolean(req.body.followupDate);
 
     const lead = await prisma.lead.update({
       where: {
@@ -438,10 +446,12 @@ export async function updateLead(req: Request, res: Response) {
         city: req.body.city,
 
         followupCompleted: hasFollowupDate
-          ? req.body.followupDate
-            ? false
+          ? hasNewFollowupDate
+            ? isCardPending
             : req.body.followupCompleted
-          : undefined,
+          : movedAwayFromCardPending && oldLead?.followupDate
+            ? false
+            : req.body.followupCompleted,
 
         followupDate: hasFollowupDate
           ? req.body.followupDate
@@ -455,11 +465,15 @@ export async function updateLead(req: Request, res: Response) {
             : null
           : undefined,
 
-        followupCompletedAt: req.body.followupCompleted
-          ? new Date()
-          : req.body.followupDate
-            ? null
-            : undefined,
+        followupCompletedAt: hasNewFollowupDate
+          ? isCardPending
+            ? new Date()
+            : null
+          : req.body.followupCompleted
+            ? new Date()
+            : movedAwayFromCardPending && oldLead?.followupDate
+              ? null
+              : undefined,
 
         expectedValue:
           req.body.expectedValue !== undefined
@@ -659,6 +673,13 @@ export async function addLeadNote(req: Request, res: Response) {
       },
     });
 
+    const lead = await prisma.lead.findUnique({
+      where: { id: leadId },
+      select: { status: true },
+    });
+
+    const isCardPending = lead?.status === CARD_PENDING_STATUS;
+
     await prisma.lead.update({
       where: {
         id: leadId,
@@ -667,6 +688,8 @@ export async function addLeadNote(req: Request, res: Response) {
         notes: req.body.note,
         lastEditedAt: new Date(),
         lastEditedBy: (req as any).user?.name || "System",
+        followupCompleted: isCardPending ? true : undefined,
+        followupCompletedAt: isCardPending ? new Date() : undefined,
       },
     });
 
@@ -767,10 +790,15 @@ export async function getFollowups(req: Request, res: Response) {
     if (filter === "today") {
       where = {
         OR: [
-          // Card Pending leads are included in the daily queue only until
-          // their follow-up is marked Done. Without this condition a
-          // completed Card Pending lead is returned forever.
-          { status: "Card Pending", followupCompleted: false },
+          // Card Pending is a daily queue. Activity today hides it only for
+          // today; tomorrow the stored completion timestamp is in the past.
+          {
+            status: CARD_PENDING_STATUS,
+            OR: [
+              { followupCompletedAt: null },
+              { followupCompletedAt: { lt: today } },
+            ],
+          },
           {
             followupCompleted: false,
             followupDate: {
@@ -913,9 +941,13 @@ export async function completeFollowup(req: Request, res: Response) {
           lastEditedAt: new Date(),
           lastEditedBy: (req as any).user?.name || "System",
 
-          followupCompleted: false,
+          // A Card Pending action is completed for the current day only.
+          // The Today query will include it again tomorrow while the status
+          // remains Card Pending.
+          followupCompleted: status === CARD_PENDING_STATUS,
 
-          followupCompletedAt: null,
+          followupCompletedAt:
+            status === CARD_PENDING_STATUS ? new Date() : null,
 
           followupTime: followupTime || null,
           status,
