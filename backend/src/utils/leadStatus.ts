@@ -1,4 +1,4 @@
-export const LEAD_STATUSES = ["Card Pending", "Whenever Required", "No Requirement", "Same Day Dispatch", "Interested", "Negotiation", "Will Visit", "Quotation Sent", "Customer"] as const;
+export const LEAD_STATUSES = ["None", "Card Pending", "Whenever Required", "No Requirement", "Same Day Dispatch", "Interested", "Negotiation", "Will Visit", "Quotation Sent", "Customer"] as const;
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
 
 const aliases: Record<string, LeadStatus> = {
@@ -10,7 +10,7 @@ const aliases: Record<string, LeadStatus> = {
 };
 
 export function normalizeLeadStatus(status?: string | null): LeadStatus {
-  return aliases[(status || "").trim().toLowerCase()] ?? "Card Pending";
+  return aliases[(status || "").trim().toLowerCase()] ?? "None";
 }
 
 export function isLeadStatus(status: unknown): status is LeadStatus {

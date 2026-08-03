@@ -1,10 +1,11 @@
 export const LEAD_STATUSES = [
-  "Card Pending", "Whenever Required", "No Requirement", "Same Day Dispatch", "Interested", "Negotiation", "Will Visit", "Quotation Sent", "Customer",
+  "None", "Card Pending", "Whenever Required", "No Requirement", "Same Day Dispatch", "Interested", "Negotiation", "Will Visit", "Quotation Sent", "Customer",
 ] as const;
 
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
 
 export const STATUS_COLORS: Record<LeadStatus, string> = {
+  None: "bg-slate-100 text-slate-600",
   "Card Pending": "bg-slate-100 text-slate-700",
   "Whenever Required": "bg-blue-100 text-blue-700",
   "No Requirement": "bg-red-100 text-red-700",
@@ -25,5 +26,5 @@ export function normalizeLeadStatus(status?: string | null): LeadStatus {
     lost: "No Requirement", "no requirement": "No Requirement", "not interested": "No Requirement",
     "on hold": "Whenever Required", "whenever required": "Whenever Required", "same day dispatch": "Same Day Dispatch", "will visit": "Will Visit",
   };
-  return aliases[value] ?? "Card Pending";
+  return aliases[value] ?? "None";
 }

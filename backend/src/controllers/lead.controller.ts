@@ -280,6 +280,8 @@ export async function createLead(req: Request, res: Response) {
     const data = {
       ...leadInput,
 
+      status: req.body.status || "None",
+
       leadDate: req.body.leadDate ? new Date(req.body.leadDate) : new Date(),
 
       city: req.body.city || "",

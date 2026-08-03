@@ -305,7 +305,7 @@ export async function commitImportLeads(
           leadSource: lead.leadSource,
           language: lead.language,
           priority: lead.priority,
-          status: lead.status,
+          status: lead.status || "None",
           followupDate: null,
 
           followupCompleted: false,

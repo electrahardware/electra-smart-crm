@@ -88,7 +88,7 @@ leadDate: new Date()
   products: [],
 
   priority: "",
-  status: "",
+  status: "None",
 
   expectedValue: 0,
   probability: 0,
