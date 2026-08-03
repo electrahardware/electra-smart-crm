@@ -43,6 +43,10 @@ export default function LeadTableHeader({
         </th>
 
         <th className="p-3 text-left">
+          Last Edit
+        </th>
+
+        <th className="p-3 text-left">
           Shop
         </th>
 

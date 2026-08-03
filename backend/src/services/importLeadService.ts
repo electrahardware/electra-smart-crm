@@ -226,6 +226,7 @@ export async function commitImportLeads(
           },
           data: {
             customerName: lead.customerName?.trim() || "",
+            lastEditedAt: new Date(),
             secondaryMobile: lead.secondaryMobile,
             whatsapp: lead.whatsapp,
             shopName: lead.shopName,

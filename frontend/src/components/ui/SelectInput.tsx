@@ -49,6 +49,7 @@ export default function SelectInput({
       </label>
 
       <select
+        data-lead-field={field}
         value={selected}
         onChange={handleChange}
         disabled={disabled}

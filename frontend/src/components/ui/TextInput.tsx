@@ -68,6 +68,7 @@ export default function TextInput({
       </label>
 
       <input
+        data-lead-field={field}
         type={type}
         value={text}
         readOnly={readOnly}

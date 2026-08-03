@@ -11,8 +11,6 @@ import {
 import LoadingOverlay from "../common/LoadingOverlay";
 
 import Step1Customer from "./Step1Customer";
-import Step2Business from "./Step2Business";
-import Step3Followup from "./Step3Followup";
 import Step4Review from "./Step4Review";
 
 type LeadWizardProps = {
@@ -38,6 +36,12 @@ export default function LeadWizard({
 
   const [duplicateLead, setDuplicateLead] =
     useState<any>(null);
+
+  function focusField(field: string) {
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(`[data-lead-field="${field}"]`)?.focus();
+    });
+  }
 
   async function save() {
 
@@ -119,13 +123,36 @@ export default function LeadWizard({
 
   }
 
+  function validateStepOne() {
+    if (!lead.mobile.trim()) {
+      toast.error("Mobile Number is required.");
+      focusField("mobile");
+      return false;
+    }
+
+    if (!lead.leadOwner.trim()) {
+      toast.error("Lead Owner is required.");
+      focusField("leadOwner");
+      return false;
+    }
+
+    if (!lead.status.trim()) {
+      toast.error("Lead Status is required.");
+      focusField("status");
+      return false;
+    }
+
+    return true;
+  }
+
   function next() {
 
-    if (step < 4) {
+    if (step === 1) {
+      if (!validateStepOne()) {
+        return;
+      }
 
-      setStep(
-        (prev) => prev + 1
-      );
+      setStep(2);
 
       return;
 
@@ -160,11 +187,11 @@ export default function LeadWizard({
         }
       />
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-lg">
 
-        <div className="border-b border-slate-200 p-8">
+        <div className="border-b border-slate-200 p-5 sm:p-6">
 
-          <h1 className="text-3xl font-bold text-slate-800">
+          <h1 className="text-2xl font-bold text-slate-800">
 
             {editingId
               ? "Edit Lead"
@@ -176,17 +203,17 @@ export default function LeadWizard({
 
             {editingId
               ? "Update the selected lead."
-              : "Complete all four steps to create a new lead."}
+              : "Complete two quick steps to create a new lead."}
 
           </p>
 
         </div>
 
-        <div className="px-8 pt-8">
+        <div className="px-5 pt-5 sm:px-6 sm:pt-6">
 
           <div className="flex items-center justify-between">
 
-            {[1, 2, 3, 4].map((item) => (
+            {[1, 2].map((item) => (
 
               <div
                 key={item}
@@ -207,10 +234,8 @@ export default function LeadWizard({
 
                 <p className="mt-2 text-sm text-slate-600">
 
-                  {item === 1 && "Customer"}
-                  {item === 2 && "Business"}
-                  {item === 3 && "Follow-up"}
-                  {item === 4 && "Review"}
+                  {item === 1 && "Customer Details"}
+                  {item === 2 && "Review & Save"}
 
                 </p>
 
@@ -222,21 +247,18 @@ export default function LeadWizard({
 
         </div>
 
-        <div className="p-8">
+        <div className="p-4 sm:p-6">
 
           {step === 1 && <Step1Customer />}
 
-          {step === 2 && <Step2Business />}
-
-          {step === 3 && <Step3Followup />}
-
-          {step === 4 && <Step4Review />}
+          {step === 2 && <Step4Review />}
 
         </div>
 
-        <div className="flex justify-between border-t border-slate-200 bg-slate-50 px-8 py-6">
+        <div className="sticky bottom-0 z-30 flex justify-between border-t border-slate-200 bg-slate-50 px-5 py-4 shadow-[0_-8px_18px_rgba(15,23,42,0.08)] sm:px-6">
 
           <button
+            data-lead-field="wizard-previous"
             onClick={previous}
             disabled={
               step === 1 ||
@@ -254,6 +276,7 @@ export default function LeadWizard({
           </button>
 
           <button
+            data-lead-field="wizard-next"
             onClick={next}
             disabled={loading}
             className="rounded-xl bg-red-600 px-8 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -263,7 +286,7 @@ export default function LeadWizard({
               ? editingId
                 ? "Updating..."
                 : "Saving..."
-              : step === 4
+              : step === 2
                 ? editingId
                   ? "Update Lead"
                   : "Save Lead"

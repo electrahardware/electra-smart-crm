@@ -29,6 +29,11 @@ export async function uploadAttachment(
         },
       });
 
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: { lastEditedAt: new Date() },
+    });
+
     await createTimeline({
       leadId,
       type: "ATTACHMENT",
@@ -85,10 +90,30 @@ export async function deleteAttachment(
 ) {
   try {
 
+    const attachment = await prisma.leadAttachment.findUnique({
+      where: {
+        id: Number(req.params.id),
+      },
+      select: {
+        leadId: true,
+      },
+    });
+
+    if (!attachment) {
+      return res.status(404).json({
+        message: "Attachment not found.",
+      });
+    }
+
     await prisma.leadAttachment.delete({
       where: {
         id: Number(req.params.id),
       },
+    });
+
+    await prisma.lead.update({
+      where: { id: attachment.leadId },
+      data: { lastEditedAt: new Date() },
     });
 
     res.json({

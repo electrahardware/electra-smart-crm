@@ -49,6 +49,7 @@ followupCompletedAt?: string | null;
 
   createdAt?: string;
   updatedAt?: string;
+  lastEditedAt?: string | null;
 }
 
 export const EmptyLead: Lead = {

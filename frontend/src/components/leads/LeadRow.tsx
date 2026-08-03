@@ -42,6 +42,42 @@ export default function LeadRow({
         .replace(/\//g, "-")
     : "-";
 
+  const lastEditDate = lead.lastEditedAt
+    ? new Intl.DateTimeFormat("en-GB")
+        .format(new Date(lead.lastEditedAt))
+        .replace(/\//g, "-")
+    : "-";
+
+  const lastEditAge = (() => {
+    if (!lead.lastEditedAt) {
+      return "";
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const editedOn = new Date(lead.lastEditedAt);
+    editedOn.setHours(0, 0, 0, 0);
+
+    const daysSinceEdit = Math.floor(
+      (today.getTime() - editedOn.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (daysSinceEdit <= 0) {
+      return "bg-emerald-100 text-emerald-700";
+    }
+
+    if (daysSinceEdit >= 2 && daysSinceEdit <= 3) {
+      return "bg-amber-100 text-amber-700";
+    }
+
+    if (daysSinceEdit >= 7) {
+      return "bg-red-100 text-red-700";
+    }
+
+    return "bg-slate-100 text-slate-600";
+  })();
+
   async function copyMobile(
     e: React.MouseEvent<HTMLButtonElement>,
     mobile: string,
@@ -94,6 +130,14 @@ export default function LeadRow({
         >
           {lead.mobile}
         </button>
+      </td>
+
+      <td className="p-3 whitespace-nowrap">
+        {lead.lastEditedAt && (
+          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${lastEditAge}`}>
+            {lastEditDate}
+          </span>
+        )}
       </td>
 
       <td className="p-3">{lead.shopName || "-"}</td>

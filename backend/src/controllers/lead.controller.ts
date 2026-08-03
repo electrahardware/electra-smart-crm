@@ -268,8 +268,16 @@ export async function getLead(req: Request, res: Response) {
 
 export async function createLead(req: Request, res: Response) {
   try {
+    const {
+      id,
+      createdAt,
+      updatedAt,
+      lastEditedAt,
+      ...leadInput
+    } = req.body;
+
     const data = {
-      ...req.body,
+      ...leadInput,
 
       leadDate: req.body.leadDate ? new Date(req.body.leadDate) : new Date(),
 
@@ -387,6 +395,7 @@ export async function updateLead(req: Request, res: Response) {
       quotations,
       createdAt,
       updatedAt,
+      lastEditedAt,
       id,
       ...leadData
     } = req.body;
@@ -397,6 +406,8 @@ export async function updateLead(req: Request, res: Response) {
       },
       data: {
         ...leadData,
+
+        lastEditedAt: new Date(),
 
         leadDate: req.body.leadDate ? new Date(req.body.leadDate) : undefined,
 
@@ -622,6 +633,7 @@ export async function addLeadNote(req: Request, res: Response) {
       },
       data: {
         notes: req.body.note,
+        lastEditedAt: new Date(),
       },
     });
 
@@ -677,6 +689,7 @@ export async function deleteLeadNote(req: Request, res: Response) {
 
       data: {
         notes: latestNote?.note || "",
+        lastEditedAt: new Date(),
       },
     });
 
@@ -804,6 +817,7 @@ export async function completeFollowup(req: Request, res: Response) {
 
         data: {
           notes: note.trim(),
+          lastEditedAt: new Date(),
         },
       });
 
@@ -841,6 +855,8 @@ export async function completeFollowup(req: Request, res: Response) {
         data: {
           followupDate: new Date(followupDate),
 
+          lastEditedAt: new Date(),
+
           followupCompleted: false,
 
           followupCompletedAt: null,
@@ -869,6 +885,8 @@ export async function completeFollowup(req: Request, res: Response) {
 
         data: {
           followupCompleted: true,
+
+          lastEditedAt: new Date(),
 
           followupCompletedAt: new Date(),
 

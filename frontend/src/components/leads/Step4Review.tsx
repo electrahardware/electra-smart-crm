@@ -1,115 +1,55 @@
 import { useLead } from "../../hooks/useLead";
+
+type SummaryItemProps = { label: string; value?: string | null };
+
+function SummaryItem({ label, value }: SummaryItemProps) {
+  return (
+    <div>
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-1 font-semibold text-slate-800">{value || "-"}</p>
+    </div>
+  );
+}
+
 export default function Step4Review() {
   const { lead } = useLead();
+  const address = [lead.addressLine1, lead.addressLine2].filter(Boolean).join(", ");
+
   return (
-    <div className="space-y-8">
-
-      <div className="flex items-center justify-between">
-
-        <div>
-          <h2 className="text-3xl font-bold text-slate-800">
-            Review & Save
-          </h2>
-
-          <p className="text-slate-500 mt-2">
-            Step 4 of 4 • Verify all details before saving
-          </p>
+    <div className="space-y-4">
+      <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+        <h2 className="mb-4 text-lg font-bold text-slate-800">Customer Summary</h2>
+        <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+          <SummaryItem label="Mobile" value={lead.mobile} />
+          <SummaryItem label="WhatsApp" value={lead.whatsapp} />
+          <SummaryItem label="Customer Name" value={lead.customerName} />
+          <SummaryItem label="Shop Name" value={lead.shopName} />
+          <SummaryItem label="Customer Type" value={lead.customerType} />
+          <SummaryItem label="Email" value={lead.email} />
         </div>
+      </section>
 
-        <div>
-          <p className="text-sm text-slate-500 mb-2">
-            Progress
-          </p>
-
-          <div className="w-44 h-3 rounded-full bg-slate-200 overflow-hidden">
-            <div className="w-full h-full bg-green-600"></div>
-          </div>
+      <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+        <h2 className="mb-4 text-lg font-bold text-slate-800">Address Summary</h2>
+        <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+          <SummaryItem label="Country" value={lead.country} />
+          <SummaryItem label="State" value={lead.state} />
+          <SummaryItem label="District" value={lead.district} />
+          <SummaryItem label="City" value={lead.city} />
+          <SummaryItem label="Area" value={lead.area} />
+          <SummaryItem label="Pincode" value={lead.pincode} />
+          <SummaryItem label="Address" value={address} />
         </div>
+      </section>
 
-      </div>
-
-      <div className="bg-slate-50 rounded-2xl border border-slate-200 p-8">
-
-        <h3 className="text-xl font-bold mb-6">
-          Customer Summary
-        </h3>
-
-        <div className="grid grid-cols-2 gap-6">
-
-          <div>
-            <p className="text-slate-500 text-sm">Customer Name</p>
-            <p className="font-semibold">
-  {lead.customerName || "-"}
-</p>
-          </div>
-
-          <div>
-            <p className="text-slate-500 text-sm">Mobile</p>
-            <p className="font-semibold">
-  {lead.mobile || "-"}
-</p>
-          </div>
-
-          <div>
-            <p className="text-slate-500 text-sm">Shop</p>
-            <p className="font-semibold">
-  {lead.shopName || "-"}
-</p>
-          </div>
-
-          <div>
-            <p className="text-slate-500 text-sm">Customer Type</p>
-            <p className="font-semibold">
-  {lead.customerType || "-"}
-</p>
-          </div>
-
+      <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+        <h2 className="mb-4 text-lg font-bold text-slate-800">Business Summary</h2>
+        <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+          <SummaryItem label="Lead Owner" value={lead.leadOwner} />
+          <SummaryItem label="Lead Status" value={lead.status} />
+          <SummaryItem label="Products Interested" value={lead.products.join(", ")} />
         </div>
-
-      </div>
-
-      <div className="bg-slate-50 rounded-2xl border border-slate-200 p-8">
-
-        <h3 className="text-xl font-bold mb-6">
-          Business Summary
-        </h3>
-
-        <div className="grid grid-cols-2 gap-6">
-
-          <div>
-            <p className="text-slate-500 text-sm">Lead Owner</p>
-            <p className="font-semibold">
-  {lead.leadOwner || "-"}
-</p>
-          </div>
-
-          <div>
-            <p className="text-slate-500 text-sm">Lead Source</p>
-            <p className="font-semibold">
-  {lead.leadSource || "-"}
-</p>
-          </div>
-
-          <div>
-            <p className="text-slate-500 text-sm">Priority</p>
-            <p className="font-semibold">
-  {lead.priority || "-"}
-</p>
-          </div>
-
-          <div>
-            <p className="text-slate-500 text-sm">Status</p>
-            <p className="font-semibold">
-  {lead.status || "-"}
-</p>
-          </div>
-
-        </div>
-
-      </div>
-
-    
-
+      </section>
     </div>
   );
 }

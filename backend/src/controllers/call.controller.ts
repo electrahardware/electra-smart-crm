@@ -56,6 +56,12 @@ export async function addLeadCall(
         },
       });
 
+    // Logging a call counts as an edit to the related lead.
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: { lastEditedAt: new Date() },
+    });
+
     await createTimeline({
       leadId,
       type: "CALL",
@@ -84,10 +90,24 @@ export async function deleteLeadCall(
 ) {
   try {
 
+    const call = await prisma.leadCall.findUnique({
+      where: { id: Number(req.params.callId) },
+      select: { leadId: true },
+    });
+
+    if (!call) {
+      return res.status(404).json({ message: "Call not found." });
+    }
+
     await prisma.leadCall.delete({
       where: {
         id: Number(req.params.callId),
       },
+    });
+
+    await prisma.lead.update({
+      where: { id: call.leadId },
+      data: { lastEditedAt: new Date() },
     });
 
     res.json({

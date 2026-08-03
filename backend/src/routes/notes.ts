@@ -25,6 +25,12 @@ router.post("/", async (req, res) => {
       },
     });
 
+    // A note is a lead interaction, so refresh its read-only Last Edit value.
+    await prisma.lead.update({
+      where: { id: Number(leadId) },
+      data: { lastEditedAt: new Date() },
+    });
+
    await prisma.leadTimeline.create({
       data: {
         leadId: Number(leadId),
