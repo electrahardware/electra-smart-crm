@@ -8,6 +8,7 @@ import type { Lead } from "../../types/lead";
 import {
   updateLead,
 } from "../../services/leadService";
+import LeadStatusQuickUpdate from "./LeadStatusQuickUpdate";
 
 interface Props {
   lead: Lead;
@@ -28,6 +29,8 @@ export default function FollowupTab({
 
   const [followupTime, setFollowupTime] =
     useState("");
+
+  const [status, setStatus] = useState("None");
 
   const [toast, setToast] = useState("");
 
@@ -53,6 +56,8 @@ const [toastType, setToastType] = useState<
       lead.followupTime || ""
     );
 
+    setStatus(lead.status || "None");
+
   }, [lead]);
 
   async function saveFollowup() {
@@ -70,6 +75,8 @@ const [toastType, setToastType] = useState<
         followupDate,
 
         followupTime,
+
+        status,
 
         followupCompleted: false,
 
@@ -178,6 +185,13 @@ setTimeout(() => {
             />
 
           </div>
+
+        </div>
+
+        <div className="mt-5">
+
+          <label className="mb-2 block text-sm font-semibold">Lead Status</label>
+          <LeadStatusQuickUpdate leadId={lead.id!} currentStatus={status} onStatusChange={setStatus} deferSave />
 
         </div>
 

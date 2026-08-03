@@ -17,6 +17,7 @@ type Props = {
 };
 
 import LeadNotesDialog from "./LeadNotesDialog";
+import LeadStatusQuickUpdate from "./LeadStatusQuickUpdate";
 
 export default function FollowupCard({
   lead,
@@ -153,6 +154,16 @@ const [rescheduleOpen, setRescheduleOpen] = useState(false);
           >
             📅 Reschedule
           </button>
+
+          <LeadStatusQuickUpdate
+            leadId={currentLead.id ?? 0}
+            currentStatus={currentLead.status}
+            compact
+            onUpdated={(updated) => {
+              setCurrentLead((previous) => ({ ...previous, status: updated.status, lastEditedAt: updated.lastEditedAt }));
+              onUpdated();
+            }}
+          />
 
           <button
   onClick={handleDone}
