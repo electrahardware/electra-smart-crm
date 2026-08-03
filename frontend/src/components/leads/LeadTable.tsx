@@ -37,7 +37,6 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
 
   const [ownerFilter, setOwnerFilter] = useState("All");
 
-  const [priorityFilter, setPriorityFilter] = useState("All");
 
   const [stateFilter, setStateFilter] = useState("All");
 
@@ -87,7 +86,6 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
     search,
     statusFilter,
     ownerFilter,
-    priorityFilter,
     stateFilter,
     sourceFilter,
     cityFilter,
@@ -104,7 +102,6 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
         search,
         statusFilter === "All" ? "" : statusFilter,
         ownerFilter === "All" ? "" : ownerFilter,
-        priorityFilter === "All" ? "" : priorityFilter,
         stateFilter === "All" ? "" : stateFilter,
         sourceFilter === "All" ? "" : sourceFilter,
         cityFilter,
@@ -136,7 +133,6 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
     search,
     statusFilter,
     ownerFilter,
-    priorityFilter,
     stateFilter,
     sourceFilter,
     cityFilter,
@@ -204,9 +200,7 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
 
   const totalLeads = totalRecords;
 
-  const hotLeads = filteredLeads.filter(
-    (lead) => lead.priority === "Hot",
-  ).length;
+  const hotLeads = 0;
 
   const todayFollowups = filteredLeads.filter(
     (lead) =>
@@ -423,8 +417,6 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
           setStatusFilter={setStatusFilter}
           ownerFilter={ownerFilter}
           setOwnerFilter={setOwnerFilter}
-          priorityFilter={priorityFilter}
-          setPriorityFilter={setPriorityFilter}
           stateFilter={stateFilter}
           setStateFilter={setStateFilter}
           cityFilter={cityFilter}

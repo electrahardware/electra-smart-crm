@@ -63,10 +63,6 @@ export default function LeadTableHeader({
         </th>
 
         <th className="p-3 text-left">
-          Priority
-        </th>
-
-        <th className="p-3 text-left">
           Actions
         </th>
 

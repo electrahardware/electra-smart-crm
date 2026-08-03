@@ -32,18 +32,10 @@ function calculateLeadStats(
 ): LeadStats {
   return {
     totalLeads: filteredLeads.length,
-    hotLeads: filteredLeads.filter(
-      (lead) => lead.priority === "Hot"
-    ).length,
-    warmLeads: filteredLeads.filter(
-      (lead) => lead.priority === "Warm"
-    ).length,
-    coldLeads: filteredLeads.filter(
-      (lead) => lead.priority === "Cold"
-    ).length,
-    noReqLeads: filteredLeads.filter(
-  (lead) => lead.priority === "No Req."
-).length,
+    hotLeads: 0,
+    warmLeads: 0,
+    coldLeads: 0,
+    noReqLeads: 0,
     todayFollowups: filteredLeads.filter(
   (lead) =>
     !lead.followupCompleted &&

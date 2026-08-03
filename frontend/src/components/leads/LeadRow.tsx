@@ -2,7 +2,6 @@ import { Eye, MessageCircle, Pencil, Phone, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { Lead } from "../../types/lead";
 import { canEditLead, isOwnerOrManager } from "../../utils/auth";
-import PriorityBadge from "./PriorityBadge";
 import StatusBadge from "./StatusBadge";
 
 interface Props {
@@ -148,10 +147,6 @@ export default function LeadRow({
 
       <td className="p-3">
         <StatusBadge status={lead.status} />
-      </td>
-
-      <td className="p-3">
-        <PriorityBadge priority={lead.priority} />
       </td>
 
       <td className="p-3">

@@ -4,6 +4,7 @@ import type {
 } from "react";
 
 import MultiSelectDropdown from "../ui/MultiSelectDropdown";
+import { LEAD_STATUSES } from "../../constants/statusConfig";
 
 import type {
   Lead,
@@ -21,9 +22,6 @@ interface Props {
 
   ownerFilter: string;
   setOwnerFilter: Dispatch<SetStateAction<string>>;
-
-  priorityFilter: string;
-  setPriorityFilter: Dispatch<SetStateAction<string>>;
 
   stateFilter: string;
   setStateFilter: Dispatch<SetStateAction<string>>;
@@ -58,9 +56,6 @@ export default function LeadToolbar({
 
   ownerFilter,
   setOwnerFilter,
-
-  priorityFilter,
-  setPriorityFilter,
 
   stateFilter,
   setStateFilter,
@@ -106,13 +101,7 @@ export default function LeadToolbar({
           className="rounded-xl border px-4 py-3"
         >
           <option value="All">All Status</option>
-          <option value="New">New</option>
-          <option value="Follow-up">Follow-up</option>
-          <option value="Quotation Sent">
-            Quotation Sent
-          </option>
-          <option value="Won">Won</option>
-          <option value="Lost">Lost</option>
+          {LEAD_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
         </select>
 
         <select
@@ -140,33 +129,6 @@ export default function LeadToolbar({
               {owner}
             </option>
           ))}
-        </select>
-
-        <select
-          value={priorityFilter}
-          onChange={(e) =>
-            setPriorityFilter(e.target.value)
-          }
-          className="rounded-xl border px-4 py-3"
-        >
-          <option value="All">
-            All Priority
-          </option>
-
-          <option value="Hot">
-            Hot
-          </option>
-
-          <option value="Warm">
-            Warm
-          </option>
-
-          <option value="Cold">
-            Cold
-          </option>
-
-          <option value="No Req.">No Req.</option>
-
         </select>
 
         <select

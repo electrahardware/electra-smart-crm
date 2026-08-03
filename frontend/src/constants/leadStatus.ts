@@ -1,12 +1,2 @@
-const leadStatus = [
-  "New Lead",
-  "Contacted",
-  "Follow-up",
-  "Quotation Sent",
-  "Negotiation",
-  "Won",
-  "Lost",
-  "On Hold",
-];
-
-export default leadStatus;
+import { LEAD_STATUSES } from "./statusConfig";
+export default LEAD_STATUSES as unknown as string[];

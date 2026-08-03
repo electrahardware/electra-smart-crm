@@ -13,7 +13,6 @@ export interface LeadFilters {
   search: string;
   statusFilter: string;
   ownerFilter: string;
-  priorityFilter: string;
   stateFilter: string;
   sourceFilter: string;
   cityFilter: string[];
@@ -26,7 +25,6 @@ export const DEFAULT_LEAD_FILTERS: LeadFilters = {
   search: "",
   statusFilter: "All",
   ownerFilter: "All",
-  priorityFilter: "All",
   stateFilter: "All",
   sourceFilter: "All",
   cityFilter: [],
@@ -70,7 +68,6 @@ function matchesSearch(lead: Lead, keyword: string): boolean {
     lead.leadOwner,
     lead.leadSource,
     lead.status,
-    lead.priority,
   ];
 
   return fields.some((field) =>
@@ -93,10 +90,6 @@ function filterLeads(
     const matchesOwner =
       filters.ownerFilter === "All" ||
       lead.leadOwner === filters.ownerFilter;
-
-    const matchesPriority =
-      filters.priorityFilter === "All" ||
-      lead.priority === filters.priorityFilter;
 
     const matchesState =
       filters.stateFilter === "All" ||
@@ -158,7 +151,6 @@ function filterLeads(
       matchesSearch(lead, keyword) &&
       matchesStatus &&
       matchesOwner &&
-      matchesPriority &&
       matchesState &&
       matchesSource &&
       matchesCity &&

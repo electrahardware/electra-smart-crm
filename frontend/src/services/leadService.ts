@@ -26,7 +26,6 @@ export async function getLeads(
   search = "",
   status = "",
   owner = "",
-  priority = "",
   state = "",
   source = "",
   cities: string[] = [],
@@ -42,7 +41,6 @@ export async function getLeads(
   if (search) params.set("search", search);
   if (status) params.set("status", status);
   if (owner) params.set("owner", owner);
-  if (priority) params.set("priority", priority);
   if (state) params.set("state", state);
   if (source) params.set("source", source);
 
