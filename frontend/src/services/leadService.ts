@@ -102,6 +102,8 @@ export async function completeFollowup(
   data: {
     note: string;
     followupDate?: string | null;
+    followupTime?: string | null;
+    status: string;
   },
 ) {
   return api<{ success: boolean }>(`/leads/${id}/complete-followup`, {

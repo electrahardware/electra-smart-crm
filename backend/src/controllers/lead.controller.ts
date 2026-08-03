@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { createAuditLog } from "../services/audit.service";
 import { createTimeline } from "../services/timeline.service";
+import { isLeadStatus } from "../utils/leadStatus";
 
 async function verifyLeadAccess(req: Request, leadId: number) {
   const currentUser = (req as any).user;
@@ -806,7 +807,11 @@ export async function completeFollowup(req: Request, res: Response) {
         message: "Access denied.",
       });
     }
-    const { note, followupDate } = req.body;
+    const { note, followupDate, followupTime, status } = req.body;
+
+    if (!isLeadStatus(status)) {
+      return res.status(400).json({ message: "A valid Lead Status is required." });
+    }
 
     // Save latest note
     if (note?.trim()) {
@@ -860,6 +865,9 @@ export async function completeFollowup(req: Request, res: Response) {
           followupCompleted: false,
 
           followupCompletedAt: null,
+
+          followupTime: followupTime || null,
+          status,
         },
       });
 
@@ -893,6 +901,8 @@ export async function completeFollowup(req: Request, res: Response) {
           followupDate: null,
 
           followupTime: null,
+
+          status,
         },
       });
     }

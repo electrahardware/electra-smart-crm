@@ -3,6 +3,8 @@ import {
   completeFollowup,
 } from "../../services/leadService";
 import type { Lead } from "../../types/lead";
+import SelectInput from "../ui/SelectInput";
+import leadStatus from "../../constants/leadStatus";
 
 type Props = {
   open: boolean;
@@ -31,6 +33,8 @@ export default function CompleteFollowupDialog({
 
   const [followupDate, setFollowupDate] =
     useState("");
+  const [followupTime, setFollowupTime] = useState("");
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
 
@@ -49,6 +53,8 @@ export default function CompleteFollowupDialog({
   );
 
   setEditingDate(false);
+  setFollowupTime(lead.followupTime || "");
+  setStatus(lead.status || "");
   setDateChanged(false);
   setNoteChanged(false);
 
@@ -61,6 +67,10 @@ export default function CompleteFollowupDialog({
       setLoading(true);
 
       if (!lead.id) return;
+      if (!status) {
+        alert("Lead Status is required.");
+        return;
+      }
 
 await completeFollowup(lead.id, {
 
@@ -71,6 +81,8 @@ await completeFollowup(lead.id, {
   followupDate: dateChanged
     ? followupDate
     : null,
+  followupTime,
+  status,
 
 });
 
@@ -103,6 +115,18 @@ await completeFollowup(lead.id, {
         </div>
 
         <div className="space-y-6 p-6">
+
+          <div>
+
+            <SelectInput
+              label="Lead Status"
+              required
+              value={status}
+              options={leadStatus}
+              onChange={(event) => setStatus(event.target.value)}
+            />
+
+          </div>
 
           <div>
 
@@ -181,8 +205,8 @@ await completeFollowup(lead.id, {
               </div>
 
             ) : (
-
-              <input
+              <>
+                <input
                 type="date"
                 value={followupDate}
                 onChange={(e) => {
@@ -194,6 +218,14 @@ await completeFollowup(lead.id, {
 }}
                 className="w-full rounded-xl border p-3"
               />
+
+                <input
+                type="time"
+                value={followupTime}
+                onChange={(e) => setFollowupTime(e.target.value)}
+                className="mt-3 w-full rounded-xl border p-3"
+                />
+              </>
 
             )}
 
