@@ -72,7 +72,7 @@ export default function CompleteFollowupDialog({
         return;
       }
 
-await completeFollowup(lead.id, {
+      await completeFollowup(lead.id, {
 
   note: noteChanged
     ? note
@@ -84,8 +84,11 @@ await completeFollowup(lead.id, {
   followupTime,
   status,
 
-});
+      });
 
+      // Keep the table, dashboard panel, and any open lead details in sync
+      // without requiring a browser reload.
+      window.dispatchEvent(new Event("lead-updated"));
       onCompleted();
 
       onClose();
@@ -222,7 +225,10 @@ await completeFollowup(lead.id, {
                 <input
                 type="time"
                 value={followupTime}
-                onChange={(e) => setFollowupTime(e.target.value)}
+                onChange={(e) => {
+                  setFollowupTime(e.target.value);
+                  setDateChanged(true);
+                }}
                 className="mt-3 w-full rounded-xl border p-3"
                 />
               </>

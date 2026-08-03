@@ -411,6 +411,14 @@ export async function updateLead(req: Request, res: Response) {
       ...leadData
     } = req.body;
 
+    // The lead update endpoint is also used by compact controls (such as the
+    // quick status dropdown). Preserve follow-up values when those controls
+    // intentionally send only a subset of lead fields.
+    const hasFollowupDate = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "followupDate",
+    );
+
     const lead = await prisma.lead.update({
       where: {
         id: leadId,
@@ -420,21 +428,32 @@ export async function updateLead(req: Request, res: Response) {
 
         lastEditedAt: new Date(),
         lastEditedBy: (req as any).user?.name || "System",
-        listPriority: getListPriority(req.body.status),
+        listPriority:
+          req.body.status !== undefined
+            ? getListPriority(req.body.status)
+            : undefined,
 
         leadDate: req.body.leadDate ? new Date(req.body.leadDate) : undefined,
 
         city: req.body.city,
 
-        followupCompleted: req.body.followupDate
-          ? false
-          : req.body.followupCompleted,
+        followupCompleted: hasFollowupDate
+          ? req.body.followupDate
+            ? false
+            : req.body.followupCompleted
+          : undefined,
 
-        followupDate: req.body.followupDate
-          ? new Date(req.body.followupDate)
-          : null,
+        followupDate: hasFollowupDate
+          ? req.body.followupDate
+            ? new Date(req.body.followupDate)
+            : null
+          : undefined,
 
-        followupTime: req.body.followupDate ? req.body.followupTime : null,
+        followupTime: hasFollowupDate
+          ? req.body.followupDate
+            ? req.body.followupTime
+            : null
+          : undefined,
 
         followupCompletedAt: req.body.followupCompleted
           ? new Date()
@@ -748,7 +767,10 @@ export async function getFollowups(req: Request, res: Response) {
     if (filter === "today") {
       where = {
         OR: [
-          { status: "Card Pending" },
+          // Card Pending leads are included in the daily queue only until
+          // their follow-up is marked Done. Without this condition a
+          // completed Card Pending lead is returned forever.
+          { status: "Card Pending", followupCompleted: false },
           {
             followupCompleted: false,
             followupDate: {
@@ -936,6 +958,14 @@ export async function completeFollowup(req: Request, res: Response) {
           status,
           listPriority: getListPriority(status),
         },
+      });
+
+      await createTimeline({
+        leadId,
+        type: "FOLLOWUP",
+        title: "Follow-up Completed",
+        description: "Follow-up marked as completed.",
+        createdBy: (req as any).user?.name || "System",
       });
     }
 
