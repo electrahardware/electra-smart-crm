@@ -31,7 +31,7 @@ export async function uploadAttachment(
 
     await prisma.lead.update({
       where: { id: leadId },
-      data: { lastEditedAt: new Date() },
+      data: { lastEditedAt: new Date(), lastEditedBy: (req as any).user?.name || "System" },
     });
 
     await createTimeline({
@@ -113,7 +113,7 @@ export async function deleteAttachment(
 
     await prisma.lead.update({
       where: { id: attachment.leadId },
-      data: { lastEditedAt: new Date() },
+      data: { lastEditedAt: new Date(), lastEditedBy: (req as any).user?.name || "System" },
     });
 
     res.json({

@@ -5,7 +5,7 @@ export default function LeadTableHeader({ allSelected, onToggleAll }: Props) {
     <tr className="text-left">
       <th className="w-12 px-4 py-4"><input aria-label="Select all leads" type="checkbox" checked={allSelected} onChange={onToggleAll} /></th>
       <th className="min-w-[260px] px-4 py-4">Customer</th>
-      <th className="min-w-[150px] px-4 py-4">Shop</th>
+      <th className="min-w-[155px] px-4 py-4">Mobile</th>
       <th className="min-w-[120px] px-4 py-4">City</th>
       <th className="min-w-[150px] px-4 py-4">Owner</th>
       <th className="min-w-[145px] px-4 py-4">Status</th>

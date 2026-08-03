@@ -283,6 +283,9 @@ export async function createLead(req: Request, res: Response) {
 
       status: req.body.status || "None",
 
+      lastEditedAt: new Date(),
+      lastEditedBy: (req as any).user?.name || "System",
+
       leadDate: req.body.leadDate ? new Date(req.body.leadDate) : new Date(),
 
       city: req.body.city || "",
@@ -412,6 +415,7 @@ export async function updateLead(req: Request, res: Response) {
         ...leadData,
 
         lastEditedAt: new Date(),
+        lastEditedBy: (req as any).user?.name || "System",
 
         leadDate: req.body.leadDate ? new Date(req.body.leadDate) : undefined,
 
@@ -638,6 +642,7 @@ export async function addLeadNote(req: Request, res: Response) {
       data: {
         notes: req.body.note,
         lastEditedAt: new Date(),
+        lastEditedBy: (req as any).user?.name || "System",
       },
     });
 
@@ -694,6 +699,7 @@ export async function deleteLeadNote(req: Request, res: Response) {
       data: {
         notes: latestNote?.note || "",
         lastEditedAt: new Date(),
+        lastEditedBy: (req as any).user?.name || "System",
       },
     });
 
@@ -839,6 +845,7 @@ export async function completeFollowup(req: Request, res: Response) {
         data: {
           notes: note.trim(),
           lastEditedAt: new Date(),
+          lastEditedBy: (req as any).user?.name || "System",
         },
       });
 
@@ -877,6 +884,7 @@ export async function completeFollowup(req: Request, res: Response) {
           followupDate: new Date(followupDate),
 
           lastEditedAt: new Date(),
+          lastEditedBy: (req as any).user?.name || "System",
 
           followupCompleted: false,
 
@@ -911,6 +919,7 @@ export async function completeFollowup(req: Request, res: Response) {
           followupCompleted: true,
 
           lastEditedAt: new Date(),
+          lastEditedBy: (req as any).user?.name || "System",
 
           followupCompletedAt: new Date(),
 

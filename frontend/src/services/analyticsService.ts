@@ -73,6 +73,26 @@ export interface AnalyticsResponse {
   sourceWise: SourceWiseItem[];
   statusWise: StatusWiseItem[];
   priorityWise: PriorityWiseItem[];
+
+  salesExecutivePerformance: {
+    user: string;
+    today: number;
+    week: number;
+    month: number;
+    total: number;
+  }[];
+  mostActiveToday: {
+    user: string;
+    today: number;
+    week: number;
+    month: number;
+    total: number;
+  } | null;
+  todaysEditActivity: {
+    time: string;
+    user: string | null;
+    leadName: string;
+  }[];
 }
 
 export async function getAnalytics(): Promise<AnalyticsResponse> {

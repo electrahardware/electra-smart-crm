@@ -260,6 +260,38 @@ router.get("/", async (_req, res) => {
       }))
       .sort((a, b) => a.month.localeCompare(b.month));
 
+    const editedLeads = await prisma.lead.findMany({
+      where: {
+        lastEditedAt: { not: null },
+        lastEditedBy: { not: null },
+      },
+      select: {
+        customerName: true,
+        shopName: true,
+        lastEditedAt: true,
+        lastEditedBy: true,
+      },
+      orderBy: { lastEditedAt: "desc" },
+    });
+
+    const editorMap = new Map<string, { today: number; week: number; month: number; total: number }>();
+    for (const lead of editedLeads) {
+      if (!lead.lastEditedAt || !lead.lastEditedBy) continue;
+      const row = editorMap.get(lead.lastEditedBy) ?? { today: 0, week: 0, month: 0, total: 0 };
+      row.total += 1;
+      if (lead.lastEditedAt >= today && lead.lastEditedAt < tomorrow) row.today += 1;
+      if (lead.lastEditedAt >= weekStart) row.week += 1;
+      if (lead.lastEditedAt >= monthStart) row.month += 1;
+      editorMap.set(lead.lastEditedBy, row);
+    }
+    const salesExecutivePerformance = [...editorMap.entries()]
+      .map(([user, counts]) => ({ user, ...counts }))
+      .sort((a, b) => b.today - a.today || b.week - a.week || b.total - a.total);
+    const todaysEditActivity = editedLeads
+      .filter((lead) => lead.lastEditedAt && lead.lastEditedAt >= today && lead.lastEditedAt < tomorrow)
+      .slice(0, 20)
+      .map((lead) => ({ time: lead.lastEditedAt, user: lead.lastEditedBy, leadName: lead.customerName || lead.shopName || "Unnamed lead" }));
+
     //--------------------------------------------------------
     // Response
     //--------------------------------------------------------
@@ -302,6 +334,10 @@ router.get("/", async (_req, res) => {
       statusWise: clean(statuses, "status", "status"),
 
       priorityWise: clean(priorities, "priority", "priority"),
+
+      salesExecutivePerformance,
+      mostActiveToday: salesExecutivePerformance[0] ?? null,
+      todaysEditActivity,
     });
   } catch (error) {
     console.error(error);

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/electra-logo.png";
+import wallpaper from "../assets/images/login-wallpaper.jpg";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -61,17 +62,20 @@ export default function Login() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0b0b0c] px-4 py-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(227,30,36,.28),transparent_30%),radial-gradient(circle_at_82%_76%,rgba(255,255,255,.09),transparent_26%),linear-gradient(135deg,#0a0a0b,#1d1d20_52%,#090909)]" />
-      <div className="absolute -left-24 top-1/3 h-80 w-80 rounded-full border border-white/8 bg-white/4 blur-3xl" />
+    <div
+      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black bg-cover bg-center px-4 py-10"
+      style={{ backgroundImage: `url(${wallpaper})` }}
+    >
+      <div className="absolute inset-0 bg-black/55" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,transparent_5%,rgba(0,0,0,.4)_72%,rgba(0,0,0,.76)_100%)]" />
       <form
         onSubmit={handleLogin}
-        className="relative w-full max-w-md rounded-3xl border border-white/15 bg-white/95 p-7 shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-9"
+        className="relative w-full max-w-md rounded-3xl border border-white/18 bg-[#17171a]/88 p-7 text-white shadow-2xl shadow-black/70 backdrop-blur-xl sm:p-9"
       >
         <div className="mb-8 text-center">
-          <img src={logo} alt="Electra Hardware" className="mx-auto mb-5 w-44" />
-          <h1 className="text-2xl font-bold tracking-[-.035em] text-zinc-900">Welcome back</h1>
-          <p className="mt-2 text-sm text-zinc-500">Sign in to your Electra Smart CRM workspace</p>
+          <img src={logo} alt="Electra Hardware" className="mx-auto mb-6 w-48 drop-shadow-[0_6px_18px_rgba(0,0,0,.6)]" />
+          <h1 className="text-2xl font-bold tracking-[-.035em] text-white">Welcome back</h1>
+          <p className="mt-2 text-sm text-zinc-300">Sign in to your Electra Smart CRM workspace</p>
         </div>
 
         <input
@@ -79,7 +83,7 @@ export default function Login() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full border px-4 py-3"
+          className="mb-4 w-full border border-white/15! bg-white/10! px-4 py-3 text-white placeholder:text-zinc-400"
         />
 
         <input
@@ -87,10 +91,10 @@ export default function Login() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-6 w-full border px-4 py-3"
+          className="mb-6 w-full border border-white/15! bg-white/10! px-4 py-3 text-white placeholder:text-zinc-400"
         />
 
-        <button className="w-full rounded-xl bg-[#e31e24] py-3 font-semibold text-white shadow-[0_8px_18px_rgba(227,30,36,.25)] hover:bg-[#c9161c]">
+        <button className="w-full rounded-xl bg-[#e31e24] py-3 font-semibold text-white shadow-[0_8px_20px_rgba(227,30,36,.35)] hover:bg-[#c9161c]">
           Login
         </button>
       </form>

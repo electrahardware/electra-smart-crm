@@ -59,7 +59,7 @@ export async function addLeadCall(
     // Logging a call counts as an edit to the related lead.
     await prisma.lead.update({
       where: { id: leadId },
-      data: { lastEditedAt: new Date() },
+      data: { lastEditedAt: new Date(), lastEditedBy: (req as any).user?.name || "System" },
     });
 
     await createTimeline({
@@ -107,7 +107,7 @@ export async function deleteLeadCall(
 
     await prisma.lead.update({
       where: { id: call.leadId },
-      data: { lastEditedAt: new Date() },
+      data: { lastEditedAt: new Date(), lastEditedBy: (req as any).user?.name || "System" },
     });
 
     res.json({

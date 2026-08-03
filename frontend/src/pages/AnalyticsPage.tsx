@@ -125,6 +125,26 @@ export default function AnalyticsPage() {
         <Card title="Overdue" value={data.overdue} color="text-rose-600" />
       </div>
 
+      <section className="premium-surface mt-8 p-6">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[.16em] text-[#e31e24]">Editor activity</p>
+            <h2 className="mt-1 text-2xl font-bold tracking-[-.03em]">Sales Executive Performance</h2>
+          </div>
+          {data.mostActiveToday && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm"><p className="text-zinc-500">Most Active Today</p><p className="mt-1 font-bold text-[#be171d]">{data.mostActiveToday.user} · {data.mostActiveToday.today} edits</p></div>}
+        </div>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          {data.salesExecutivePerformance.slice(0, 3).map((item, index) => <div key={item.user} className="rounded-xl border border-zinc-200 bg-zinc-50 p-4"><p className="text-sm text-zinc-500">{["🥇 First", "🥈 Second", "🥉 Third"][index]}</p><p className="mt-2 font-bold text-zinc-900">{item.user}</p><p className="mt-1 text-sm text-[#e31e24]">{item.today} edits today</p></div>)}
+        </div>
+
+        <div className="mt-6 overflow-x-auto rounded-xl border border-zinc-200">
+          <table className="min-w-full text-sm"><thead className="bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500"><tr><th className="px-4 py-3">Sales Executive</th><th className="px-4 py-3">Today</th><th className="px-4 py-3">This Week</th><th className="px-4 py-3">This Month</th><th className="px-4 py-3">Total Edited</th></tr></thead><tbody>{data.salesExecutivePerformance.map((item) => <tr key={item.user} className="border-t border-zinc-100"><td className="px-4 py-3 font-semibold text-zinc-800">{item.user}</td><td className="px-4 py-3">{item.today}</td><td className="px-4 py-3">{item.week}</td><td className="px-4 py-3">{item.month}</td><td className="px-4 py-3">{item.total}</td></tr>)}</tbody></table>
+        </div>
+
+        <div className="mt-6"><h3 className="text-lg font-bold">Today's Activity</h3><div className="mt-3 overflow-x-auto rounded-xl border border-zinc-200"><table className="min-w-full text-sm"><thead className="bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500"><tr><th className="px-4 py-3">Time</th><th className="px-4 py-3">User</th><th className="px-4 py-3">Lead Name</th></tr></thead><tbody>{data.todaysEditActivity.map((item, index) => <tr key={`${item.time}-${index}`} className="border-t border-zinc-100"><td className="whitespace-nowrap px-4 py-3">{new Date(item.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td><td className="px-4 py-3">{item.user || "System"}</td><td className="px-4 py-3 font-medium text-zinc-800">{item.leadName}</td></tr>)}{data.todaysEditActivity.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-zinc-500">No edits recorded today.</td></tr>}</tbody></table></div></div>
+      </section>
+
       {/* Charts Section */}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
