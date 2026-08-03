@@ -60,6 +60,8 @@ export async function getLeads(
     params.set("followup", followup);
   }
 
+  if (limit === 0) params.set("all", "true");
+
   return api(`/leads?${params.toString()}`);
 }
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getLeads } from "../../services/leadService";
+import { getFollowups } from "../../services/followupService";
 import type { Lead } from "../../types/lead";
 import FollowupCard from "./FollowupCard";
 
@@ -9,29 +9,13 @@ export default function FollowupPanel() {
 
   const loadLeads = useCallback(async () => {
     try {
-      const response = await getLeads();
+      const [today, overdue] = await Promise.all([
+        getFollowups("today"),
+        getFollowups("overdue"),
+      ]);
 
-      const leads = response.data;
-
-      const today = new Date().toISOString().slice(0, 10);
-
-      setTodayLeads(
-        leads.filter(
-          (lead) =>
-            !lead.followupCompleted &&
-            lead.followupDate &&
-            lead.followupDate.slice(0, 10) === today,
-        ),
-      );
-
-      setOverdueLeads(
-        leads.filter(
-          (lead) =>
-            !lead.followupCompleted &&
-            lead.followupDate &&
-            lead.followupDate.slice(0, 10) < today,
-        ),
-      );
+      setTodayLeads(today);
+      setOverdueLeads(overdue);
     } catch (err) {
       console.error(err);
     }

@@ -32,9 +32,10 @@ export async function getAllLeads(req: Request, res: Response) {
   try {
     const page = Number(req.query.page) || 1;
 
+    const all = req.query.all === "true";
     const limit = Number(req.query.limit) || 50;
 
-    const skip = (page - 1) * limit;
+    const skip = all ? 0 : (page - 1) * limit;
 
     const search = (req.query.search as string)?.trim() || "";
 
@@ -197,7 +198,7 @@ export async function getAllLeads(req: Request, res: Response) {
 
         skip,
 
-        take: limit,
+        take: all ? undefined : limit,
 
         orderBy: [
           {
@@ -733,9 +734,17 @@ export async function getFollowups(req: Request, res: Response) {
     };
 
     if (filter === "today") {
-      where.followupDate = {
-        gte: today,
-        lt: tomorrow,
+      where = {
+        OR: [
+          { status: "Card Pending" },
+          {
+            followupCompleted: false,
+            followupDate: {
+              gte: today,
+              lt: tomorrow,
+            },
+          },
+        ],
       };
     }
 

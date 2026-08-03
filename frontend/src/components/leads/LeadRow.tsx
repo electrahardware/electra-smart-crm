@@ -1,5 +1,4 @@
 import { Eye, MessageCircle, Pencil, Phone, Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
 import type { Lead } from "../../types/lead";
 import { canEditLead, isOwnerOrManager } from "../../utils/auth";
 import StatusBadge from "./StatusBadge";
@@ -77,20 +76,10 @@ export default function LeadRow({
     return "bg-slate-100 text-slate-600";
   })();
 
-  async function copyMobile(
-    e: React.MouseEvent<HTMLButtonElement>,
-    mobile: string,
-  ) {
-    e.stopPropagation();
-
-    try {
-      await navigator.clipboard.writeText(mobile);
-
-      toast.success("Mobile number copied");
-    } catch {
-      toast.error("Unable to copy mobile number");
-    }
-  }
+  const mobileNumbers = [lead.mobile, lead.secondaryMobile, lead.whatsapp]
+    .map((number) => number?.trim())
+    .filter((number): number is string => Boolean(number))
+    .filter((number, index, numbers) => numbers.indexOf(number) === index);
 
   return (
     <tr
@@ -121,14 +110,20 @@ export default function LeadRow({
         {lead.customerName}
       </td>
 
-      <td className="p-3">
-        <button
-          onClick={(e) => copyMobile(e, lead.mobile)}
-          className="font-medium text-blue-600 hover:underline"
-          title="Copy Mobile Number"
-        >
-          {lead.mobile}
-        </button>
+      <td className="p-3 align-top">
+        <div className="space-y-1">
+          {mobileNumbers.map((mobile, mobileIndex) => (
+            <a
+              key={mobile}
+              href={`tel:${mobile}`}
+              onClick={(event) => event.stopPropagation()}
+              className="block font-medium text-blue-600 hover:underline"
+              title={`Call ${mobile}`}
+            >
+              {mobileIndex + 1}. {mobile}
+            </a>
+          ))}
+        </div>
       </td>
 
       <td className="p-3 whitespace-nowrap">

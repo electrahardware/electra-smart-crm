@@ -125,6 +125,15 @@ export async function parseElectraExcel(
       getCellText(row, columnIndexes, "whatsapp"),
     );
 
+    const contactNumbers = [
+      mobileNumbers.primaryMobile,
+      mobileNumbers.secondaryMobile,
+      whatsappNumbers.primaryMobile,
+      whatsappNumbers.secondaryMobile,
+    ].filter((number): number is string => Boolean(number));
+
+    const uniqueContactNumbers = [...new Set(contactNumbers)];
+
     const notes = noteIndexes
       .map((index) => cellToString(row[index]))
       .filter(Boolean)
@@ -149,11 +158,11 @@ export async function parseElectraExcel(
         getCellText(row, columnIndexes, "customerName") ||
         getCellText(row, columnIndexes, "shopName"),
 
-      mobile: mobileNumbers.primaryMobile ?? "",
+      mobile: uniqueContactNumbers[0] ?? "",
 
-      secondaryMobile: mobileNumbers.secondaryMobile ?? undefined,
+      secondaryMobile: uniqueContactNumbers[1] ?? undefined,
 
-      whatsapp: whatsappNumbers.primaryMobile ?? undefined,
+      whatsapp: whatsappNumbers.primaryMobile ?? uniqueContactNumbers[0] ?? undefined,
 
       shopName: getCellText(row, columnIndexes, "shopName"),
 

@@ -34,13 +34,6 @@ export default function Step1Customer() {
   useEffect(() => {
     async function fetchPincode() {
       if (lead.pincode.length !== 6) {
-        setLead((previous) => ({
-          ...previous,
-          state: "",
-          district: "",
-          city: "",
-          area: "",
-        }));
         return;
       }
 
@@ -56,8 +49,9 @@ export default function Step1Customer() {
             country: office.Country,
             state: office.State,
             district: office.District,
-            city: office.District,
-            area: office.Name,
+            // Keep imported/saved values intact when editing an existing lead.
+            city: previous.city || office.District,
+            area: previous.area || office.Name,
           }));
         }
       } catch (error) {

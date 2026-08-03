@@ -194,7 +194,7 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
     return rows;
   }, [filteredLeads, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
+  const totalPages = pageSize === 0 ? 1 : Math.max(1, Math.ceil(totalRecords / pageSize));
 
   const paginatedLeads = sortedLeads;
 
