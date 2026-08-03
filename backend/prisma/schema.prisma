@@ -61,6 +61,7 @@ model Lead {
   updatedAt DateTime @updatedAt
   lastEditedAt DateTime?
   lastEditedBy String?
+  listPriority Int @default(0)
 
   notesHistory LeadNote[]
   activities   LeadActivity[]

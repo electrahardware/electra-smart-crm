@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma";
+import { getListPriority } from "../utils/listPriority";
 
 import type {
   DuplicatePolicy,
@@ -262,6 +263,7 @@ export async function commitImportLeads(
             language: lead.language,
             priority: lead.priority,
             status: lead.status,
+            listPriority: getListPriority(lead.status),
             followupDate: null,
 
             followupCompleted: false,
@@ -322,6 +324,7 @@ export async function commitImportLeads(
           language: lead.language,
           priority: lead.priority,
           status: lead.status || "None",
+          listPriority: getListPriority(lead.status || "None"),
           followupDate: null,
 
           followupCompleted: false,

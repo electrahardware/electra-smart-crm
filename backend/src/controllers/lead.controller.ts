@@ -4,6 +4,7 @@ import prisma from "../lib/prisma";
 import { createAuditLog } from "../services/audit.service";
 import { createTimeline } from "../services/timeline.service";
 import { isLeadStatus } from "../utils/leadStatus";
+import { getListPriority } from "../utils/listPriority";
 
 async function verifyLeadAccess(req: Request, leadId: number) {
   const currentUser = (req as any).user;
@@ -202,11 +203,13 @@ export async function getAllLeads(req: Request, res: Response) {
 
         orderBy: [
           {
-            leadDate: "desc",
+            listPriority: "asc",
           },
-
           {
-            id: "desc",
+            lastEditedAt: "asc",
+          },
+          {
+            id: "asc",
           },
         ],
       }),
@@ -282,6 +285,7 @@ export async function createLead(req: Request, res: Response) {
       ...leadInput,
 
       status: req.body.status || "None",
+      listPriority: getListPriority(req.body.status || "None"),
 
       lastEditedAt: new Date(),
       lastEditedBy: (req as any).user?.name || "System",
@@ -416,6 +420,7 @@ export async function updateLead(req: Request, res: Response) {
 
         lastEditedAt: new Date(),
         lastEditedBy: (req as any).user?.name || "System",
+        listPriority: getListPriority(req.body.status),
 
         leadDate: req.body.leadDate ? new Date(req.body.leadDate) : undefined,
 
@@ -892,6 +897,7 @@ export async function completeFollowup(req: Request, res: Response) {
 
           followupTime: followupTime || null,
           status,
+          listPriority: getListPriority(status),
         },
       });
 
@@ -928,6 +934,7 @@ export async function completeFollowup(req: Request, res: Response) {
           followupTime: null,
 
           status,
+          listPriority: getListPriority(status),
         },
       });
     }
