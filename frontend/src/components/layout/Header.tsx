@@ -88,22 +88,23 @@ setDropdownOpen(data.length > 0);
 
   return (
     <>
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm">
+    <header className="sticky top-0 z-40 flex h-[4.5rem] items-center justify-between border-b border-black/7 bg-white/85 px-4 shadow-[0_1px_0_rgb(0_0_0_/_0.03)] backdrop-blur-xl sm:px-6">
       <div className="flex items-center gap-4">
         <button
           onClick={toggle}
-          className="rounded-xl p-2 transition hover:bg-slate-100"
+          aria-label="Toggle navigation"
+          className="rounded-lg p-2 text-zinc-700 transition hover:bg-zinc-100"
         >
           <Menu size={22} />
         </button>
 
-        <h1 className="text-2xl font-bold text-slate-800">
+        <h1 className="text-lg font-bold tracking-[-.025em] text-zinc-900 sm:text-xl">
           {title}
         </h1>
       </div>
 
       <div className="relative hidden w-full max-w-md lg:block">
-        <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4">
+        <div className="flex items-center rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 transition focus-within:border-red-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-red-500/10">
           <Search
             size={18}
             className="text-slate-400"
@@ -114,12 +115,12 @@ setDropdownOpen(data.length > 0);
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search customers, mobile, GST..."
-            className="w-full bg-transparent px-3 py-2 outline-none"
+            className="w-full border-0! bg-transparent! px-3 py-2 outline-none! ring-0!"
           />
         </div>
 
         {loading && (
-          <div className="absolute left-0 right-0 mt-2 rounded-xl border bg-white p-3 shadow-lg">
+          <div className="absolute left-0 right-0 mt-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-xl shadow-black/8">
             <p className="text-sm text-slate-500">
               Searching...
             </p>
@@ -127,7 +128,7 @@ setDropdownOpen(data.length > 0);
         )}
 
         {!loading && dropdownOpen && results.length > 0 && (
-          <div className="absolute left-0 right-0 mt-2 max-h-80 overflow-auto rounded-xl border bg-white shadow-lg">
+          <div className="absolute left-0 right-0 mt-2 max-h-80 overflow-auto rounded-xl border border-zinc-200 bg-white shadow-xl shadow-black/10">
             {results.map((lead) => (
               <div
   key={lead.id}
@@ -155,7 +156,7 @@ setDrawerOpen(true);
   }
 }}
 
-  className="cursor-pointer border-b p-3 transition hover:bg-slate-50"
+  className="cursor-pointer border-b border-zinc-100 p-3 transition hover:bg-red-50/60"
 >
                 <div className="font-semibold">
                   {lead.customerName}

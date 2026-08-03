@@ -1,3 +1,5 @@
+import { AlertCircle, CalendarDays, CircleDollarSign, Flame, Users } from "lucide-react";
+
 interface Props {
   totalLeads: number;
   hotLeads: number;
@@ -7,106 +9,29 @@ interface Props {
   upcomingLeads: number;
 }
 
-export default function LeadSummaryCards({
-  totalLeads,
-  hotLeads,
-  todayFollowups,
-  expectedValue,
-  overdueLeads,
-  upcomingLeads,
-}: Props) {
+type SummaryIcon = typeof Users;
+
+function SummaryCard({ title, value, icon: Icon }: { title: string; value: string | number; icon: SummaryIcon }) {
   return (
-    <div className="grid grid-cols-6 gap-4 border-b p-6">
-
-      <SummaryCard
-        title="Total Leads"
-        value={totalLeads}
-        color="blue"
-      />
-
-      <SummaryCard
-        title="Hot Leads"
-        value={hotLeads}
-        color="red"
-      />
-
-      <SummaryCard
-        title="Today's Follow-up"
-        value={todayFollowups}
-        color="green"
-      />
-
-      <SummaryCard
-        title="Expected Value"
-        value={`₹ ${expectedValue.toLocaleString()}`}
-        color="yellow"
-      />
-
-      <SummaryCard
-        title="Overdue"
-        value={overdueLeads}
-        color="orange"
-      />
-
-      <SummaryCard
-        title="Upcoming"
-        value={upcomingLeads}
-        color="cyan"
-      />
-
+    <div className="premium-stat-card p-4">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-xs font-medium text-zinc-500">{title}</p>
+        <span className="premium-icon-tile h-8 w-8 rounded-lg"><Icon size={16} /></span>
+      </div>
+      <h2 className="mt-3 text-2xl font-bold tracking-[-.04em] text-zinc-900">{value}</h2>
     </div>
   );
 }
 
-interface SummaryCardProps {
-  title: string;
-  value: string | number;
-  color:
-    | "blue"
-    | "red"
-    | "green"
-    | "yellow"
-    | "orange"
-    | "cyan";
-}
-
-function SummaryCard({
-  title,
-  value,
-  color,
-}: SummaryCardProps) {
-
-  const colors = {
-    blue:
-      "bg-blue-50 border-blue-200 text-blue-700",
-
-    red:
-      "bg-red-50 border-red-200 text-red-700",
-
-    green:
-      "bg-green-50 border-green-200 text-green-700",
-
-    yellow:
-      "bg-yellow-50 border-yellow-200 text-yellow-700",
-
-    orange:
-      "bg-orange-50 border-orange-200 text-orange-700",
-
-    cyan:
-      "bg-cyan-50 border-cyan-200 text-cyan-700",
-  };
-
+export default function LeadSummaryCards({ totalLeads, hotLeads, todayFollowups, expectedValue, overdueLeads, upcomingLeads }: Props) {
   return (
-    <div
-      className={`rounded-xl border p-5 ${colors[color]}`}
-    >
-      <p className="text-sm opacity-70">
-        {title}
-      </p>
-
-      <h2 className="mt-2 text-3xl font-bold">
-        {value}
-      </h2>
+    <div className="grid gap-3 border-b border-zinc-100 p-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <SummaryCard title="Total Leads" value={totalLeads} icon={Users} />
+      <SummaryCard title="Hot Leads" value={hotLeads} icon={Flame} />
+      <SummaryCard title="Today's Follow-up" value={todayFollowups} icon={CalendarDays} />
+      <SummaryCard title="Expected Value" value={`₹ ${expectedValue.toLocaleString()}`} icon={CircleDollarSign} />
+      <SummaryCard title="Overdue" value={overdueLeads} icon={AlertCircle} />
+      <SummaryCard title="Upcoming" value={upcomingLeads} icon={CalendarDays} />
     </div>
   );
 }

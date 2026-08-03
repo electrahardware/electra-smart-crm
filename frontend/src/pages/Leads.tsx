@@ -63,11 +63,11 @@ const handleFileChange = async (
     <MainLayout>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">
+          <h1 className="premium-page-title text-3xl font-bold sm:text-4xl">
             Lead Management
           </h1>
 
-          <p className="text-slate-500 mt-1">
+          <p className="premium-muted mt-1">
             Manage all customer leads and follow-ups.
           </p>
         </div>
@@ -129,17 +129,17 @@ const handleFileChange = async (
 
 </div>
 
-<div className="grid grid-cols-4 gap-4">
+<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
   <button
   onClick={() => setQuickLeadOpen(true)}
-  className="rounded-2xl bg-blue-600 text-white p-5 text-left transition hover:bg-blue-700"
+  className="premium-action-card p-5 text-left"
 >
     <h3 className="text-lg font-bold">
       ➕ New Lead
     </h3>
 
-    <p className="text-blue-100 text-sm mt-1">
+    <p className="mt-1 text-sm text-zinc-500">
       Create a new customer lead
     </p>
   </button>
@@ -185,26 +185,26 @@ const handleFileChange = async (
         "Electra_Lead_Import_Template.xlsx"
       );
     }}
-    className="rounded-2xl bg-green-600 text-white p-5 text-left hover:bg-green-700 transition"
+    className="premium-action-card p-5 text-left"
   >
     <h3 className="text-lg font-bold">
       📤 Download Template
     </h3>
 
-    <p className="text-green-100 text-sm mt-1">
+    <p className="mt-1 text-sm text-zinc-500">
       Excel Import Format
     </p>
   </button>
 
   <label
     onClick={handleImportClick}
-    className="rounded-2xl bg-purple-600 text-white p-5 text-left hover:bg-purple-700 transition cursor-pointer"
+    className="premium-action-card cursor-pointer p-5 text-left"
   >
     <h3 className="text-lg font-bold">
       📥 Import Excel
     </h3>
 
-    <p className="text-purple-100 text-sm mt-1">
+    <p className="mt-1 text-sm text-zinc-500">
       Upload dealer list
     </p>
   </label>
@@ -219,13 +219,13 @@ const handleFileChange = async (
 
   <button
   onClick={() => navigate("/followups")}
-  className="rounded-2xl bg-orange-600 text-white p-5 text-left transition hover:bg-orange-700"
+  className="premium-action-card p-5 text-left"
 >
     <h3 className="text-lg font-bold">
       🔔 Follow-up
     </h3>
 
-    <p className="text-orange-100 text-sm mt-1">
+    <p className="mt-1 text-sm text-zinc-500">
       Today's reminders
     </p>
   </button>

@@ -79,7 +79,7 @@ export default function LeadToolbar({
 
   return (
 
-    <div className="space-y-4 border-b p-6">
+    <div className="space-y-4 border-b border-zinc-100 bg-zinc-50/50 p-5 sm:p-6">
 
       <input
         type="text"
@@ -88,17 +88,17 @@ export default function LeadToolbar({
         onChange={(e) =>
           setSearch(e.target.value)
         }
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"
+        className="w-full border border-zinc-200 bg-white px-4 py-3 text-sm shadow-sm"
       />
 
-      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-8">
+      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-7">
 
         <select
           value={statusFilter}
           onChange={(e) =>
             setStatusFilter(e.target.value)
           }
-          className="rounded-xl border px-4 py-3"
+          className="border border-zinc-200 bg-white px-3 py-2.5 text-sm"
         >
           <option value="All">All Status</option>
           {LEAD_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
@@ -109,7 +109,7 @@ export default function LeadToolbar({
           onChange={(e) =>
             setOwnerFilter(e.target.value)
           }
-          className="rounded-xl border px-4 py-3"
+          className="border border-zinc-200 bg-white px-3 py-2.5 text-sm"
         >
           <option value="All">
             All Owners
@@ -136,7 +136,7 @@ export default function LeadToolbar({
           onChange={(e) =>
             setStateFilter(e.target.value)
           }
-          className="rounded-xl border px-4 py-3"
+          className="border border-zinc-200 bg-white px-3 py-2.5 text-sm"
         >
           <option value="All">
             All States
@@ -176,7 +176,7 @@ export default function LeadToolbar({
           onChange={(e) =>
             setSourceFilter(e.target.value)
           }
-          className="rounded-xl border px-4 py-3"
+          className="border border-zinc-200 bg-white px-3 py-2.5 text-sm"
         >
           <option value="All">
             All Sources
@@ -204,7 +204,7 @@ export default function LeadToolbar({
           onChange={(e) =>
             setFromDate(e.target.value)
           }
-          className="rounded-xl border px-4 py-3"
+          className="border border-zinc-200 bg-white px-3 py-2.5 text-sm"
         />
 
         <input
@@ -213,7 +213,7 @@ export default function LeadToolbar({
           onChange={(e) =>
             setToDate(e.target.value)
           }
-          className="rounded-xl border px-4 py-3"
+          className="border border-zinc-200 bg-white px-3 py-2.5 text-sm"
         />
 
       </div>

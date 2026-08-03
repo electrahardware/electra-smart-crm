@@ -382,7 +382,7 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
       <div className="h-6" />
 
       <div className="h-6" />
-      <div className="bg-white rounded-2xl shadow border border-slate-200">
+      <div className="premium-surface overflow-hidden">
         {canManage && (
           <LeadBulkActions
             selectedCount={selectedIds.length}

@@ -11,6 +11,8 @@ import {
   getDashboard,
   type DashboardData,
 } from "../services/dashboardService";
+import { getAnalytics, type AnalyticsResponse } from "../services/analyticsService";
+import PremiumInsights from "../components/dashboard/PremiumInsights";
 
 export default function Dashboard() {
 
@@ -18,6 +20,8 @@ export default function Dashboard() {
 
   const [stats, setStats] =
     useState<DashboardData | null>(null);
+
+  const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
 
   useEffect(() => {
 
@@ -29,10 +33,10 @@ export default function Dashboard() {
 
     try {
 
-      const data =
-        await getDashboard();
+      const [dashboardData, analyticsData] = await Promise.all([getDashboard(), getAnalytics()]);
 
-      setStats(data);
+      setStats(dashboardData);
+      setAnalytics(analyticsData);
 
     } catch (error) {
 
@@ -110,24 +114,34 @@ export default function Dashboard() {
 
       <div className="mb-8">
 
-        <h1 className="text-3xl font-bold text-slate-800">
+        <h1 className="premium-page-title text-3xl font-bold sm:text-4xl">
           Dashboard
         </h1>
 
-        <p className="mt-2 text-slate-500">
+        <p className="premium-muted mt-2">
           Welcome to Electra Smart CRM
         </p>
 
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <PremiumInsights dashboard={stats} analytics={analytics} />
+
+      <section className="border-t border-zinc-200 pt-8">
+      <div className="mb-5 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold tracking-[-.025em]">Operational activity</h2>
+          <p className="mt-1 text-sm text-zinc-500">Existing live dashboard widgets</p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 
         {cards.map((card) => (
 
           <div
   key={card.title}
   onClick={card.onClick}
-  className="cursor-pointer rounded-2xl border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+  className="premium-surface cursor-pointer p-5 transition duration-300 hover:-translate-y-1 hover:shadow-xl"
 >
 
             <div className="flex items-center justify-between">
@@ -152,7 +166,7 @@ export default function Dashboard() {
 
             </div>
 
-            <p className="mt-4 text-xs font-medium text-blue-600">
+            <p className="mt-4 text-xs font-semibold text-[#e31e24]">
   View Details →
 </p>
 
@@ -162,9 +176,9 @@ export default function Dashboard() {
 
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      <div className="mt-8 grid gap-5 lg:grid-cols-2">
 
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <div className="premium-surface p-6">
 
           <h2 className="text-xl font-bold">
             📈 Sales Overview
@@ -178,7 +192,7 @@ export default function Dashboard() {
 
         </div>
 
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <div className="premium-surface p-6">
 
   <h2 className="mb-5 text-xl font-bold">
     🆕 Recent Leads
@@ -208,10 +222,6 @@ export default function Dashboard() {
 
             <th className="px-4 py-3 text-left">
               Status
-            </th>
-
-            <th className="px-4 py-3 text-left">
-              Priority
             </th>
 
           </tr>
@@ -244,10 +254,6 @@ export default function Dashboard() {
                 {lead.status || "-"}
               </td>
 
-              <td className="px-4 py-3">
-                {lead.priority || "-"}
-              </td>
-
             </tr>
 
           ))}
@@ -275,6 +281,8 @@ export default function Dashboard() {
         <RecentActivities />
 
       </div>
+
+      </section>
 
     </MainLayout>
 

@@ -68,7 +68,8 @@ export default function Sidebar() {
 
       <button
         onClick={toggle}
-        className="rounded-xl p-2 text-slate-700 transition hover:bg-slate-100"
+        aria-label="Toggle navigation"
+        className="rounded-lg p-2 text-zinc-700 transition hover:bg-zinc-100"
       >
         {open ? <X size={22} /> : <Menu size={22} />}
       </button>
@@ -94,7 +95,9 @@ export default function Sidebar() {
           h-screen
           w-72
           flex-col
-          bg-slate-900
+          border-r
+          border-white/10
+          bg-[#111113]
           text-white
           transition-transform
           duration-300
@@ -103,15 +106,15 @@ export default function Sidebar() {
 
         `}
       >
-        <div className="border-b border-slate-800 bg-slate-950 p-3">
+        <div className="border-b border-white/10 bg-black/30 px-5 py-6">
           <img
             src={logo}
             alt="Electra"
-            className="mx-auto w-52 object-contain"
+            className="mx-auto w-44 object-contain"
           />
 
-          <p className="mt-2 text-center text-sm text-slate-400">
-            Smart CRM v1.0
+          <p className="mt-3 text-center text-[10px] font-semibold uppercase tracking-[.22em] text-zinc-500">
+            Smart CRM
           </p>
         </div>
 
@@ -134,16 +137,16 @@ export default function Sidebar() {
                 to={item.path}
                 onClick={() => setOpen(false)}
                 className={`
-                  mb-2
+                  mb-1.5
                   flex
                   items-center
                   gap-3
-                  rounded-xl
+                  rounded-lg
                   px-4
                   py-3
                   transition
 
-                  ${active ? "bg-red-600 text-white" : "hover:bg-slate-800"}
+                  ${active ? "bg-[#e31e24] text-white shadow-[0_8px_22px_rgba(227,30,36,.28)]" : "text-zinc-300 hover:bg-white/8 hover:text-white"}
                 `}
               >
                 <Icon size={20} />

@@ -18,7 +18,7 @@ export default function MainLayout({
 
     <SidebarProvider>
 
-      <div className="flex min-h-screen bg-slate-100">
+      <div className="flex min-h-screen bg-[#f5f5f7] text-[#202023]">
 
         <Sidebar />
 
@@ -26,7 +26,7 @@ export default function MainLayout({
 
           <Header />
 
-          <main className="flex-1 overflow-auto p-4 lg:p-8">
+          <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 xl:p-10">
 
             {children}
 

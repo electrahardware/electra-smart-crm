@@ -187,11 +187,11 @@ export default function LeadWizard({
         }
       />
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-lg">
+      <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl shadow-black/10">
 
-        <div className="border-b border-slate-200 p-5 sm:p-6">
+        <div className="border-b border-zinc-100 bg-gradient-to-r from-white to-red-50/45 p-5 sm:p-6">
 
-          <h1 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-2xl font-bold tracking-[-.035em] text-zinc-900">
 
             {editingId
               ? "Edit Lead"
@@ -199,7 +199,7 @@ export default function LeadWizard({
 
           </h1>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-sm text-zinc-500">
 
             {editingId
               ? "Update the selected lead."
@@ -209,7 +209,7 @@ export default function LeadWizard({
 
         </div>
 
-        <div className="px-5 pt-5 sm:px-6 sm:pt-6">
+        <div className="bg-zinc-50/50 px-5 pt-5 sm:px-6 sm:pt-6">
 
           <div className="flex items-center justify-between">
 
@@ -224,7 +224,7 @@ export default function LeadWizard({
                   className={`flex h-12 w-12 items-center justify-center rounded-full font-bold text-white ${
                     step >= item
                       ? "bg-red-600"
-                      : "bg-slate-300"
+                      : "bg-zinc-200 text-zinc-500"
                   }`}
                 >
 
@@ -232,7 +232,7 @@ export default function LeadWizard({
 
                 </div>
 
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm font-medium text-zinc-600">
 
                   {item === 1 && "Customer Details"}
                   {item === 2 && "Review & Save"}
@@ -247,7 +247,7 @@ export default function LeadWizard({
 
         </div>
 
-        <div className="p-4 sm:p-6">
+        <div className="bg-zinc-50/50 p-4 sm:p-6">
 
           {step === 1 && <Step1Customer />}
 
@@ -255,7 +255,7 @@ export default function LeadWizard({
 
         </div>
 
-        <div className="sticky bottom-0 z-30 flex justify-between border-t border-slate-200 bg-slate-50 px-5 py-4 shadow-[0_-8px_18px_rgba(15,23,42,0.08)] sm:px-6">
+        <div className="sticky bottom-0 z-30 flex justify-between border-t border-zinc-200 bg-white/95 px-5 py-4 shadow-[0_-8px_22px_rgba(0,0,0,0.08)] backdrop-blur sm:px-6">
 
           <button
             data-lead-field="wizard-previous"
@@ -266,8 +266,8 @@ export default function LeadWizard({
             }
             className={`rounded-xl px-6 py-3 font-semibold transition ${
               step === 1
-                ? "cursor-not-allowed bg-slate-200 text-slate-400"
-                : "border border-slate-300 bg-white hover:bg-slate-100"
+                ? "cursor-not-allowed bg-zinc-100 text-zinc-400"
+                : "border border-zinc-200 bg-white text-zinc-700 hover:border-red-200 hover:bg-red-50"
             }`}
           >
 
@@ -279,7 +279,7 @@ export default function LeadWizard({
             data-lead-field="wizard-next"
             onClick={next}
             disabled={loading}
-            className="rounded-xl bg-red-600 px-8 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl bg-[#e31e24] px-8 py-3 font-semibold text-white shadow-[0_8px_18px_rgba(227,30,36,.2)] transition hover:bg-[#c9161c] disabled:cursor-not-allowed disabled:opacity-50"
           >
 
             {loading

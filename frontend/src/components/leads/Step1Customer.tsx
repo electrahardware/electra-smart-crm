@@ -62,7 +62,7 @@ export default function Step1Customer() {
     fetchPincode();
   }, [lead.pincode, setLead]);
 
-  const sectionClass = "rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5";
+  const sectionClass = "rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5";
   const gridClass = "grid gap-3 sm:grid-cols-2 lg:grid-cols-3";
 
   function moveToNextField(event: KeyboardEvent<HTMLDivElement>) {

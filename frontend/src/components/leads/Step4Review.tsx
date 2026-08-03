@@ -17,7 +17,7 @@ export default function Step4Review() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+      <section className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="mb-4 text-lg font-bold text-slate-800">Customer Summary</h2>
         <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
           <SummaryItem label="Mobile" value={lead.mobile} />
@@ -29,7 +29,7 @@ export default function Step4Review() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+      <section className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="mb-4 text-lg font-bold text-slate-800">Address Summary</h2>
         <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
           <SummaryItem label="Country" value={lead.country} />
@@ -42,7 +42,7 @@ export default function Step4Review() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+      <section className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="mb-4 text-lg font-bold text-slate-800">Business Summary</h2>
         <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
           <SummaryItem label="Lead Owner" value={lead.leadOwner} />
