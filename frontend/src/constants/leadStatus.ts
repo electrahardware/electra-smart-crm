@@ -1,2 +1,2 @@
-import { LEAD_STATUSES } from "./statusConfig";
-export default LEAD_STATUSES as unknown as string[];
+import { LEAD_STATUS_OPTIONS } from "./statusConfig";
+export default LEAD_STATUS_OPTIONS;

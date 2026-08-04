@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { QUICK_NOTES } from "../../constants/quickNotes";
 import { formatDate } from "../../utils/date";
 import Toast from "../common/Toast";
+import QuickNotes from "../common/QuickNotes";
 
 import type { Lead } from "../../types/lead";
 
@@ -213,28 +213,9 @@ setTimeout(() => {
 
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-
-  {QUICK_NOTES.map((item) => (
-
-    <button
-      key={item}
-      type="button"
-      onClick={() =>
-        setNote((prev) =>
-          prev
-            ? `${prev}\n${item}`
-            : item
-        )
-      }
-      className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-sm hover:bg-blue-100 hover:border-blue-400"
-    >
-      {item}
-    </button>
-
-  ))}
-
-</div>
+        <div className="mt-4">
+          <QuickNotes value={note} onChange={setNote} />
+        </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
 

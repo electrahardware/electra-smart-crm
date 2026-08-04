@@ -5,6 +5,7 @@ import {
 import type { Lead } from "../../types/lead";
 import SelectInput from "../ui/SelectInput";
 import leadStatus from "../../constants/leadStatus";
+import { getSelectableLeadStatus } from "../../constants/statusConfig";
 
 type Props = {
   open: boolean;
@@ -54,7 +55,7 @@ export default function CompleteFollowupDialog({
 
   setEditingDate(false);
   setFollowupTime(lead.followupTime || "");
-  setStatus(lead.status || "");
+  setStatus(getSelectableLeadStatus(lead.status));
   setDateChanged(false);
   setNoteChanged(false);
 

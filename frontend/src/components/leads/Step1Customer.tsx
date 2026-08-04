@@ -7,6 +7,7 @@ import TextInput from "../ui/TextInput";
 import customerTypes from "../../constants/customerTypes";
 import leadOwners from "../../constants/leadOwners";
 import leadStatus from "../../constants/leadStatus";
+import { getSelectableLeadStatus } from "../../constants/statusConfig";
 import products from "../../constants/products";
 import { useLead } from "../../hooks/useLead";
 import { isOwnerOrManager } from "../../utils/auth";
@@ -130,7 +131,7 @@ export default function Step1Customer() {
       <section className={sectionClass}>
         <h2 className="mb-4 text-lg font-bold text-slate-800">Lead Status</h2>
         <div className="max-w-md">
-          <SelectInput label="Lead Status" required value={lead.status} field="status" options={leadStatus} onChange={(event) => updateLead("status", event.target.value)} />
+          <SelectInput label="Lead Status" required value={getSelectableLeadStatus(lead.status)} field="status" options={leadStatus} onChange={(event) => updateLead("status", event.target.value)} />
         </div>
       </section>
     </div>

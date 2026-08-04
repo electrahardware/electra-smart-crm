@@ -73,19 +73,19 @@ export default function Dashboard() {
     },
 
     {
-      title: "Won Leads",
+      title: "Closed Won Leads",
       value: stats?.wonLeads ?? 0,
       color: "text-emerald-600",
       icon: "🏆",
-      onClick: () => navigate("/leads?status=Won"),
+      onClick: () => navigate("/leads?status=Closed Won"),
     },
 
     {
-      title: "Lost Leads",
+      title: "Closed Lost Leads",
       value: stats?.lostLeads ?? 0,
       color: "text-slate-600",
       icon: "❌",
-      onClick: () => navigate("/leads?status=Lost"),
+      onClick: () => navigate("/leads?status=Closed Lost"),
     },
 
     {

@@ -1,10 +1,12 @@
 export const QUICK_NOTES = [
   "NO ANS",
+  "BUSY",
   "NO REQ",
   "CUT",
   "PDF SEND",
   "INVALID NO",
   "SWITCH OFF",
+  "Out of Network",
   "CALL BACK",
   "CHECK KRINE KESE",
   "VISITING",

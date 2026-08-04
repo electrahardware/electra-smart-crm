@@ -4,7 +4,7 @@ import type {
 } from "react";
 
 import MultiSelectDropdown from "../ui/MultiSelectDropdown";
-import { LEAD_STATUSES } from "../../constants/statusConfig";
+import { LEAD_STATUS_OPTIONS } from "../../constants/statusConfig";
 
 import type {
   Lead,
@@ -101,7 +101,7 @@ export default function LeadToolbar({
           className="border border-zinc-200 bg-white px-3 py-2.5 text-sm"
         >
           <option value="All">All Status</option>
-          {LEAD_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+          {LEAD_STATUS_OPTIONS.map((status) => <option key={status} value={status}>{status}</option>)}
         </select>
 
         <select
