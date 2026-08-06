@@ -42,6 +42,35 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install PostgreSQL 18 client
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl --fail --silent --show-error -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] http://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+          /usr/lib/postgresql/18/bin/psql --version
+          /usr/lib/postgresql/18/bin/pg_dump --version
+      - name: Verify PostgreSQL client compatibility
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          psql --version
+          pg_dump --version
+          CLIENT_MAJOR="$(pg_dump --version | sed -nE 's/.*PostgreSQL\) ([0-9]+).*/\1/p')"
+          SERVER_VERSION_NUM="$(psql "$DIRECT_DATABASE_URL" --no-password --tuples-only --no-align --command 'SHOW server_version_num' | tr -d '[:space:]')"
+          SERVER_MAJOR="$((SERVER_VERSION_NUM / 10000))"
+          if [[ -z "$CLIENT_MAJOR" || -z "$SERVER_VERSION_NUM" ]]; then
+            echo "::error::Unable to determine PostgreSQL client or Neon server version."
+            exit 1
+          fi
+          if (( CLIENT_MAJOR < SERVER_MAJOR )); then
+            echo "::error::pg_dump major version ${CLIENT_MAJOR} is lower than Neon server major version ${SERVER_MAJOR}. Upgrade the GitHub Actions PostgreSQL client before retrying."
+            exit 1
+          fi
       - name: Start protected backup job
         id: start
         shell: bash
