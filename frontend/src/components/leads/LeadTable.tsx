@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { deleteLead, getLead, getLeads } from "../../services/leadService";
 import { getFollowups } from "../../services/followupService";
@@ -24,6 +25,7 @@ type LeadTableProps = {
 };
 
 export default function LeadTable({ onEditLead }: LeadTableProps) {
+  const [searchParams] = useSearchParams();
   const canManage = isOwnerOrManager();
 
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -63,6 +65,19 @@ export default function LeadTable({ onEditLead }: LeadTableProps) {
   const { setLead, setEditingId } = useLead();
 
   const today = new Date().toISOString().slice(0, 10);
+
+  // Dashboard cards and charts use the same server-side filters as the table.
+  // Reading URL params also keeps browser back/forward navigation consistent.
+  useEffect(() => {
+    setSearch(searchParams.get("search") ?? "");
+    setStatusFilter(searchParams.get("status") ?? "All");
+    setOwnerFilter(searchParams.get("owner") ?? "All");
+    setSourceFilter(searchParams.get("source") ?? "All");
+    setFromDate(searchParams.get("fromDate") ?? "");
+    setToDate(searchParams.get("toDate") ?? "");
+    setFollowupFilter(searchParams.get("followup") ?? "All");
+    setSortBy(searchParams.get("sort") ?? "latest");
+  }, [searchParams]);
 
   useEffect(() => {
     loadLeads();

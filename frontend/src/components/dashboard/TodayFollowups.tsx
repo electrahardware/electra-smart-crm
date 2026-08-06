@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 
 import type { Lead } from "../../types/lead";
 import { getTodayFollowups } from "../../services/followupService";
+import { useNavigate } from "react-router-dom";
 
 export default function TodayFollowups() {
+
+  const navigate = useNavigate();
 
   const [followups, setFollowups] =
   useState<Lead[]>([]);
@@ -55,9 +58,11 @@ export default function TodayFollowups() {
 
           {followups.map((item) => (
 
-            <div
+            <button
+              type="button"
               key={item.id}
-              className="rounded-xl border p-4"
+              onClick={() => navigate(`/leads/${item.id}`)}
+              className="w-full rounded-xl border p-4 text-left transition hover:border-red-200 hover:bg-red-50/40 focus:outline-none focus:ring-2 focus:ring-red-500/30"
             >
 
               <div className="flex items-center justify-between">
@@ -86,7 +91,7 @@ export default function TodayFollowups() {
 
               </div>
 
-            </div>
+            </button>
 
           ))}
 

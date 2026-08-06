@@ -1,0 +1,76 @@
+name: Electra CRM encrypted database backup
+
+on:
+  schedule:
+    # 20:30 UTC = 02:00 Asia/Kolkata on the following calendar day.
+    - cron: "30 20 * * *"
+  workflow_dispatch:
+    inputs:
+      backup_type:
+        description: "Automatic or Manual"
+        required: true
+        default: "Automatic"
+        type: choice
+        options: [Automatic, Manual]
+      job_id:
+        description: "CRM backup job ID for manual runs"
+        required: false
+        type: string
+
+concurrency:
+  group: electra-crm-database-backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+      BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+      GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
+      GOOGLE_DRIVE_CLIENT_SECRET: ${{ secrets.GOOGLE_DRIVE_CLIENT_SECRET }}
+      GOOGLE_DRIVE_REFRESH_TOKEN: ${{ secrets.GOOGLE_DRIVE_REFRESH_TOKEN }}
+      GOOGLE_DRIVE_ROOT_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_ROOT_FOLDER_ID }}
+      CRM_API_URL: ${{ secrets.CRM_API_URL }}
+      BACKUP_WORKFLOW_SECRET: ${{ secrets.BACKUP_WORKFLOW_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Start protected backup job
+        id: start
+        shell: bash
+        run: |
+          TYPE="${{ github.event.inputs.backup_type || 'Automatic' }}"
+          IST_DATE="$(TZ=Asia/Kolkata date +%F)"
+          KEY="automatic-${IST_DATE}-0200-asia-kolkata"
+          BODY=$(jq -nc --arg type "$TYPE" --arg jobId "${{ github.event.inputs.job_id || '' }}" --arg key "$KEY" '{type:$type,jobId:$jobId,idempotencyKey:$key}')
+          RESPONSE=$(curl --fail-with-body --retry 3 --silent --show-error -X POST "$CRM_API_URL/api/backups/workflow/start" -H "Content-Type: application/json" -H "x-backup-secret: $BACKUP_WORKFLOW_SECRET" --data "$BODY")
+          echo "should_run=$(echo "$RESPONSE" | jq -r '.shouldRun')" >> "$GITHUB_OUTPUT"
+          echo "job_id=$(echo "$RESPONSE" | jq -r '.jobId // empty')" >> "$GITHUB_OUTPUT"
+          echo "retention_count=$(echo "$RESPONSE" | jq -r '.retentionCount // 30')" >> "$GITHUB_OUTPUT"
+      - name: Create encrypted PostgreSQL backup and upload it
+        if: steps.start.outputs.should_run == 'true'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          export BACKUP_RETENTION_COUNT="${{ steps.start.outputs.retention_count }}"
+          STARTED_AT=$(date +%s%3N)
+          TYPE="${{ github.event.inputs.backup_type || 'Automatic' }}"
+          STAMP="$(TZ=Asia/Kolkata date +%Y-%m-%d-%H%M%S)"
+          RAW_FILE="/tmp/electra-crm-backup-${STAMP}.dump"
+          ENCRYPTED_FILE="${RAW_FILE}.enc"
+          trap 'curl --silent --show-error -X POST "$CRM_API_URL/api/backups/workflow/report" -H "Content-Type: application/json" -H "x-backup-secret: $BACKUP_WORKFLOW_SECRET" --data "{\"jobId\":\"${{ steps.start.outputs.job_id }}\",\"status\":\"Failed\",\"errorStage\":\"workflow\",\"errorMessage\":\"Backup workflow failed\"}" || true' ERR
+          pg_dump "$DIRECT_DATABASE_URL" --format=custom --compress=9 --no-owner --no-privileges --file "$RAW_FILE"
+          node scripts/encrypt-file.mjs "$RAW_FILE" "$ENCRYPTED_FILE"
+          RESULT=$(node scripts/upload-google-drive.mjs --file "$ENCRYPTED_FILE" --type "$TYPE" --latest true)
+          SIZE=$(stat -c%s "$ENCRYPTED_FILE")
+          CHECKSUM=$(sha256sum "$ENCRYPTED_FILE" | awk '{print $1}')
+          DURATION=$(( $(date +%s%3N) - STARTED_AT ))
+          BODY=$(jq -nc --arg jobId "${{ steps.start.outputs.job_id }}" --arg fileName "$(basename "$ENCRYPTED_FILE")" --arg fileSize "$SIZE" --arg checksum "$CHECKSUM" --arg fileId "$(echo "$RESULT" | jq -r '.fileId')" --arg path "$(echo "$RESULT" | jq -r '.folder')" --argjson duration "$DURATION" '{jobId:$jobId,status:"Success",fileName:$fileName,fileSize:$fileSize,checksum:$checksum,storageFileId:$fileId,storagePath:$path,durationMs:$duration}')
+          curl --fail-with-body --retry 3 --silent --show-error -X POST "$CRM_API_URL/api/backups/workflow/report" -H "Content-Type: application/json" -H "x-backup-secret: $BACKUP_WORKFLOW_SECRET" --data "$BODY"

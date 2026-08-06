@@ -195,6 +195,18 @@ export async function getAllLeads(req: Request, res: Response) {
       };
     }
 
+    if (followup === "Pending") {
+      where.followupCompleted = false;
+    }
+
+    if (followup === "CompletedToday") {
+      where.followupCompleted = true;
+      where.followupCompletedAt = {
+        gte: today,
+        lt: tomorrow,
+      };
+    }
+
     const [leads, total] = await Promise.all([
       prisma.lead.findMany({
         where,

@@ -138,10 +138,11 @@ export default function Dashboard() {
 
         {cards.map((card) => (
 
-          <div
+          <button
+  type="button"
   key={card.title}
   onClick={card.onClick}
-  className="premium-surface cursor-pointer p-5 transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+  className="premium-surface cursor-pointer p-5 text-left transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-red-500/15"
 >
 
             <div className="flex items-center justify-between">
@@ -170,7 +171,7 @@ export default function Dashboard() {
   View Details →
 </p>
 
-          </div>
+          </button>
 
         ))}
 
@@ -234,7 +235,7 @@ export default function Dashboard() {
 
             <tr
   key={lead.id}
-  onClick={() => navigate("/leads")}
+  onClick={() => navigate(`/leads/${lead.id}`)}
   className="cursor-pointer border-b transition hover:bg-blue-50"
 >
 

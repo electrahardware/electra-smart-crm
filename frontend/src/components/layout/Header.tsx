@@ -1,6 +1,6 @@
 import { Menu, Search } from "lucide-react";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import NotificationBell from "./NotificationBell";
 import ProfileMenu from "./ProfileMenu";
@@ -29,6 +29,7 @@ const pageTitles: Record<string, string> = {
 export default function Header() {
   const { toggle } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const {
   setLead: setEditingLead,
@@ -104,11 +105,19 @@ setDropdownOpen(data.length > 0);
       </div>
 
       <div className="relative hidden w-full max-w-md lg:block">
-        <div className="flex items-center rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 transition focus-within:border-red-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-red-500/10">
+        <form onSubmit={(event) => {
+          event.preventDefault();
+          const query = search.trim();
+          if (query) {
+            setDropdownOpen(false);
+            navigate(`/leads?search=${encodeURIComponent(query)}`);
+          }
+        }} className="flex items-center rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 transition focus-within:border-red-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-red-500/10">
+          <button type="submit" aria-label="Search leads" className="rounded p-0.5 text-slate-400 transition hover:text-[#e31e24]">
           <Search
             size={18}
-            className="text-slate-400"
           />
+          </button>
 
           <input
             type="text"
@@ -117,7 +126,7 @@ setDropdownOpen(data.length > 0);
             placeholder="Search customers, mobile, GST..."
             className="w-full border-0! bg-transparent! px-3 py-2 outline-none! ring-0!"
           />
-        </div>
+        </form>
 
         {loading && (
           <div className="absolute left-0 right-0 mt-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-xl shadow-black/8">

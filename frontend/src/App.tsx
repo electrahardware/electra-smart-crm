@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import AnalyticsPage from "./pages/AnalyticsPage";
 import AuditLogs from "./pages/AuditLogs";
+import BackupSettingsPage from "./pages/BackupSettingsPage";
 import Dashboard from "./pages/Dashboard";
 import DuplicateLeads from "./pages/DuplicateLeads";
 import Followups from "./pages/Followups";
@@ -100,6 +101,15 @@ function App() {
           element={
             <ProtectedRoute>
               <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings/backup"
+          element={
+            <ProtectedRoute>
+              <BackupSettingsPage />
             </ProtectedRoute>
           }
         />

@@ -31,15 +31,6 @@ export default function NotificationBell() {
       const data =
         await getNotifications();
 
-console.log("TYPE:", typeof data);
-console.log("DATA:", data);
-console.log("TODAY:", data.today);
-console.log("IS ARRAY:", Array.isArray(data.today));
-
-      
-
-console.log("Notification API =>", data);
-
       setItems([
 
         {
@@ -92,6 +83,11 @@ console.log("Notification API =>", data);
 
 }, []);
 
+  const unreadCount = items.reduce((sum, item) => {
+    const count = parseInt(item.title, 10);
+    return sum + (Number.isNaN(count) ? 0 : count);
+  }, 0);
+
   return (
 
     <div className="relative">
@@ -105,18 +101,11 @@ console.log("Notification API =>", data);
 
         <Bell size={22} />
 
-        {items.length > 0 && (
+        {unreadCount > 0 && (
 
           <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
 
-            {items.reduce((sum, item) => {
-
-  const count =
-    parseInt(item.title);
-
-  return sum + (isNaN(count) ? 0 : count);
-
-}, 0)}
+            {unreadCount}
 
           </span>
 

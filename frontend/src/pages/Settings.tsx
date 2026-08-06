@@ -1,7 +1,7 @@
 import MainLayout from "../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { Navigate } from "react-router-dom";
-import { isAdminOrManager } from "../utils/auth";
+import { isAdminOrManager, isOwner } from "../utils/auth";
 
 const menus = [
 
@@ -47,6 +47,12 @@ const menus = [
       "Company information",
   },
 
+  {
+    title: "Backup",
+    icon: "🗄️",
+    description: "Encrypted database backup and recovery",
+  },
+
 ];
 
 export default function Settings() {
@@ -86,6 +92,10 @@ export default function Settings() {
 
       navigate("/settings/users");
 
+    }
+
+    if (item.title === "Backup" && isOwner()) {
+      navigate("/settings/backup");
     }
 
   }}

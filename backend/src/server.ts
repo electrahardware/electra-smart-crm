@@ -5,11 +5,13 @@ dotenv.config();
 import cors from "cors";
 import express from "express";
 import path from "path";
+import * as Sentry from "@sentry/node";
 
 import activityRoutes from "./routes/activity.routes";
 import analyticsRoutes from "./routes/analytics";
 import attachmentRoutes from "./routes/attachment.routes";
 import auditRoutes from "./routes/audit.routes";
+import backupRoutes from "./routes/backup.routes";
 import callRoutes from "./routes/call.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import duplicateRoutes from "./routes/duplicate.routes";
@@ -23,6 +25,10 @@ import timelineRoutes from "./routes/timeline.routes";
 import userRoutes from "./routes/user.routes";
 
 const app = express();
+
+if (process.env.SENTRY_DSN) {
+  Sentry.init({ dsn: process.env.SENTRY_DSN, sendDefaultPii: false });
+}
 
 app.use(
   cors({
@@ -75,6 +81,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/quotations", quotationRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/audit-logs", auditRoutes);
+app.use("/api/backups", backupRoutes);
 app.use("/api/duplicates", duplicateRoutes);
 app.use("/api/merge", mergeRoutes);
 app.use("/api/activity", activityRoutes);

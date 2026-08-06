@@ -239,3 +239,66 @@ model AuditLog {
   @@index([userId])
   @@index([createdAt])
 }
+
+model BackupSettings {
+  id                   Int      @id @default(1)
+  automaticEnabled     Boolean  @default(true)
+  frequency            String   @default("Daily")
+  backupTime           String   @default("02:00")
+  timezone             String   @default("Asia/Kolkata")
+  retentionDays        Int      @default(30)
+  retentionCount       Int      @default(30)
+  googleDriveRootFolderId String?
+  lastBackupAt         DateTime?
+  nextBackupAt         DateTime?
+  latestBackupJobId    String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model BackupJob {
+  id               String   @id @default(cuid())
+  idempotencyKey   String?  @unique
+  type             String
+  status           String   @default("Queued")
+  startedAt        DateTime?
+  completedAt      DateTime?
+  durationMs       Int?
+  fileName         String?
+  fileSize         BigInt?
+  format           String?
+  checksum         String?
+  storageProvider  String?  @default("Google Drive")
+  storageFileId    String?
+  storagePath      String?
+  createdBy        String?
+  errorStage       String?
+  errorMessage     String?
+  retryCount       Int      @default(0)
+  metadata         Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  restoreJobs RestoreJob[]
+
+  @@index([status, createdAt])
+  @@index([type, createdAt])
+}
+
+model RestoreJob {
+  id                String   @id @default(cuid())
+  backupJobId       String
+  snapshotBackupId  String?
+  status            String   @default("Blocked")
+  initiatedBy       String?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  verificationResult Json?
+  errorMessage      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  backupJob BackupJob @relation(fields: [backupJobId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+}
