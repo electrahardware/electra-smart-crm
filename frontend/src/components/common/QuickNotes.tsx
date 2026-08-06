@@ -1,4 +1,5 @@
 import { QUICK_NOTES } from "../../constants/quickNotes";
+import { formatDate } from "../../utils/date";
 
 interface Props {
   value: string;
@@ -11,19 +12,10 @@ export default function QuickNotes({
 }: Props) {
 
   function addNote(note: string) {
-
-    const current = value.trim();
-
-    if (!current) {
-      onChange(note);
-      return;
-    }
-
-    if (current.includes(note)) {
-      return;
-    }
-
-    onChange(`${current}\n${note}`);
+    // Each click represents a separate follow-up activity. Never de-duplicate
+    // quick notes; append a dated record while preserving typed content/order.
+    const entry = `${note} - ${formatDate(new Date())}`;
+    onChange(value ? `${value}\n${entry}` : entry);
   }
 
   return (
