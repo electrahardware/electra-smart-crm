@@ -16,9 +16,9 @@ import {
 } from "../services/backup.service";
 import type { AuthRequest } from "../middleware/auth.middleware";
 
-function serializeJob<T extends { fileSize?: bigint | null } | null>(job: T) {
+function serializeJob<T extends { fileSize?: bigint | null; databaseSize?: bigint | null } | null>(job: T) {
   if (!job) return job;
-  return { ...job, fileSize: job.fileSize?.toString() ?? null };
+  return { ...job, fileSize: job.fileSize?.toString() ?? null, databaseSize: job.databaseSize?.toString() ?? null };
 }
 
 function owner(req: AuthRequest, res: Response) {
