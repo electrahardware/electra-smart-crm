@@ -270,6 +270,7 @@ model BackupJob {
   checksum         String?
   verified         Boolean  @default(false)
   verificationAt   DateTime?
+  verificationStatus String?
   postgresVersion  String?
   tableCount       Int?
   databaseSize     BigInt?

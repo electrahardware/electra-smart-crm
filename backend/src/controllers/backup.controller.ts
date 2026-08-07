@@ -319,36 +319,57 @@ export async function workflowStart(req: Request, res: Response) {
 }
 
 export async function workflowReport(req: Request, res: Response) {
-  if (!workflowAuthorized(req)) return res.status(401).json({ message: "Unauthorized backup workflow." });
+  const authPassed = workflowAuthorized(req);
+  console.info("[backup:workflow-report] authentication", { authPassed, hasConfiguredSecret: Boolean(process.env.BACKUP_WORKFLOW_SECRET), hasRequestSecret: Boolean(req.header("x-backup-secret")) });
+  if (!authPassed) return res.status(401).json({ message: "Unauthorized backup workflow." });
   const jobId = String(req.body.jobId || "");
+  console.info("[backup:workflow-report] received payload", {
+    jobId: jobId || null,
+    status: req.body.status ?? null,
+    verified: req.body.verified ?? null,
+    verificationAt: req.body.verificationAt ?? null,
+    hasChecksum: Boolean(req.body.checksum),
+    postgresVersion: req.body.postgresVersion ?? null,
+    tableCount: req.body.tableCount ?? null,
+    databaseSize: req.body.databaseSize ?? null,
+    hasStorageFileId: Boolean(req.body.storageFileId),
+  });
   if (!jobId) return res.status(400).json({ message: "jobId is required." });
   try {
-    const verificationPassed = req.body.verified === true;
+    const verificationPassed = req.body.verified === true || req.body.verified === "true";
     const succeeded = req.body.status === "Success" && verificationPassed;
-    const job = await prisma.backupJob.update({
-      where: { id: jobId },
-      data: {
-        status: succeeded ? "Success" : req.body.status === "Success" ? "Verification Failed" : "Failed",
-        completedAt: new Date(),
-        durationMs: Number(req.body.durationMs) || undefined,
-        fileName: succeeded ? String(req.body.fileName || "") : undefined,
-        fileSize: succeeded && req.body.fileSize ? BigInt(req.body.fileSize) : undefined,
-        format: succeeded ? "pg_dump custom + AES-256-GCM" : undefined,
-        checksum: succeeded ? String(req.body.checksum || "") : undefined,
-        verified: verificationPassed,
-        verificationAt: req.body.verificationAt ? new Date(String(req.body.verificationAt)) : new Date(),
-        postgresVersion: req.body.postgresVersion ? String(req.body.postgresVersion) : undefined,
-        tableCount: Number.isFinite(Number(req.body.tableCount)) ? Number(req.body.tableCount) : undefined,
-        databaseSize: req.body.databaseSize ? BigInt(req.body.databaseSize) : undefined,
-        verificationError: verificationPassed ? null : String(req.body.verificationError || req.body.errorMessage || "Backup integrity verification failed.").slice(0, 500),
-        storageFileId: succeeded ? String(req.body.storageFileId || "") : undefined,
-        storagePath: succeeded ? String(req.body.storagePath || "") : undefined,
-        errorStage: succeeded ? null : String(req.body.errorStage || "workflow"),
-        errorMessage: succeeded ? null : String(req.body.errorMessage || "Backup workflow failed.").slice(0, 500),
-      },
+    const job = await prisma.$transaction(async (tx) => {
+      const existing = await tx.backupJob.findUnique({ where: { id: jobId }, select: { id: true, status: true } });
+      console.info("[backup:workflow-report] job lookup", { jobId, found: Boolean(existing), previousStatus: existing?.status ?? null });
+      if (!existing) throw new Error(`Backup job ${jobId} was not found.`);
+      const updated = await tx.backupJob.update({
+        where: { id: jobId },
+        data: {
+          status: succeeded ? "Success" : req.body.status === "Success" ? "Verification Failed" : "Failed",
+          completedAt: new Date(),
+          durationMs: Number(req.body.durationMs) || undefined,
+          fileName: succeeded ? String(req.body.fileName || "") : undefined,
+          fileSize: succeeded && req.body.fileSize ? BigInt(req.body.fileSize) : undefined,
+          format: succeeded ? "pg_dump custom + AES-256-GCM" : undefined,
+          checksum: succeeded ? String(req.body.checksum || "") : undefined,
+          verified: verificationPassed,
+          verificationAt: req.body.verificationAt ? new Date(String(req.body.verificationAt)) : new Date(),
+          verificationStatus: verificationPassed ? "Verified" : "Failed",
+          postgresVersion: req.body.postgresVersion ? String(req.body.postgresVersion) : undefined,
+          tableCount: Number.isFinite(Number(req.body.tableCount)) ? Number(req.body.tableCount) : undefined,
+          databaseSize: req.body.databaseSize ? BigInt(req.body.databaseSize) : undefined,
+          verificationError: verificationPassed ? null : String(req.body.verificationError || req.body.errorMessage || "Backup integrity verification failed.").slice(0, 500),
+          storageFileId: succeeded ? String(req.body.storageFileId || "") : undefined,
+          storagePath: succeeded ? String(req.body.storagePath || "") : undefined,
+          errorStage: succeeded ? null : String(req.body.errorStage || "workflow"),
+          errorMessage: succeeded ? null : String(req.body.errorMessage || "Backup workflow failed.").slice(0, 500),
+        },
+      });
+      if (succeeded) await tx.backupSettings.upsert({ where: { id: 1 }, create: { id: 1, lastBackupAt: new Date(), latestBackupJobId: updated.id }, update: { lastBackupAt: new Date(), latestBackupJobId: updated.id } });
+      return updated;
     });
+    console.info("[backup:workflow-report] transaction committed", { jobId: job.id, status: job.status, verified: job.verified, verificationStatus: job.verificationStatus, checksumPersisted: Boolean(job.checksum), tableCount: job.tableCount, databaseSize: job.databaseSize?.toString() ?? null });
     if (succeeded) {
-      await prisma.backupSettings.upsert({ where: { id: 1 }, create: { id: 1, lastBackupAt: new Date(), latestBackupJobId: job.id }, update: { lastBackupAt: new Date(), latestBackupJobId: job.id } });
       await createAuditLog({ module: "Backup", action: "Backup Created", userName: "GitHub Actions", entityName: job.fileName ?? job.id, newValues: { verified: true, checksum: job.checksum } });
     } else {
       await reportBackupFailure(String(req.body.errorStage || "workflow"), String(req.body.errorMessage || "Backup workflow failed."), job.id);

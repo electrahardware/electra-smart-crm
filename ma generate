@@ -1,0 +1,13 @@
+warning: in the working copy of 'backend/prisma/schema.prisma', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/backend/prisma/schema.prisma b/backend/prisma/schema.prisma[m
+[1mindex e2d2da4..74da274 100644[m
+[1m--- a/backend/prisma/schema.prisma[m
+[1m+++ b/backend/prisma/schema.prisma[m
+[36m@@ -270,6 +270,7 @@[m [mmodel BackupJob {[m
+   checksum         String?[m
+   verified         Boolean  @default(false)[m
+   verificationAt   DateTime?[m
+[32m+[m[32m  verificationStatus String?[m
+   postgresVersion  String?[m
+   tableCount       Int?[m
+   databaseSize     BigInt?[m
