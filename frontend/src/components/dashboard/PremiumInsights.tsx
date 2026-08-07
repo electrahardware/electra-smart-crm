@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { DashboardData } from "../../services/dashboardService";
 import type { AnalyticsResponse } from "../../services/analyticsService";
 
-const colors = ["#e31e24", "#27272a", "#71717a", "#f87171", "#a1a1aa", "#fecaca"];
+const colors = ["#e31e24", "#60a5fa", "#a78bfa", "#f59e0b", "#34d399", "#fda4af"];
 type InsightIcon = typeof Users;
 type ChartItem = { name: string; value: number };
 
@@ -17,7 +17,7 @@ function KpiCard({ title, value, icon: Icon, note, alert = false, onClick }: { t
 
 function Bars({ items, onSelect }: { items: ChartItem[]; onSelect: (item: ChartItem) => void }) {
   const max = Math.max(...items.map((item) => item.value), 1);
-  return <div className="space-y-3.5">{items.slice(0, 6).map((item, index) => <button type="button" key={item.name} onClick={() => onSelect(item)} className="block w-full rounded-lg text-left transition hover:bg-red-50/60 focus:outline-none focus:ring-2 focus:ring-red-500/30"><div className="mb-1.5 flex justify-between gap-3 text-sm"><span className="truncate text-zinc-600">{item.name}</span><b className="text-zinc-900">{item.value}</b></div><div className="h-2 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full" style={{ width: `${(item.value / max) * 100}%`, backgroundColor: colors[index % colors.length] }} /></div></button>)}</div>;
+  return <div className="space-y-3.5">{items.slice(0, 6).map((item, index) => <button type="button" key={item.name} onClick={() => onSelect(item)} className="block w-full rounded-lg text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-red-500/30"><div className="mb-1.5 flex justify-between gap-3 text-sm"><span className="truncate text-zinc-300">{item.name}</span><b className="text-zinc-100">{item.value}</b></div><div className="h-2 overflow-hidden rounded-full bg-[#2b3038] ring-1 ring-white/5"><div className="h-full rounded-full" style={{ width: `${(item.value / max) * 100}%`, backgroundColor: colors[index % colors.length] }} /></div></button>)}</div>;
 }
 
 function Trend({ rows, onSelect }: { rows: { month: string; count: number }[]; onSelect: (month: string) => void }) {

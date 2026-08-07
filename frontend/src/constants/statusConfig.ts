@@ -18,19 +18,19 @@ export type LeadStatusValue = LeadStatus | "None";
 export const LEAD_STATUS_OPTIONS: LeadStatusValue[] = ["None", ...LEAD_STATUSES];
 
 export const STATUS_COLORS: Record<LeadStatusValue, string> = {
-  None: "bg-slate-100 text-slate-600",
-  "Card Pending": "bg-slate-100 text-slate-700",
-  "Whenever Required": "bg-blue-100 text-blue-700",
-  "No Requirement": "bg-red-100 text-red-700",
-  "Same Day Dispatch": "bg-emerald-100 text-emerald-700",
-  Interested: "bg-sky-100 text-sky-700",
-  Negotiation: "bg-orange-100 text-orange-700",
-  "Will Visit": "bg-purple-100 text-purple-700",
-  "Quotation Sent": "bg-yellow-100 text-yellow-800",
-  "Send Pdf": "bg-blue-100 text-blue-700",
-  "Sample Sent": "bg-purple-100 text-purple-700",
-  Visited: "bg-emerald-100 text-emerald-700",
-  Customer: "bg-green-900 text-white",
+  None: "border border-slate-700 bg-slate-800 text-slate-200",
+  "Card Pending": "border border-slate-700 bg-slate-800 text-slate-100",
+  "Whenever Required": "border border-blue-800 bg-blue-950 text-blue-200",
+  "No Requirement": "border border-red-800 bg-red-950 text-red-200",
+  "Same Day Dispatch": "border border-emerald-800 bg-emerald-950 text-emerald-200",
+  Interested: "border border-sky-800 bg-sky-950 text-sky-200",
+  Negotiation: "border border-orange-800 bg-orange-950 text-orange-200",
+  "Will Visit": "border border-purple-800 bg-purple-950 text-purple-200",
+  "Quotation Sent": "border border-yellow-800 bg-yellow-950 text-yellow-200",
+  "Send Pdf": "border border-blue-800 bg-blue-950 text-blue-200",
+  "Sample Sent": "border border-purple-800 bg-purple-950 text-purple-200",
+  Visited: "border border-emerald-800 bg-emerald-950 text-emerald-200",
+  Customer: "border border-green-800 bg-green-950 text-green-200",
 };
 
 export function normalizeLeadStatus(status?: string | null): LeadStatusValue {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/electra-logo.png";
-import wallpaper from "../assets/images/login-wallpaper.jpg";
+import officeBackground from "../assets/images/login-office-background.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -63,14 +63,13 @@ export default function Login() {
 
   return (
     <div
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black bg-cover bg-center px-4 py-10"
-      style={{ backgroundImage: `url(${wallpaper})` }}
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${officeBackground})` }}
     >
-      <div className="absolute inset-0 bg-black/55" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,transparent_5%,rgba(0,0,0,.4)_72%,rgba(0,0,0,.76)_100%)]" />
+      <div className="absolute inset-0 bg-black/[.45]" />
       <form
         onSubmit={handleLogin}
-        className="relative w-full max-w-md rounded-3xl border border-white/18 bg-[#17171a]/88 p-7 text-white shadow-2xl shadow-black/70 backdrop-blur-xl sm:p-9"
+        className="relative w-[calc(100%_-_40px)] max-w-[360px] rounded-[15px] border border-white/[.08] bg-[rgb(20_20_22_/_0.75)] p-7 text-white shadow-[0_20px_60px_rgba(0,0,0,.4)] backdrop-blur-[16px] sm:w-full sm:max-w-[380px] sm:p-9 lg:max-w-[420px]"
       >
         <div className="mb-8 text-center">
           <img src={logo} alt="Electra Hardware" className="mx-auto mb-6 w-48 drop-shadow-[0_6px_18px_rgba(0,0,0,.6)]" />
@@ -83,7 +82,7 @@ export default function Login() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full border border-white/15! bg-white/10! px-4 py-3 text-white placeholder:text-zinc-400"
+          className="mb-4 h-[50px] w-full rounded-xl border border-white! bg-white! px-4 text-[#111111] placeholder:text-[#666666]"
         />
 
         <input
@@ -91,10 +90,10 @@ export default function Login() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-6 w-full border border-white/15! bg-white/10! px-4 py-3 text-white placeholder:text-zinc-400"
+          className="mb-6 h-[50px] w-full rounded-xl border border-white! bg-white! px-4 text-[#111111] placeholder:text-[#666666]"
         />
 
-        <button className="w-full rounded-xl bg-[#e31e24] py-3 font-semibold text-white shadow-[0_8px_20px_rgba(227,30,36,.35)] hover:bg-[#c9161c]">
+        <button className="h-[50px] w-full rounded-xl bg-[#e31e24] font-semibold text-white shadow-[0_8px_20px_rgba(227,30,36,.35)] hover:bg-[#c9161c]">
           Login
         </button>
       </form>

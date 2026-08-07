@@ -189,9 +189,9 @@ export default function LeadWizard({
 
       <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl shadow-black/10">
 
-        <div className="border-b border-zinc-100 bg-gradient-to-r from-white to-red-50/45 p-5 sm:p-6">
+        <div className="border-b border-white/10 bg-[#171a1f] p-5 sm:p-6">
 
-          <h1 className="text-2xl font-bold tracking-[-.035em] text-zinc-900">
+          <h1 className="text-2xl font-bold tracking-[-.035em] text-zinc-100">
 
             {editingId
               ? "Edit Lead"
@@ -199,7 +199,7 @@ export default function LeadWizard({
 
           </h1>
 
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-zinc-400">
 
             {editingId
               ? "Update the selected lead."

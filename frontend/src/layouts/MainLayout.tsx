@@ -18,7 +18,7 @@ export default function MainLayout({
 
     <SidebarProvider>
 
-      <div className="flex min-h-screen bg-[#f5f5f7] text-[#202023]">
+      <div className="crm-shell flex min-h-screen bg-[#0b0d10] text-[#f4f4f5]">
 
         <Sidebar />
 

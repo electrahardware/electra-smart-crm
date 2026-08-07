@@ -102,19 +102,19 @@ export default function LeadDetailsDrawer({
 
                 <div className="mt-3 flex flex-wrap gap-2">
 
-                  <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                  <span className="rounded-full border border-red-800 bg-red-950 px-3 py-1 text-xs font-semibold text-red-200">
 
                     📌 {lead.status || "No Status"}
 
                   </span>
 
-                  <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                  <span className="rounded-full border border-emerald-800 bg-emerald-950 px-3 py-1 text-xs font-semibold text-emerald-200">
 
                     👤 {lead.leadOwner || "Unassigned"}
 
                   </span>
 
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                  <span className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-100">
 
                     📍 {lead.state || "Unknown"}
 

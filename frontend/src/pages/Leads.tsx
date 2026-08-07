@@ -5,7 +5,6 @@ import MainLayout from "../layouts/MainLayout";
 import LeadWizard from "../components/leads/LeadWizard";
 import LeadTable from "../components/leads/LeadTable";
 import LeadSearch from "../components/leads/LeadSearch";
-import FollowupPanel from "../components/leads/FollowupPanel";
 import ImportPreviewTable from "../components/leads/ImportPreviewTable";
 import { useImport } from "../hooks/useImport";
 import toast from "react-hot-toast";
@@ -247,7 +246,6 @@ const handleFileChange = async (
   />
 </Drawer>
 
-<FollowupPanel />
 {preview && (
   <>
     <div className="flex items-center justify-between rounded-xl border bg-white p-4">
