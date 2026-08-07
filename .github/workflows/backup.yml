@@ -97,9 +97,16 @@ jobs:
           trap 'curl --silent --show-error -X POST "$CRM_API_URL/api/backups/workflow/report" -H "Content-Type: application/json" -H "x-backup-secret: $BACKUP_WORKFLOW_SECRET" --data "{\"jobId\":\"${{ steps.start.outputs.job_id }}\",\"status\":\"Failed\",\"errorStage\":\"workflow\",\"errorMessage\":\"Backup workflow failed\"}" || true' ERR
           pg_dump "$DIRECT_DATABASE_URL" --format=custom --compress=9 --no-owner --no-privileges --file "$RAW_FILE"
           node scripts/encrypt-file.mjs "$RAW_FILE" "$ENCRYPTED_FILE"
+          # Integrity is verified from the encrypted artifact before it is uploaded or marked successful.
+          VERIFIED_DUMP="${RAW_FILE}.verified"
+          node scripts/decrypt-file.mjs "$ENCRYPTED_FILE" "$VERIFIED_DUMP"
+          pg_restore --list "$VERIFIED_DUMP" > /tmp/electra-crm-restore-manifest.txt
+          TABLE_COUNT=$(grep ' TABLE ' /tmp/electra-crm-restore-manifest.txt | grep -v ' TABLE DATA ' | wc -l | tr -d ' ')
+          POSTGRES_VERSION=$(pg_restore --version | tr -d '\n')
+          DATABASE_SIZE=$(stat -c%s "$RAW_FILE")
           RESULT=$(node scripts/upload-google-drive.mjs --file "$ENCRYPTED_FILE" --type "$TYPE" --latest true)
           SIZE=$(stat -c%s "$ENCRYPTED_FILE")
           CHECKSUM=$(sha256sum "$ENCRYPTED_FILE" | awk '{print $1}')
           DURATION=$(( $(date +%s%3N) - STARTED_AT ))
-          BODY=$(jq -nc --arg jobId "${{ steps.start.outputs.job_id }}" --arg fileName "$(basename "$ENCRYPTED_FILE")" --arg fileSize "$SIZE" --arg checksum "$CHECKSUM" --arg fileId "$(echo "$RESULT" | jq -r '.fileId')" --arg path "$(echo "$RESULT" | jq -r '.folder')" --argjson duration "$DURATION" '{jobId:$jobId,status:"Success",fileName:$fileName,fileSize:$fileSize,checksum:$checksum,storageFileId:$fileId,storagePath:$path,durationMs:$duration}')
+          BODY=$(jq -nc --arg jobId "${{ steps.start.outputs.job_id }}" --arg fileName "$(basename "$ENCRYPTED_FILE")" --arg fileSize "$SIZE" --arg checksum "$CHECKSUM" --arg fileId "$(echo "$RESULT" | jq -r '.fileId')" --arg path "$(echo "$RESULT" | jq -r '.folder')" --arg postgresVersion "$POSTGRES_VERSION" --arg verificationAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --argjson tableCount "$TABLE_COUNT" --arg databaseSize "$DATABASE_SIZE" --argjson duration "$DURATION" '{jobId:$jobId,status:"Success",fileName:$fileName,fileSize:$fileSize,checksum:$checksum,storageFileId:$fileId,storagePath:$path,durationMs:$duration,verified:true,verificationAt:$verificationAt,postgresVersion:$postgresVersion,tableCount:$tableCount,databaseSize:$databaseSize}')
           curl --fail-with-body --retry 3 --silent --show-error -X POST "$CRM_API_URL/api/backups/workflow/report" -H "Content-Type: application/json" -H "x-backup-secret: $BACKUP_WORKFLOW_SECRET" --data "$BODY"

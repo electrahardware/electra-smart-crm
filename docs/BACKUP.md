@@ -37,14 +37,14 @@ GOOGLE_DRIVE_CLIENT_SECRET=
 GOOGLE_DRIVE_REFRESH_TOKEN=
 GOOGLE_DRIVE_ROOT_FOLDER_ID=
 BACKUP_WORKFLOW_SECRET=
-GITHUB_BACKUP_TOKEN=
-GITHUB_REPOSITORY=owner/repository
+BACKUP_GITHUB_TOKEN=
+BACKUP_GITHUB_REPOSITORY=owner/repository
 GITHUB_BACKUP_WORKFLOW=backup.yml
 GITHUB_BACKUP_REF=main
 SENTRY_DSN=
 ```
 
-`GITHUB_BACKUP_TOKEN` is a fine-grained token allowed only to dispatch Actions workflows for this repository. It is used only by the Owner-triggered manual backup endpoint. Vercel hosts this project’s frontend; it does not need backup secrets. Continue using the existing `VITE_API_URL` to point at the API.
+`BACKUP_GITHUB_TOKEN` is a fine-grained token allowed only to dispatch Actions workflows for this repository. It is used only by the Owner-triggered manual backup endpoint. Vercel hosts this project’s frontend; it does not need backup secrets. Continue using the existing `VITE_API_URL` to point at the API.
 
 ## Behavior
 

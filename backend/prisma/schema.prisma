@@ -268,6 +268,12 @@ model BackupJob {
   fileSize         BigInt?
   format           String?
   checksum         String?
+  verified         Boolean  @default(false)
+  verificationAt   DateTime?
+  postgresVersion  String?
+  tableCount       Int?
+  databaseSize     BigInt?
+  verificationError String?
   storageProvider  String?  @default("Google Drive")
   storageFileId    String?
   storagePath      String?
@@ -291,6 +297,11 @@ model RestoreJob {
   snapshotBackupId  String?
   status            String   @default("Blocked")
   initiatedBy       String?
+  initiatedByUserId Int?
+  operatorIp        String?
+  stage             String   @default("Staging")
+  durationMs        Int?
+  backupName        String?
   startedAt         DateTime?
   completedAt       DateTime?
   verificationResult Json?
