@@ -12,7 +12,6 @@ export interface Followup {
 
   followupTime?: string;
 
-  priority?: string;
 
   status?: string;
 

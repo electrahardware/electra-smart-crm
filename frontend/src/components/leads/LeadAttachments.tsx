@@ -8,7 +8,7 @@ import {
   uploadAttachment,
   getAttachments,
   deleteAttachment,
-  getAttachmentUrl,
+  downloadAttachment,
 } from "../../services/attachmentService";
 
 interface Props {
@@ -29,20 +29,18 @@ export default function LeadAttachments({
   const [loading, setLoading] =
     useState(false);
 
-  if (!lead) {
-    return null;
-  }
-
-  const leadId = lead.id!;
+  const leadId = lead?.id;
 
   useEffect(() => {
-    loadAttachments();
+    if (!leadId) return;
+    void loadAttachments(leadId);
   }, [leadId]);
 
-  async function loadAttachments() {
+  async function loadAttachments(id = leadId) {
+    if (!id) return;
     try {
       const data =
-        await getAttachments(leadId);
+        await getAttachments(id);
 
       setAttachments(data);
     } catch (error) {
@@ -67,11 +65,11 @@ export default function LeadAttachments({
       setLoading(true);
 
       await uploadAttachment(
-        leadId,
+        leadId!,
         file
       );
 
-      await loadAttachments();
+      await loadAttachments(leadId);
 
       onUpload?.();
 
@@ -116,6 +114,34 @@ export default function LeadAttachments({
       alert(
         "Unable to delete attachment."
       );
+    }
+  }
+
+  if (!lead || !leadId) {
+    return null;
+  }
+
+  async function handleOpenAttachment(file: Attachment, download = false) {
+    try {
+      const blob = await downloadAttachment(file.id);
+      const url = URL.createObjectURL(blob);
+
+      if (download) {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = file.originalName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      window.open(url, "_blank", "noopener,noreferrer");
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (error) {
+      console.error(error);
+      alert("Unable to open attachment.");
     }
   }
 
@@ -211,12 +237,7 @@ export default function LeadAttachments({
               <div className="flex gap-2">
 
                 <button
-  onClick={() =>
-    window.open(
-      getAttachmentUrl(file.filePath),
-      "_blank"
-    )
-  }
+  onClick={() => handleOpenAttachment(file)}
   className="rounded-lg bg-slate-100 px-3 py-2 hover:bg-slate-200"
   title="Preview"
 >
@@ -224,24 +245,7 @@ export default function LeadAttachments({
 </button>
 
                 <button
-  onClick={() => {
-
-    const link =
-      document.createElement("a");
-
-    link.href =
-      getAttachmentUrl(file.filePath);
-
-    link.download =
-      file.originalName;
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
-
-  }}
+  onClick={() => handleOpenAttachment(file, true)}
   className="rounded-lg bg-blue-100 px-3 py-2 hover:bg-blue-200"
   title="Download"
 >

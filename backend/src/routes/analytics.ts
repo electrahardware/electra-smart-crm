@@ -40,8 +40,6 @@ router.get("/", async (_req, res) => {
 
       completedToday,
 
-      priorities,
-
       statuses,
 
       cities,
@@ -123,14 +121,6 @@ router.get("/", async (_req, res) => {
       }),
 
       prisma.lead.groupBy({
-        by: ["priority"],
-
-        _count: {
-          priority: true,
-        },
-      }),
-
-      prisma.lead.groupBy({
         by: ["status"],
 
         _count: {
@@ -182,39 +172,6 @@ router.get("/", async (_req, res) => {
         },
       }),
     ]);
-
-    //--------------------------------------------------------
-    // Priority Summary
-    //--------------------------------------------------------
-
-    let hotLeads = 0;
-    let warmLeads = 0;
-    let coldLeads = 0;
-    let noReqLeads = 0;
-
-    for (const row of priorities) {
-      const value = (row.priority ?? "").trim().toLowerCase();
-
-      switch (value) {
-        case "hot":
-          hotLeads += row._count.priority;
-          break;
-
-        case "warm":
-          warmLeads += row._count.priority;
-          break;
-
-        case "cold":
-          coldLeads += row._count.priority;
-          break;
-
-        case "no req.":
-        case "no requirement":
-        case "no req":
-          noReqLeads += row._count.priority;
-          break;
-      }
-    }
 
     //--------------------------------------------------------
     // Helper
@@ -307,14 +264,6 @@ router.get("/", async (_req, res) => {
 
       monthLeads,
 
-      hotLeads,
-
-      warmLeads,
-
-      coldLeads,
-
-      noReqLeads,
-
       overdue,
 
       todayFollowups,
@@ -332,8 +281,6 @@ router.get("/", async (_req, res) => {
       sourceWise: clean(sources, "leadSource", "leadSource"),
 
       statusWise: clean(statuses, "status", "status"),
-
-      priorityWise: clean(priorities, "priority", "priority"),
 
       salesExecutivePerformance,
       mostActiveToday: salesExecutivePerformance[0] ?? null,

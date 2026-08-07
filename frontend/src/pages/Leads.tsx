@@ -160,7 +160,6 @@ const handleFileChange = async (
         "Pincode",
         "Lead Owner",
         "Lead Source",
-        "Priority",
         "Status",
         "Follow-up Date",
         "Notes 1",

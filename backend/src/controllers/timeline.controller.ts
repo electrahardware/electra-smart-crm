@@ -1,9 +1,14 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import prisma from "../lib/prisma";
+import { AuthRequest, requireLeadAccess } from "../middleware/auth.middleware";
 
-export async function getTimeline(req: Request, res: Response) {
+export async function getTimeline(req: AuthRequest, res: Response) {
   try {
     const leadId = Number(req.params.leadId);
+
+    if (!(await requireLeadAccess(req, res, leadId))) {
+      return;
+    }
 
     const timeline = await prisma.leadTimeline.findMany({
       where: {
@@ -24,11 +29,15 @@ export async function getTimeline(req: Request, res: Response) {
   }
 }
 
-export async function addTimeline(req: Request, res: Response) {
+export async function addTimeline(req: AuthRequest, res: Response) {
   try {
     const leadId = Number(req.params.leadId);
 
-    const { type, title, description, createdBy } = req.body;
+    if (!(await requireLeadAccess(req, res, leadId))) {
+      return;
+    }
+
+    const { type, title, description } = req.body;
 
     const item = await prisma.leadTimeline.create({
       data: {
@@ -36,7 +45,7 @@ export async function addTimeline(req: Request, res: Response) {
         type,
         title,
         description,
-        createdBy,
+        createdBy: req.user!.name,
       },
     });
 

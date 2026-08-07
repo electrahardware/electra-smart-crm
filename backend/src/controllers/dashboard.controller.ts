@@ -5,12 +5,6 @@ export async function getDashboard(req: Request, res: Response) {
   try {
     const totalLeads = await prisma.lead.count();
 
-    const hotLeads = await prisma.lead.count({
-      where: {
-        priority: "Hot",
-      },
-    });
-
     const wonLeads = await prisma.lead.count({
       where: {
         status: "Won",
@@ -66,14 +60,12 @@ export async function getDashboard(req: Request, res: Response) {
         shopName: true,
         mobile: true,
         status: true,
-        priority: true,
         createdAt: true,
       },
     });
 
     res.json({
       totalLeads,
-      hotLeads,
       wonLeads,
       lostLeads,
       todayFollowups,

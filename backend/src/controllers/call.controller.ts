@@ -1,17 +1,24 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import prisma from "../lib/prisma";
 import { createTimeline } from "../services/timeline.service";
+import { AuthRequest, requireLeadAccess } from "../middleware/auth.middleware";
 
 export async function getLeadCalls(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
 
+    const leadId = Number(req.params.id);
+
+    if (!(await requireLeadAccess(req, res, leadId))) {
+      return;
+    }
+
     const calls =
       await prisma.leadCall.findMany({
         where: {
-          leadId: Number(req.params.id),
+          leadId,
         },
         orderBy: {
           createdAt: "desc",
@@ -32,13 +39,17 @@ export async function getLeadCalls(
 }
 
 export async function addLeadCall(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
 
     const leadId =
       Number(req.params.id);
+
+    if (!(await requireLeadAccess(req, res, leadId))) {
+      return;
+    }
 
     const call =
       await prisma.leadCall.create({
@@ -59,7 +70,7 @@ export async function addLeadCall(
     // Logging a call counts as an edit to the related lead.
     await prisma.lead.update({
       where: { id: leadId },
-      data: { lastEditedAt: new Date(), lastEditedBy: (req as any).user?.name || "System" },
+      data: { lastEditedAt: new Date(), lastEditedBy: req.user!.name },
     });
 
     await createTimeline({
@@ -68,7 +79,7 @@ export async function addLeadCall(
       title: "Call Logged",
       description:
         call.remarks || call.callType,
-      createdBy: "System",
+      createdBy: req.user!.name,
     });
 
     res.status(201).json(call);
@@ -85,7 +96,7 @@ export async function addLeadCall(
 }
 
 export async function deleteLeadCall(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
@@ -99,6 +110,10 @@ export async function deleteLeadCall(
       return res.status(404).json({ message: "Call not found." });
     }
 
+    if (!(await requireLeadAccess(req, res, call.leadId))) {
+      return;
+    }
+
     await prisma.leadCall.delete({
       where: {
         id: Number(req.params.callId),
@@ -107,7 +122,7 @@ export async function deleteLeadCall(
 
     await prisma.lead.update({
       where: { id: call.leadId },
-      data: { lastEditedAt: new Date(), lastEditedBy: (req as any).user?.name || "System" },
+      data: { lastEditedAt: new Date(), lastEditedBy: req.user!.name },
     });
 
     res.json({

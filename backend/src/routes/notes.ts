@@ -1,9 +1,12 @@
 import { Router } from "express";
 import prisma from "../lib/prisma";
+import { AuthRequest, requireAuth, requireLeadAccess } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.post("/", async (req, res) => {
+router.use(requireAuth);
+
+router.post("/", async (req: AuthRequest, res) => {
   try {
     const {
       leadId,
@@ -17,18 +20,22 @@ router.post("/", async (req, res) => {
       });
     }
 
+    if (!(await requireLeadAccess(req, res, Number(leadId)))) {
+      return;
+    }
+
     const savedNote = await prisma.leadNote.create({
       data: {
         leadId: Number(leadId),
         note,
-        createdBy: createdBy || "System",
+        createdBy: req.user!.name,
       },
     });
 
     // A note is a lead interaction, so refresh its read-only Last Edit value.
     await prisma.lead.update({
       where: { id: Number(leadId) },
-      data: { lastEditedAt: new Date(), lastEditedBy: (req as any).user?.name || createdBy || "System" },
+      data: { lastEditedAt: new Date(), lastEditedBy: req.user!.name },
     });
 
    await prisma.leadTimeline.create({
@@ -36,7 +43,8 @@ router.post("/", async (req, res) => {
         leadId: Number(leadId),
         type: "NOTE",
         title: "Note Added",
-        description: note,
+      description: note,
+      createdBy: req.user!.name,
       },
     });
 

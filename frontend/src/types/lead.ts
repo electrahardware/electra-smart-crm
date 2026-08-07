@@ -32,7 +32,6 @@ leadDate: string;
 
   products: string[];
 
-  priority: string;
   status: string;
 
   expectedValue: number;
@@ -87,7 +86,6 @@ leadDate: new Date()
 
   products: [],
 
-  priority: "",
   status: "None",
 
   expectedValue: 0,

@@ -39,7 +39,6 @@ leadDate?: string;
   leadSource?: string;
   language?: string;
 
-  priority?: string;
   status?: string;
 
   expectedValue?: number;

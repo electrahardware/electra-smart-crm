@@ -58,31 +58,6 @@ export default function LeadDetailsDrawer({
     return null;
   }
 
-  function getPriorityColor(
-  priority?: string
-) {
-
-  switch (priority) {
-
-    case "Hot":
-      return "bg-red-100 text-red-700";
-
-    case "Warm":
-      return "bg-orange-100 text-orange-700";
-
-    case "Cold":
-      return "bg-blue-100 text-blue-700";
-
-    case "No Req.":
-  return "⚪";
-
-    default:
-      return "bg-slate-100 text-slate-700";
-
-  }
-
-}
-
   return (
 
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -126,16 +101,6 @@ export default function LeadDetailsDrawer({
                 </p>
 
                 <div className="mt-3 flex flex-wrap gap-2">
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${getPriorityColor(
-  lead.priority
-)}`}
-                  >
-
-                    🔥 {lead.priority || "Normal"}
-
-                  </span>
 
                   <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
 
@@ -272,11 +237,6 @@ export default function LeadDetailsDrawer({
                 <Info
                   label="📌 Lead Status"
                   value={lead.status}
-                />
-
-                <Info
-                  label="🔥 Priority"
-                  value={lead.priority}
                 />
 
                 <Info

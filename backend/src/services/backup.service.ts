@@ -3,6 +3,7 @@ import { Readable } from "stream";
 import * as Sentry from "@sentry/node";
 
 import prisma from "../lib/prisma";
+import { sendBackupFailureAlert, sendRestoreReport } from "./backup-email.service";
 
 const OWNER_ROLES = ["Owner", "Admin"];
 const DRIVE_TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -108,7 +109,7 @@ export function safeBackupError(error: unknown) {
   return message.replace(/postgres(?:ql)?:\/\/[^\s]+/gi, "[redacted database URL]").slice(0, 500);
 }
 
-export async function reportBackupFailure(stage: string, error: unknown, jobId?: string) {
+export async function reportBackupFailure(stage: string, error: unknown, jobId?: string, kind: "backup" | "restore" = "backup") {
   const safeMessage = safeBackupError(error);
   console.error(`[backup:${stage}]`, safeMessage, jobId ? { jobId } : "");
   if (process.env.SENTRY_DSN) {
@@ -119,6 +120,11 @@ export async function reportBackupFailure(stage: string, error: unknown, jobId?:
       scope.setExtra("safe_message", safeMessage);
       Sentry.captureException(new Error(safeMessage));
     });
+  }
+  if (kind === "restore") {
+    await sendRestoreReport({ passed: false, backupName: jobId, error: safeMessage });
+  } else {
+    await sendBackupFailureAlert({ stage, message: safeMessage, jobId });
   }
 }
 

@@ -70,7 +70,12 @@ model Lead {
   timeline     LeadTimeline[]
   quotations   Quotation[]
 
-
+  @@index([leadOwner])
+  @@index([status])
+  @@index([followupDate])
+  @@index([updatedAt])
+  @@index([city])
+  @@index([state])
 }
 
 model LeadNote {

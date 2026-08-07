@@ -86,14 +86,8 @@ const [rescheduleOpen, setRescheduleOpen] = useState(false);
   👤 {lead.customerName}
 </p>
 
-{/* Priority + Lead Owner */}
+{/* Lead Owner */}
 <div className="mt-3 flex flex-wrap gap-2">
-
-  {lead.priority && (
-    <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
-      🔥 {lead.priority}
-    </span>
-  )}
 
   {lead.leadOwner && (
     <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">

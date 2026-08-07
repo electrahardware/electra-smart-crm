@@ -33,8 +33,7 @@ export async function uploadAttachment(
     file
   );
 
-  const token =
-    localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const res = await fetch(
     `${BASE_URL}/attachments/${leadId}`,
@@ -69,11 +68,15 @@ export async function deleteAttachment(
   );
 }
 
-export function getAttachmentUrl(
-  fileName: string
-) {
-  return `${BASE_URL.replace(
-    "/api",
-    ""
-  )}/uploads/${fileName}`;
+export async function downloadAttachment(id: number): Promise<Blob> {
+  const token = sessionStorage.getItem("token");
+  const response = await fetch(`${BASE_URL}/attachments/file/${id}`, {
+    headers: { Authorization: token ? `Bearer ${token}` : "" },
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to download attachment.");
+  }
+
+  return response.blob();
 }

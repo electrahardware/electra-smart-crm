@@ -7,8 +7,11 @@ import {
   updateQuotation,
   deleteQuotation,
 } from "../controllers/quotation.controller";
+import { requireAuth } from "../middleware/auth.middleware";
 
 const router = Router();
+
+router.use(requireAuth);
 
 router.get("/", getQuotations);
 

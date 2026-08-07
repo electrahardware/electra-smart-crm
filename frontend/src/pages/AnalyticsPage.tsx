@@ -87,26 +87,6 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      {/* Second Row */}
-
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        <Card title="Hot Leads" value={data.hotLeads} color="text-red-600" />
-
-        <Card
-          title="Warm Leads"
-          value={data.warmLeads}
-          color="text-amber-600"
-        />
-
-        <Card title="Cold Leads" value={data.coldLeads} color="text-cyan-600" />
-
-        <Card
-          title="No Requirement"
-          value={data.noReqLeads}
-          color="text-slate-600"
-        />
-      </div>
-
       {/* Third Row */}
 
       <div className="mt-6 grid gap-6 sm:grid-cols-3">
@@ -283,26 +263,6 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Priority */}
-
-        <div className="rounded-2xl border bg-white p-6 shadow-sm">
-          <h2 className="mb-5 text-xl font-bold">⭐ Priority</h2>
-
-          <div className="space-y-3">
-            {data.priorityWise.map((item) => (
-              <div
-                key={item.priority ?? "Unknown"}
-                className="flex items-center justify-between rounded-lg border-b pb-2"
-              >
-                <span>{item.priority || "Unknown"}</span>
-
-                <span className="font-bold text-red-600">
-                  {item._count.priority}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </MainLayout>
   );

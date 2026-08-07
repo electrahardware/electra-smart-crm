@@ -21,7 +21,6 @@ export interface DashboardData {
     shopName: string | null;
     mobile: string;
     status: string | null;
-    priority: string | null;
     createdAt: string;
   }[];
 }

@@ -14,7 +14,6 @@ export type CanonicalColumn =
   | "pincode"
   | "leadOwner"
   | "leadSource"
-  | "priority"
   | "status"
   | "followupDate"
   | "notes";
@@ -78,7 +77,6 @@ export const HEADER_SYNONYMS: Record<CanonicalColumn, string[]> = {
 
   leadSource: ["Lead Source", "Source", "Inquiry Source"],
 
-  priority: ["Priority"],
 
   status: ["Status"],
 

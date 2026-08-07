@@ -65,14 +65,6 @@ export default function Dashboard() {
     },
 
     {
-      title: "Hot Leads",
-      value: stats?.hotLeads ?? 0,
-      color: "text-red-600",
-      icon: "🔥",
-      onClick: () => navigate("/leads?priority=Hot"),
-    },
-
-    {
       title: "Closed Won Leads",
       value: stats?.wonLeads ?? 0,
       color: "text-emerald-600",

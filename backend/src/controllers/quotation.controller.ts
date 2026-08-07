@@ -1,14 +1,20 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import prisma from "../lib/prisma";
+import { AuthRequest, isLeadPrivileged, requireLeadAccess } from "../middleware/auth.middleware";
 
 export async function getQuotations(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
 
+    const where = isLeadPrivileged(req.user?.role)
+      ? {}
+      : { lead: { leadOwner: req.user!.name } };
+
     const quotations =
       await prisma.quotation.findMany({
+        where,
         include: {
           items: true,
           lead: true,
@@ -33,7 +39,7 @@ export async function getQuotations(
 }
 
 export async function getQuotation(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
@@ -48,6 +54,14 @@ export async function getQuotation(
           lead: true,
         },
       });
+
+    if (!quotation) {
+      return res.status(404).json({ message: "Quotation not found." });
+    }
+
+    if (!(await requireLeadAccess(req, res, quotation.leadId))) {
+      return;
+    }
 
     res.json(quotation);
 
@@ -64,10 +78,16 @@ export async function getQuotation(
 }
 
 export async function createQuotation(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
+
+    const leadId = Number(req.body.leadId);
+
+    if (!(await requireLeadAccess(req, res, leadId))) {
+      return;
+    }
 
     const quotation =
       await prisma.quotation.create({
@@ -94,10 +114,23 @@ export async function createQuotation(
 }
 
 export async function updateQuotation(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
+
+    const existing = await prisma.quotation.findUnique({
+      where: { id: Number(req.params.id) },
+      select: { leadId: true },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ message: "Quotation not found." });
+    }
+
+    if (!(await requireLeadAccess(req, res, existing.leadId))) {
+      return;
+    }
 
     const quotation =
       await prisma.quotation.update({
@@ -122,10 +155,23 @@ export async function updateQuotation(
 }
 
 export async function deleteQuotation(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
+
+    const existing = await prisma.quotation.findUnique({
+      where: { id: Number(req.params.id) },
+      select: { leadId: true },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ message: "Quotation not found." });
+    }
+
+    if (!(await requireLeadAccess(req, res, existing.leadId))) {
+      return;
+    }
 
     await prisma.quotation.delete({
       where: {

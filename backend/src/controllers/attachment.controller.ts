@@ -1,9 +1,11 @@
-import { Request, Response } from "express";
+import path from "path";
+import { Response } from "express";
 import prisma from "../lib/prisma";
 import { createTimeline } from "../services/timeline.service";
+import { AuthRequest, requireLeadAccess } from "../middleware/auth.middleware";
 
 export async function uploadAttachment(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
@@ -16,6 +18,10 @@ export async function uploadAttachment(
 
     const leadId =
       Number(req.params.leadId);
+
+    if (!(await requireLeadAccess(req, res, leadId))) {
+      return;
+    }
 
     const attachment =
       await prisma.leadAttachment.create({
@@ -31,7 +37,7 @@ export async function uploadAttachment(
 
     await prisma.lead.update({
       where: { id: leadId },
-      data: { lastEditedAt: new Date(), lastEditedBy: (req as any).user?.name || "System" },
+      data: { lastEditedAt: new Date(), lastEditedBy: req.user!.name },
     });
 
     await createTimeline({
@@ -39,7 +45,7 @@ export async function uploadAttachment(
       type: "ATTACHMENT",
       title: "Attachment Uploaded",
       description: attachment.originalName,
-      createdBy: "System",
+      createdBy: req.user!.name,
     });
 
     res.status(201).json(attachment);
@@ -56,15 +62,21 @@ export async function uploadAttachment(
 }
 
 export async function getAttachments(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
 
+    const leadId = Number(req.params.leadId);
+
+    if (!(await requireLeadAccess(req, res, leadId))) {
+      return;
+    }
+
     const files =
       await prisma.leadAttachment.findMany({
         where: {
-          leadId: Number(req.params.leadId),
+          leadId,
         },
         orderBy: {
           createdAt: "desc",
@@ -85,7 +97,7 @@ export async function getAttachments(
 }
 
 export async function deleteAttachment(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
   try {
@@ -105,6 +117,10 @@ export async function deleteAttachment(
       });
     }
 
+    if (!(await requireLeadAccess(req, res, attachment.leadId))) {
+      return;
+    }
+
     await prisma.leadAttachment.delete({
       where: {
         id: Number(req.params.id),
@@ -113,7 +129,7 @@ export async function deleteAttachment(
 
     await prisma.lead.update({
       where: { id: attachment.leadId },
-      data: { lastEditedAt: new Date(), lastEditedBy: (req as any).user?.name || "System" },
+      data: { lastEditedAt: new Date(), lastEditedBy: req.user!.name },
     });
 
     res.json({
@@ -128,5 +144,34 @@ export async function deleteAttachment(
       message: "Unable to delete attachment.",
     });
 
+  }
+}
+
+export async function downloadAttachment(req: AuthRequest, res: Response) {
+  try {
+    const attachmentId = Number(req.params.id);
+    const attachment = await prisma.leadAttachment.findUnique({
+      where: { id: attachmentId },
+    });
+
+    if (!attachment) {
+      return res.status(404).json({ message: "Attachment not found." });
+    }
+
+    if (!(await requireLeadAccess(req, res, attachment.leadId))) {
+      return;
+    }
+
+    const uploadsDirectory = path.resolve(process.cwd(), "uploads");
+    const resolvedPath = path.resolve(uploadsDirectory, attachment.filePath);
+
+    if (!resolvedPath.startsWith(`${uploadsDirectory}${path.sep}`)) {
+      return res.status(400).json({ message: "Invalid attachment path." });
+    }
+
+    return res.download(resolvedPath, attachment.originalName);
+  } catch (error) {
+    console.error("Unable to download attachment:", error);
+    return res.status(500).json({ message: "Unable to download attachment." });
   }
 }

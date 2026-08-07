@@ -197,7 +197,6 @@ export async function parseElectraExcel(
 
       language: "Gujarati",
 
-      priority: getCellText(row, columnIndexes, "priority"),
 
       status: getCellText(row, columnIndexes, "status"),
 

@@ -13,6 +13,48 @@ export interface AuthRequest extends Request {
   };
 }
 
+export function isLeadPrivileged(role?: string) {
+  return role === "Owner" || role === "Sales Manager";
+}
+
+/**
+ * Central ownership check for resources that belong to a lead. Owners and
+ * sales managers can access every lead; sales executives can access only
+ * leads assigned to their own name.
+ */
+export async function requireLeadAccess(
+  req: AuthRequest,
+  res: Response,
+  leadId: number,
+): Promise<boolean> {
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return false;
+  }
+
+  if (!Number.isInteger(leadId) || leadId <= 0) {
+    res.status(400).json({ message: "Invalid Lead ID" });
+    return false;
+  }
+
+  const lead = await prisma.lead.findUnique({
+    where: { id: leadId },
+    select: { leadOwner: true },
+  });
+
+  if (!lead) {
+    res.status(404).json({ message: "Lead not found." });
+    return false;
+  }
+
+  if (!isLeadPrivileged(req.user.role) && lead.leadOwner !== req.user.name) {
+    res.status(403).json({ message: "You do not have access to this lead." });
+    return false;
+  }
+
+  return true;
+}
+
 export async function requireAuth(
   req: AuthRequest,
   res: Response,

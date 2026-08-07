@@ -46,8 +46,6 @@ export async function getAllLeads(req: Request, res: Response) {
 
     const owner = (req.query.owner as string)?.trim() || "";
 
-    const priority = (req.query.priority as string)?.trim() || "";
-
     const state = (req.query.state as string)?.trim() || "";
 
     const source = (req.query.source as string)?.trim() || "";
@@ -114,10 +112,6 @@ export async function getAllLeads(req: Request, res: Response) {
 
     if (owner) {
       where.leadOwner = owner;
-    }
-
-    if (priority) {
-      where.priority = priority;
     }
 
     if (state) {

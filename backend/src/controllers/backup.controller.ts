@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 
 import prisma from "../lib/prisma";
 import { createAuditLog } from "../services/audit.service";
+import { sendBackupSuccessReport, sendRestoreReport, sendWeeklyBackupHealthReport } from "../services/backup-email.service";
 import {
   deleteDriveFile,
   getBackupSettings,
@@ -149,7 +150,7 @@ export async function requestStagingRestore(req: AuthRequest, res: Response) {
     if (restoreId) {
       await prisma.restoreJob.update({ where: { id: restoreId }, data: { status: "Failed", completedAt: new Date(), errorMessage: safeBackupError(error) } }).catch(() => undefined);
     }
-    await reportBackupFailure("staging_restore_dispatch", error, backupJobId || undefined);
+    await reportBackupFailure("staging_restore_dispatch", error, backupJobId || undefined, "restore");
     res.status(500).json({ message: safeBackupError(error) });
   }
 }
@@ -361,6 +362,14 @@ export async function workflowReport(req: Request, res: Response) {
     console.info("[backup:workflow-report] transaction committed", { jobId: job.id, status: job.status, verified: job.verified, verificationStatus: job.verificationStatus, checksumPersisted: Boolean(job.checksum), tableCount: job.tableCount, databaseSize: job.databaseSize?.toString() ?? null });
     if (succeeded) {
       await createAuditLog({ module: "Backup", action: "Backup Created", userName: "GitHub Actions", entityName: job.fileName ?? job.id, newValues: { verified: true, checksum: job.checksum } });
+      await sendBackupSuccessReport(job);
+      const weekdayInIst = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Kolkata", weekday: "long" }).format(new Date());
+      if (job.type === "Automatic" && weekdayInIst === "Monday") {
+        const reportAlreadySent = await prisma.auditLog.findFirst({
+          where: { module: "Backup", action: "Weekly Backup Health Report Sent", createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+        });
+        if (!reportAlreadySent) await sendWeeklyBackupHealthReport();
+      }
     } else {
       await reportBackupFailure(String(req.body.errorStage || "workflow"), String(req.body.errorMessage || "Backup workflow failed."), job.id);
     }
@@ -397,7 +406,11 @@ export async function restoreWorkflowReport(req: Request, res: Response) {
       });
     });
     await createAuditLog({ module: "Backup", action: passed ? "Restore Completed" : "Restore Failed", userName: restore.initiatedBy ?? "GitHub Actions", entityName: restore.backupName ?? restore.backupJobId, ipAddress: restore.operatorIp ?? undefined, newValues: { stage: restore.stage, restoreJobId: restore.id, verification: req.body.verification ?? null } });
-    if (!passed) await reportBackupFailure("restore_verification", new Error(restore.errorMessage ?? "Restore verification failed."), restore.backupJobId);
+    if (passed) {
+      await sendRestoreReport({ passed: true, backupName: restore.backupName, durationMs: restore.durationMs, operator: restore.initiatedBy });
+    } else {
+      await reportBackupFailure("restore_verification", new Error(restore.errorMessage ?? "Restore verification failed."), restore.backupJobId, "restore");
+    }
     res.json({ ok: true });
   } catch (error) { res.status(500).json({ message: safeBackupError(error) }); }
 }

@@ -13,10 +13,6 @@ import {
 } from "../services/userService";
 
 export default function UserManagement() {
-  if (!isOwner()) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   const [users, setUsers] = useState<User[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -26,10 +22,6 @@ export default function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [passwordUser, setPasswordUser] = useState<User | null>(null);
-
-  const [newPassword, setNewPassword] = useState("");
-
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   async function loadUsers() {
     try {
@@ -46,6 +38,10 @@ export default function UserManagement() {
   useEffect(() => {
     loadUsers();
   }, []);
+
+  if (!isOwner()) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <MainLayout>
@@ -142,9 +138,6 @@ export default function UserManagement() {
                           onClick={() => {
                             setPasswordUser(user);
 
-                            setNewPassword("");
-
-                            setConfirmPassword("");
                           }}
                           className="rounded-lg bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700"
                         >

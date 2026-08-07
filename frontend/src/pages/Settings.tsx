@@ -34,13 +34,6 @@ const menus = [
   },
 
   {
-    title: "Priority",
-    icon: "⭐",
-    description:
-      "Manage priorities",
-  },
-
-  {
     title: "Company",
     icon: "🏢",
     description:
@@ -57,6 +50,8 @@ const menus = [
 
 export default function Settings() {
 
+  const navigate = useNavigate();
+
   if (!isAdminOrManager()) {
 
   return (
@@ -67,8 +62,6 @@ export default function Settings() {
   );
 
 }
-
-  const navigate = useNavigate();
 
   return (
 

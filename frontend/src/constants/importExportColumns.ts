@@ -19,7 +19,6 @@ export const IMPORT_EXPORT_COLUMNS: ExportColumn[] = [
   { header: "Pincode", key: "pincode" },
   { header: "Lead Owner", key: "leadOwner" },
   { header: "Lead Source", key: "leadSource" },
-  { header: "Priority", key: "priority" },
   { header: "Status", key: "status" },
   { header: "Follow-up Date", key: "followupDate" },
   { header: "Notes 1", key: "note1" },

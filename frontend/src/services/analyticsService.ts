@@ -35,13 +35,6 @@ export interface StatusWiseItem {
   };
 }
 
-export interface PriorityWiseItem {
-  priority: string | null;
-  _count: {
-    priority: number;
-  };
-}
-
 export interface MonthlyLeadItem {
   month: string;
   count: number;
@@ -55,11 +48,6 @@ export interface AnalyticsResponse {
   weekLeads: number;
   monthLeads: number;
 
-  hotLeads: number;
-  warmLeads: number;
-  coldLeads: number;
-  noReqLeads: number;
-
   overdue: number;
   todayFollowups: number;
   completedToday: number;
@@ -72,8 +60,6 @@ export interface AnalyticsResponse {
 
   sourceWise: SourceWiseItem[];
   statusWise: StatusWiseItem[];
-  priorityWise: PriorityWiseItem[];
-
   salesExecutivePerformance: {
     user: string;
     today: number;

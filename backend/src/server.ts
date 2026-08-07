@@ -4,7 +4,8 @@ dotenv.config();
 
 import cors from "cors";
 import express from "express";
-import path from "path";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import * as Sentry from "@sentry/node";
 
 import activityRoutes from "./routes/activity.routes";
@@ -26,15 +27,53 @@ import userRoutes from "./routes/user.routes";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 if (process.env.SENTRY_DSN) {
   Sentry.init({ dsn: process.env.SENTRY_DSN, sendDefaultPii: false });
 }
 
-app.use(
-  cors({
-    origin: "*",
-  }),
-);
+const productionOrigins = [
+  "https://crm.electrahardware.com",
+  "https://electra-smart-crm.vercel.app",
+];
+
+const allowedOrigins = process.env.NODE_ENV === "production"
+  ? productionOrigins
+  : [...productionOrigins, "http://localhost:5173", "http://127.0.0.1:5173"];
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'none'"],
+      baseUri: ["'none'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'none'"],
+    },
+  },
+  hsts: process.env.NODE_ENV === "production" ? undefined : false,
+}));
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Origin is not allowed by CORS."));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Authorization", "Content-Type"],
+  maxAge: 86_400,
+}));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 1_000,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: { message: "Too many requests. Please try again shortly." },
+});
 
 app.use(
   express.json({
@@ -67,10 +106,12 @@ app.get("/health", (_req, res) => {
 // ================= API Routes =================
 
 app.use((req, _res, next) => {
-  console.log(req.method, req.originalUrl);
+  console.log(req.method, req.path);
 
   next();
 });
+
+app.use("/api", apiLimiter);
 
 app.use("/api/leads", leadRoutes);
 app.use("/api/import", importRoutes);
@@ -91,7 +132,26 @@ app.use("/api/notes", notesRoutes);
 
 // ==============================================
 
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use((_req, res) => {
+  res.status(404).json({ message: "Route not found." });
+});
+
+app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (error instanceof Error) {
+    console.error("API error:", error.message);
+    if (process.env.SENTRY_DSN) Sentry.captureException(error);
+
+    if (error.message === "Origin is not allowed by CORS.") {
+      return res.status(403).json({ message: "Origin is not allowed." });
+    }
+
+    if (error.message.includes("Only JPG") || error.message.includes("File too large")) {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+
+  return res.status(500).json({ message: "Internal server error." });
+});
 
 const PORT = Number(process.env.PORT) || 5000;
 
