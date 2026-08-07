@@ -5,9 +5,12 @@
   "main": "dist/server.js",
   "type": "commonjs",
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
+    "start:production": "prisma migrate deploy && node dist/server.js",
+    "deploy:production": "prisma migrate deploy",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:push": "prisma db push",
