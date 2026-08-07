@@ -1,10 +1,5 @@
-import axios from "axios";
-
-const API =
-  `${import.meta.env.VITE_API_URL}/master-search`;
+import { api } from "../lib/api";
 
 export async function getLeadDetails(id: number) {
-  const { data } = await axios.get(`${API}/${id}`);
-
-  return data;
+  return api(`/master-search/${id}`);
 }
