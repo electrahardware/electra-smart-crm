@@ -50,6 +50,7 @@ jobs:
         id: start
         run: |
           set -Eeuo pipefail
+          echo "started_at_ms=$(date +%s%3N)" >> "$GITHUB_OUTPUT"
           BODY=$(jq -nc --arg restoreJobId "${{ inputs.restore_job_id }}" --arg mode "${{ inputs.mode }}" '{restoreJobId:$restoreJobId,mode:$mode}')
           curl --fail-with-body --silent --show-error -X POST "$CRM_API_URL/api/backups/restore-workflow/start" -H "Content-Type: application/json" -H "x-backup-secret: $BACKUP_WORKFLOW_SECRET" --data "$BODY" > /tmp/restore.json
       - name: Download, decrypt, and restore to isolated staging PostgreSQL
@@ -63,18 +64,27 @@ jobs:
           ACCESS_TOKEN=$(node -e 'fetch("https://oauth2.googleapis.com/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:process.env.GOOGLE_DRIVE_CLIENT_ID,client_secret:process.env.GOOGLE_DRIVE_CLIENT_SECRET,refresh_token:process.env.GOOGLE_DRIVE_REFRESH_TOKEN,grant_type:"refresh_token"})}).then(r=>r.json()).then(x=>console.log(x.access_token))')
           curl --fail --silent --show-error -H "Authorization: Bearer $ACCESS_TOKEN" "https://www.googleapis.com/drive/v3/files/$FILE_ID?alt=media" -o /tmp/backup.dump.enc
           node scripts/decrypt-file.mjs /tmp/backup.dump.enc /tmp/backup.dump
+          # The client must match the temporary PostgreSQL 18 database.
+          pg_restore --version
           pg_restore --exit-on-error --no-owner --no-privileges -h 127.0.0.1 -p 54329 -U postgres -d electra_restore /tmp/backup.dump
+          SCHEMA_EXISTS=$(PGPASSWORD=staging psql -h 127.0.0.1 -p 54329 -U postgres -d electra_restore -Atc "select exists(select 1 from pg_namespace where nspname='public')")
           TABLE_COUNT=$(PGPASSWORD=staging psql -h 127.0.0.1 -p 54329 -U postgres -d electra_restore -Atc "select count(*) from pg_tables where schemaname='public'")
-          ROW_COUNT=$(PGPASSWORD=staging psql -h 127.0.0.1 -p 54329 -U postgres -d electra_restore -Atc "select coalesce(sum(n_live_tup),0) from pg_stat_user_tables")
+          ROW_COUNT=$(PGPASSWORD=staging psql -h 127.0.0.1 -p 54329 -U postgres -d electra_restore -Atc "select format('select count(*) from %I.%I;', schemaname, tablename) from pg_tables where schemaname='public'" | PGPASSWORD=staging psql -h 127.0.0.1 -p 54329 -U postgres -d electra_restore -At | awk '{total += $1} END {print total + 0}')
           INDEX_COUNT=$(PGPASSWORD=staging psql -h 127.0.0.1 -p 54329 -U postgres -d electra_restore -Atc "select count(*) from pg_indexes where schemaname='public'")
           CONSTRAINT_COUNT=$(PGPASSWORD=staging psql -h 127.0.0.1 -p 54329 -U postgres -d electra_restore -Atc "select count(*) from pg_constraint")
           DB_VERSION=$(PGPASSWORD=staging psql -h 127.0.0.1 -p 54329 -U postgres -d electra_restore -Atc 'show server_version')
-          jq -nc --argjson tables "$TABLE_COUNT" --argjson rows "$ROW_COUNT" --argjson indexes "$INDEX_COUNT" --argjson constraints "$CONSTRAINT_COUNT" --arg version "$DB_VERSION" '{passed:true,pgRestoreExitCode:0,schemaCompared:true,tableCount:$tables,rowCount:$rows,indexCount:$indexes,constraintCount:$constraints,databaseVersion:$version}' > /tmp/verification.json
+          DATABASE_SIZE=$(PGPASSWORD=staging psql -h 127.0.0.1 -p 54329 -U postgres -d electra_restore -Atc "select pg_database_size(current_database())")
+          if [[ "$SCHEMA_EXISTS" != "t" || "$TABLE_COUNT" -eq 0 ]]; then
+            echo "Staging verification failed: public schema or restored tables are missing." >&2
+            exit 1
+          fi
+          jq -nc --argjson tables "$TABLE_COUNT" --argjson rows "$ROW_COUNT" --argjson indexes "$INDEX_COUNT" --argjson constraints "$CONSTRAINT_COUNT" --argjson databaseSize "$DATABASE_SIZE" --arg version "$DB_VERSION" '{passed:true,pgRestoreExitCode:0,schemaExists:true,schemaCompared:true,tableCount:$tables,rowCount:$rows,indexCount:$indexes,constraintCount:$constraints,databaseSize:$databaseSize,databaseVersion:$version}' > /tmp/verification.json
       - name: Report staging verification
         if: always()
         run: |
           set -Eeuo pipefail
           STATUS="Failed"; ERROR="Staging restore verification failed"; VERIFICATION='{"passed":false}'
           if [[ -f /tmp/verification.json ]]; then STATUS="Success"; ERROR=""; VERIFICATION=$(cat /tmp/verification.json); fi
-          BODY=$(jq -nc --arg restoreJobId "${{ inputs.restore_job_id }}" --arg status "$STATUS" --arg errorMessage "$ERROR" --argjson verification "$VERIFICATION" '{restoreJobId:$restoreJobId,status:$status,errorMessage:$errorMessage,verification:$verification}')
+          DURATION_MS=$(( $(date +%s%3N) - ${{ steps.start.outputs.started_at_ms }} ))
+          BODY=$(jq -nc --arg restoreJobId "${{ inputs.restore_job_id }}" --arg status "$STATUS" --arg errorMessage "$ERROR" --argjson durationMs "$DURATION_MS" --argjson verification "$VERIFICATION" '{restoreJobId:$restoreJobId,status:$status,errorMessage:$errorMessage,durationMs:$durationMs,verification:$verification}')
           curl --silent --show-error -X POST "$CRM_API_URL/api/backups/restore-workflow/report" -H "Content-Type: application/json" -H "x-backup-secret: $BACKUP_WORKFLOW_SECRET" --data "$BODY"

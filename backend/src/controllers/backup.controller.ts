@@ -130,6 +130,7 @@ export async function listRestoreJobs(req: AuthRequest, res: Response) {
 export async function requestStagingRestore(req: AuthRequest, res: Response) {
   if (!restoreOwner(req, res)) return;
   const backupJobId = String(req.body.backupJobId || "");
+  let restoreId: string | undefined;
   try {
     const backup = await prisma.backupJob.findUnique({ where: { id: backupJobId } });
     if (!backup || backup.status !== "Success" || !backup.verified || !backup.storageFileId) {
@@ -140,10 +141,14 @@ export async function requestStagingRestore(req: AuthRequest, res: Response) {
     const restore = await prisma.restoreJob.create({
       data: { backupJobId: backup.id, backupName: backup.fileName, status: "Queued", stage: "Staging", initiatedBy: req.user!.name, initiatedByUserId: req.user!.id, operatorIp: requestIp(req) },
     });
+    restoreId = restore.id;
     await dispatchWorkflow("restore.yml", { restore_job_id: restore.id, mode: "staging" });
     await createAuditLog({ module: "Backup", action: "Restore Started", userId: req.user!.id, userName: req.user!.name, entityName: backup.fileName ?? backup.id, ipAddress: requestIp(req), newValues: { stage: "Staging", restoreJobId: restore.id } });
     res.status(202).json(restore);
   } catch (error) {
+    if (restoreId) {
+      await prisma.restoreJob.update({ where: { id: restoreId }, data: { status: "Failed", completedAt: new Date(), errorMessage: safeBackupError(error) } }).catch(() => undefined);
+    }
     await reportBackupFailure("staging_restore_dispatch", error, backupJobId || undefined);
     res.status(500).json({ message: safeBackupError(error) });
   }
@@ -151,22 +156,7 @@ export async function requestStagingRestore(req: AuthRequest, res: Response) {
 
 export async function confirmProductionRestore(req: AuthRequest, res: Response) {
   if (!restoreOwner(req, res)) return;
-  const restoreJobId = String(req.params.id || "");
-  if (req.body.confirmation !== "RESTORE") return res.status(400).json({ message: 'Type RESTORE exactly to enable production restore.' });
-  if (process.env.ENABLE_PRODUCTION_RESTORE !== "true") return res.status(403).json({ message: "Production restore is disabled by deployment policy." });
-  try {
-    const staging = await prisma.restoreJob.findUnique({ include: { backupJob: true }, where: { id: restoreJobId } });
-    if (!staging || staging.stage !== "Staging" || staging.status !== "Success") return res.status(409).json({ message: "A successful staging restore is required before production restore." });
-    const verification = staging.verificationResult as { passed?: boolean } | null;
-    if (!verification?.passed) return res.status(409).json({ message: "Staging integrity verification did not pass." });
-    const production = await prisma.restoreJob.create({ data: { backupJobId: staging.backupJobId, backupName: staging.backupName, status: "Queued", stage: "Production", initiatedBy: req.user!.name, initiatedByUserId: req.user!.id, operatorIp: requestIp(req) } });
-    await dispatchWorkflow("restore.yml", { restore_job_id: production.id, mode: "production" });
-    await createAuditLog({ module: "Backup", action: "Restore Started", userId: req.user!.id, userName: req.user!.name, entityName: staging.backupName ?? staging.backupJobId, ipAddress: requestIp(req), newValues: { stage: "Production", restoreJobId: production.id } });
-    res.status(202).json(production);
-  } catch (error) {
-    await reportBackupFailure("production_restore_dispatch", error);
-    res.status(500).json({ message: safeBackupError(error) });
-  }
+  return res.status(403).json({ message: "Production restore is disabled by policy. Only isolated staging verification is available." });
 }
 
 export async function requestManualBackup(req: AuthRequest, res: Response) {
@@ -383,11 +373,11 @@ export async function workflowReport(req: Request, res: Response) {
 export async function restoreWorkflowStart(req: Request, res: Response) {
   if (!workflowAuthorized(req)) return res.status(401).json({ message: "Unauthorized restore workflow." });
   const restoreJobId = String(req.body.restoreJobId || "");
-  const mode = req.body.mode === "production" ? "Production" : "Staging";
+  const mode: string = req.body.mode === "production" ? "Production" : "Staging";
+  if (mode !== "Staging") return res.status(403).json({ message: "Production restore is disabled by policy." });
   const restore = await prisma.restoreJob.findUnique({ include: { backupJob: true }, where: { id: restoreJobId } });
   if (!restore || restore.stage !== mode || restore.status !== "Queued") return res.status(409).json({ message: "Restore job is not eligible to start." });
   if (!restore.backupJob.verified || restore.backupJob.status !== "Success" || !restore.backupJob.storageFileId) return res.status(409).json({ message: "Backup integrity verification is required." });
-  if (mode === "Production" && process.env.ENABLE_PRODUCTION_RESTORE !== "true") return res.status(403).json({ message: "Production restore is disabled by deployment policy." });
   await prisma.restoreJob.update({ where: { id: restore.id }, data: { status: "Running", startedAt: new Date() } });
   res.json({ ok: true, backup: { storageFileId: restore.backupJob.storageFileId, fileName: restore.backupJob.fileName, checksum: restore.backupJob.checksum }, stage: mode });
 }
@@ -395,11 +385,16 @@ export async function restoreWorkflowStart(req: Request, res: Response) {
 export async function restoreWorkflowReport(req: Request, res: Response) {
   if (!workflowAuthorized(req)) return res.status(401).json({ message: "Unauthorized restore workflow." });
   const restoreJobId = String(req.body.restoreJobId || "");
+  if (!restoreJobId) return res.status(400).json({ message: "restoreJobId is required." });
   const passed = req.body.status === "Success" && req.body.verification?.passed === true;
   try {
-    const restore = await prisma.restoreJob.update({
-      where: { id: restoreJobId },
-      data: { status: passed ? "Success" : "Failed", completedAt: new Date(), durationMs: Number(req.body.durationMs) || undefined, verificationResult: req.body.verification ?? null, errorMessage: passed ? null : String(req.body.errorMessage || "Restore verification failed.").slice(0, 500) },
+    const restore = await prisma.$transaction(async (tx) => {
+      const existing = await tx.restoreJob.findUnique({ where: { id: restoreJobId } });
+      if (!existing || existing.stage !== "Staging" || !["Queued", "Running"].includes(existing.status)) throw new Error("Restore job is not eligible for a staging verification report.");
+      return tx.restoreJob.update({
+        where: { id: restoreJobId },
+        data: { status: passed ? "Success" : "Failed", completedAt: new Date(), durationMs: Number(req.body.durationMs) || undefined, verificationResult: req.body.verification ?? null, errorMessage: passed ? null : String(req.body.errorMessage || "Restore verification failed.").slice(0, 500) },
+      });
     });
     await createAuditLog({ module: "Backup", action: passed ? "Restore Completed" : "Restore Failed", userName: restore.initiatedBy ?? "GitHub Actions", entityName: restore.backupName ?? restore.backupJobId, ipAddress: restore.operatorIp ?? undefined, newValues: { stage: restore.stage, restoreJobId: restore.id, verification: req.body.verification ?? null } });
     if (!passed) await reportBackupFailure("restore_verification", new Error(restore.errorMessage ?? "Restore verification failed."), restore.backupJobId);
