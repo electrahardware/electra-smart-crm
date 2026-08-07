@@ -101,7 +101,10 @@ jobs:
           VERIFIED_DUMP="${RAW_FILE}.verified"
           node scripts/decrypt-file.mjs "$ENCRYPTED_FILE" "$VERIFIED_DUMP"
           pg_restore --list "$VERIFIED_DUMP" > /tmp/electra-crm-restore-manifest.txt
-          TABLE_COUNT=$(grep ' TABLE ' /tmp/electra-crm-restore-manifest.txt | grep -v ' TABLE DATA ' | wc -l | tr -d ' ')
+          # Keep the table-count rule identical to staging restore verification:
+          # count real relations in the application-owned public schema only.
+          TABLE_COUNT_SQL="SELECT count(*) FROM pg_catalog.pg_tables WHERE schemaname = 'public';"
+          TABLE_COUNT=$(psql "$DIRECT_DATABASE_URL" --no-password --tuples-only --no-align --command "$TABLE_COUNT_SQL" | tr -d '[:space:]')
           POSTGRES_VERSION=$(pg_restore --version | tr -d '\n')
           DATABASE_SIZE=$(stat -c%s "$RAW_FILE")
           RESULT=$(node scripts/upload-google-drive.mjs --file "$ENCRYPTED_FILE" --type "$TYPE" --latest true)
