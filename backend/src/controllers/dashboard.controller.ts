@@ -1,18 +1,39 @@
-import { Request, Response } from "express";
+import { Prisma } from "@prisma/client";
+import { Response } from "express";
 import prisma from "../lib/prisma";
+import { AuthRequest } from "../middleware/auth.middleware";
 
-export async function getDashboard(req: Request, res: Response) {
+export async function getDashboard(req: AuthRequest, res: Response) {
   try {
-    const totalLeads = await prisma.lead.count();
+    // Keep dashboard visibility identical to the Leads page: only Sales
+    // Executives are scoped to their own assigned leads.
+    const leadScope: Prisma.LeadWhereInput = req.user?.role === "Sales Executive"
+      ? { leadOwner: req.user.name }
+      : {};
+    const isSalesExecutive = req.user?.role === "Sales Executive";
+    const recentLeadSelect: Prisma.LeadSelect = {
+      id: true,
+      customerName: true,
+      shopName: true,
+      status: true,
+      createdAt: true,
+      // A Sales Executive must never receive another lead's phone number
+      // through the dashboard response, including via browser devtools.
+      ...(isSalesExecutive ? {} : { mobile: true }),
+    };
+
+    const totalLeads = await prisma.lead.count({ where: leadScope });
 
     const wonLeads = await prisma.lead.count({
       where: {
+        ...leadScope,
         status: "Won",
       },
     });
 
     const lostLeads = await prisma.lead.count({
       where: {
+        ...leadScope,
         status: "Lost",
       },
     });
@@ -27,6 +48,7 @@ export async function getDashboard(req: Request, res: Response) {
 
     const todayFollowups = await prisma.lead.count({
       where: {
+        ...leadScope,
         followupDate: {
           gte: today,
           lt: tomorrow,
@@ -36,6 +58,7 @@ export async function getDashboard(req: Request, res: Response) {
 
     const overdueFollowups = await prisma.lead.count({
       where: {
+        ...leadScope,
         followupDate: {
           lt: today,
         },
@@ -44,24 +67,19 @@ export async function getDashboard(req: Request, res: Response) {
     });
 
     const pipeline = await prisma.lead.aggregate({
+      where: leadScope,
       _sum: {
         expectedValue: true,
       },
     });
 
     const recentLeads = await prisma.lead.findMany({
+      where: leadScope,
       orderBy: {
         createdAt: "desc",
       },
       take: 5,
-      select: {
-        id: true,
-        customerName: true,
-        shopName: true,
-        mobile: true,
-        status: true,
-        createdAt: true,
-      },
+      select: recentLeadSelect,
     });
 
     res.json({

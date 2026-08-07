@@ -10,9 +10,10 @@ export async function getActivities(
     const where =
       req.user?.role === "Sales Executive"
         ? {
-            lead: {
-              leadOwner: req.user.name,
-            },
+            AND: [
+              { lead: { leadOwner: req.user.name } },
+              { createdBy: req.user.name },
+            ],
           }
         : {};
 

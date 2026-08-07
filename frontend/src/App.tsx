@@ -13,6 +13,7 @@ import Followups from "./pages/Followups";
 import LeadDetailsPage from "./pages/LeadDetailsPage";
 import Leads from "./pages/Leads";
 import Login from "./pages/Login";
+import MyProfile from "./pages/MyProfile";
 import Settings from "./pages/Settings";
 import UserManagement from "./pages/UserManagement";
 
@@ -83,6 +84,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AuditLogs />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <MyProfile />
             </ProtectedRoute>
           }
         />

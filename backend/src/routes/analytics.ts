@@ -1,13 +1,21 @@
+import { Prisma } from "@prisma/client";
 import { Router } from "express";
 import prisma from "../lib/prisma";
-import { requireAuth } from "../middleware/auth.middleware";
+import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
 
 const router = Router();
 
 router.use(requireAuth);
 
-router.get("/", async (_req, res) => {
+router.get("/", async (req: AuthRequest, res) => {
   try {
+    // Dashboard analytics must use the same ownership scope as the Leads page.
+    const leadScope: Prisma.LeadWhereInput = req.user?.role === "Sales Executive"
+      ? { leadOwner: req.user.name }
+      : {};
+    const ownActivityScope: Prisma.LeadWhereInput = req.user?.role === "Sales Executive"
+      ? { ...leadScope, lastEditedBy: req.user.name }
+      : leadScope;
     const today = new Date();
 
     today.setHours(0, 0, 0, 0);
@@ -52,10 +60,11 @@ router.get("/", async (_req, res) => {
 
       monthlyTrend,
     ] = await Promise.all([
-      prisma.lead.count(),
+      prisma.lead.count({ where: leadScope }),
 
       prisma.lead.count({
         where: {
+          ...leadScope,
           leadDate: {
             gte: today,
             lt: tomorrow,
@@ -65,6 +74,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.count({
         where: {
+          ...leadScope,
           leadDate: {
             gte: yesterday,
             lt: today,
@@ -74,6 +84,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.count({
         where: {
+          ...leadScope,
           leadDate: {
             gte: weekStart,
           },
@@ -82,6 +93,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.count({
         where: {
+          ...leadScope,
           leadDate: {
             gte: monthStart,
           },
@@ -90,6 +102,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.count({
         where: {
+          ...leadScope,
           followupCompleted: false,
 
           followupDate: {
@@ -100,6 +113,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.count({
         where: {
+          ...leadScope,
           followupCompleted: false,
 
           followupDate: {
@@ -111,6 +125,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.count({
         where: {
+          ...leadScope,
           followupCompleted: true,
 
           followupCompletedAt: {
@@ -122,6 +137,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.groupBy({
         by: ["status"],
+        where: leadScope,
 
         _count: {
           status: true,
@@ -130,6 +146,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.groupBy({
         by: ["city"],
+        where: leadScope,
 
         _count: {
           city: true,
@@ -138,6 +155,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.groupBy({
         by: ["state"],
+        where: leadScope,
 
         _count: {
           state: true,
@@ -146,6 +164,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.groupBy({
         by: ["leadOwner"],
+        where: leadScope,
 
         _count: {
           leadOwner: true,
@@ -154,6 +173,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.groupBy({
         by: ["leadSource"],
+        where: leadScope,
 
         _count: {
           leadSource: true,
@@ -162,6 +182,7 @@ router.get("/", async (_req, res) => {
 
       prisma.lead.findMany({
         where: {
+          ...leadScope,
           leadDate: {
             gte: new Date(today.getFullYear(), today.getMonth() - 11, 1),
           },
@@ -219,6 +240,7 @@ router.get("/", async (_req, res) => {
 
     const editedLeads = await prisma.lead.findMany({
       where: {
+        ...ownActivityScope,
         lastEditedAt: { not: null },
         lastEditedBy: { not: null },
       },

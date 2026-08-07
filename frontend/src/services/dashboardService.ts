@@ -19,7 +19,7 @@ export interface DashboardData {
     id: number;
     customerName: string;
     shopName: string | null;
-    mobile: string;
+    mobile?: string;
     status: string | null;
     createdAt: string;
   }[];

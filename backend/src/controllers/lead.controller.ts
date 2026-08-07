@@ -1207,6 +1207,10 @@ export async function createQuickBulkLead(req: Request, res: Response) {
 
 export async function getNewLeadsToday(req: Request, res: Response) {
   try {
+    const currentUser = (req as any).user;
+    const leadScope: Prisma.LeadWhereInput = currentUser?.role === "Sales Executive"
+      ? { leadOwner: currentUser.name }
+      : {};
     const today = new Date();
 
     today.setHours(0, 0, 0, 0);
@@ -1217,6 +1221,7 @@ export async function getNewLeadsToday(req: Request, res: Response) {
 
     const leads = await prisma.lead.findMany({
       where: {
+        ...leadScope,
         createdAt: {
           gte: today,
 
@@ -1241,6 +1246,10 @@ export async function getNewLeadsToday(req: Request, res: Response) {
 
 export async function getNotifications(req: Request, res: Response) {
   try {
+    const currentUser = (req as any).user;
+    const leadScope: Prisma.LeadWhereInput = currentUser?.role === "Sales Executive"
+      ? { leadOwner: currentUser.name }
+      : {};
     const today = new Date();
 
     today.setHours(0, 0, 0, 0);
@@ -1251,6 +1260,7 @@ export async function getNotifications(req: Request, res: Response) {
 
     const overdue = await prisma.lead.count({
       where: {
+        ...leadScope,
         followupCompleted: false,
         followupDate: {
           lt: today,
@@ -1260,6 +1270,7 @@ export async function getNotifications(req: Request, res: Response) {
 
     const todayFollowups = await prisma.lead.count({
       where: {
+        ...leadScope,
         followupCompleted: false,
         followupDate: {
           gte: today,
@@ -1270,6 +1281,7 @@ export async function getNotifications(req: Request, res: Response) {
 
     const newLeads = await prisma.lead.count({
       where: {
+        ...leadScope,
         createdAt: {
           gte: today,
           lt: tomorrow,

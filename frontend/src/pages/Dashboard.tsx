@@ -13,6 +13,7 @@ import {
 } from "../services/dashboardService";
 import { getAnalytics, type AnalyticsResponse } from "../services/analyticsService";
 import PremiumInsights from "../components/dashboard/PremiumInsights";
+import { isSalesExecutive } from "../utils/auth";
 
 export default function Dashboard() {
 
@@ -22,6 +23,7 @@ export default function Dashboard() {
     useState<DashboardData | null>(null);
 
   const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
+  const salesExecutiveView = isSalesExecutive();
 
   useEffect(() => {
 
@@ -209,9 +211,11 @@ export default function Dashboard() {
               Shop
             </th>
 
-            <th className="px-4 py-3 text-left">
-              Mobile
-            </th>
+            {salesExecutiveView ? (
+              <th className="px-4 py-3 text-left">Date</th>
+            ) : (
+              <th className="px-4 py-3 text-left">Mobile</th>
+            )}
 
             <th className="px-4 py-3 text-left">
               Status
@@ -232,16 +236,20 @@ export default function Dashboard() {
 >
 
               <td className="px-4 py-3 font-medium text-blue-600">
-  {lead.customerName}
+  {salesExecutiveView ? (lead.customerName || "Unnamed Lead") : lead.customerName}
 </td>
 
               <td className="px-4 py-3">
                 {lead.shopName || "-"}
               </td>
 
-              <td className="px-4 py-3">
-                {lead.mobile}
-              </td>
+              {salesExecutiveView ? (
+                <td className="px-4 py-3">
+                  {lead.createdAt ? new Intl.DateTimeFormat("en-GB").format(new Date(lead.createdAt)).replace(/\//g, "-") : "-"}
+                </td>
+              ) : (
+                <td className="px-4 py-3">{lead.mobile}</td>
+              )}
 
               <td className="px-4 py-3">
                 {lead.status || "-"}
@@ -261,7 +269,7 @@ export default function Dashboard() {
 
     <div className="flex h-56 items-center justify-center text-slate-500">
 
-      📭 No Leads Yet
+      {isSalesExecutive() ? "No recent leads assigned." : "No Leads Yet"}
 
     </div>
 
