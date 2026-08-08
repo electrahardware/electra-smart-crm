@@ -5,6 +5,8 @@ import { LeadProvider } from "./contexts/LeadContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import AnalyticsPage from "./pages/AnalyticsPage";
+import AiDailyLeads from "./pages/AiDailyLeads";
+import AiDailyLeadConfiguration from "./pages/AiDailyLeadConfiguration";
 import AuditLogs from "./pages/AuditLogs";
 import BackupSettingsPage from "./pages/BackupSettingsPage";
 import Dashboard from "./pages/Dashboard";
@@ -39,6 +41,24 @@ function App() {
           element={
             <ProtectedRoute>
               <Leads />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ai-daily-leads"
+          element={
+            <ProtectedRoute>
+              <AiDailyLeads />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ai-daily-leads/configuration"
+          element={
+            <ProtectedRoute>
+              <AiDailyLeadConfiguration />
             </ProtectedRoute>
           }
         />

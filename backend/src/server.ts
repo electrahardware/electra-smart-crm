@@ -24,6 +24,8 @@ import notesRoutes from "./routes/notes";
 import quotationRoutes from "./routes/quotation.routes";
 import timelineRoutes from "./routes/timeline.routes";
 import userRoutes from "./routes/user.routes";
+import aiDailyLeadRoutes from "./routes/aiDailyLead.routes";
+import { startAiDailyLeadScheduler } from "./services/aiDailyLead.service";
 
 const app = express();
 
@@ -129,6 +131,7 @@ app.use("/api/activity", activityRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/master-search", masterSearchRoutes);
 app.use("/api/notes", notesRoutes);
+app.use("/api/ai-daily-leads", aiDailyLeadRoutes);
 
 // ==============================================
 
@@ -154,6 +157,8 @@ app.use((error: unknown, _req: express.Request, res: express.Response, _next: ex
 });
 
 const PORT = Number(process.env.PORT) || 5000;
+
+startAiDailyLeadScheduler();
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

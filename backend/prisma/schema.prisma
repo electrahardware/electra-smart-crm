@@ -69,6 +69,7 @@ model Lead {
   calls        LeadCall[]
   timeline     LeadTimeline[]
   quotations   Quotation[]
+  aiDailyItems AiDailyLeadBatchItem[]
 
   @@index([leadOwner])
   @@index([status])
@@ -197,6 +198,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   auditLogs AuditLog[]
+  aiDailyBatches AiDailyLeadBatch[]
 }
 
 model LeadActivity {
@@ -243,6 +245,72 @@ model AuditLog {
   @@index([action])
   @@index([userId])
   @@index([createdAt])
+}
+
+model AiDailyLeadSettings {
+  id               Int      @id @default(1)
+  batchSize        Int      @default(100)
+  generationHour   Int      @default(2)
+  timezone         String   @default("Asia/Kolkata")
+  lastGeneratedFor DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model AiDailyLeadScoringRule {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  label     String
+  weight    Int      @default(0)
+  action    String   @default("SCORE")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model AiDailyLeadBatch {
+  id                 String   @id @default(cuid())
+  batchDate          DateTime
+  salesExecutiveId   Int
+  salesExecutiveName String
+  batchSize          Int
+  generatedAt        DateTime @default(now())
+  archivedAt         DateTime?
+  archiveStatus      String   @default("Active")
+  regenerationCount  Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  salesExecutive User                   @relation(fields: [salesExecutiveId], references: [id], onDelete: Restrict)
+  items          AiDailyLeadBatchItem[]
+
+  @@unique([batchDate, salesExecutiveId])
+  @@index([salesExecutiveId, batchDate])
+  @@index([archiveStatus, batchDate])
+}
+
+model AiDailyLeadBatchItem {
+  id             String    @id @default(cuid())
+  batchId        String
+  leadId         Int
+  aiScore        Int
+  aiReason       String
+  reasonCategory String
+  lastNote       String?
+  lastFollowupAt DateTime?
+  generatedAt    DateTime  @default(now())
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  batch AiDailyLeadBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  lead  Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, leadId])
+  @@index([batchId, completedAt, aiScore])
+  @@index([leadId])
 }
 
 model BackupSettings {

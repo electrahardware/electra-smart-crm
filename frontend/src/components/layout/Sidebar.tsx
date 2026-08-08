@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Menu,
   PhoneCall,
+  Sparkles,
   Settings,
   Users,
   X
@@ -30,6 +31,11 @@ const menu = [
     title: "Follow-ups",
     path: "/followups",
     icon: PhoneCall,
+  },
+  {
+    title: "AI Daily Leads",
+    path: "/ai-daily-leads",
+    icon: Sparkles,
   },
   {
     title: "Quotations",
